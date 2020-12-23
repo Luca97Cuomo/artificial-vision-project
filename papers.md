@@ -38,3 +38,10 @@ It is suggested to adopt the transfer learning approach. Choose a network pretra
 
 #### Architecture
 It seems that the most effective architecture is Vgg16.
+
+## A Data Augmentation Methodology to Improve Age Estimation using Convolutional Neural Networks
+Download: https://ieeexplore.ieee.org/document/7813020
+
+### Notes
+It is proposed to perfom data augmentation using facial landmarks and algorithms that produce a trasformed image using this landmarks.
+Doig so the, for example, it is possible for example to change the shape and the dimensions of some parts of the face, as the nose and the mouth.
