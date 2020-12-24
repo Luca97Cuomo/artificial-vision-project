@@ -4,6 +4,8 @@ import random
 import shutil
 import cv2
 from utilities.face_detector import *
+from pathlib import Path
+from tqdm import tqdm
 
 # from PIL import Image
 # from IPython.display import display
@@ -19,7 +21,7 @@ def detect(image_path, detector):
     height, width, channels = image.shape
     faces = detector.detect(image)
     if len(faces) <= 0:
-        print("Non ho trovato facce per " + image_path)
+        print("Could not find faces for " + image_path)
         return image
     face = findRelevantFace(faces, width, height)
 
@@ -31,18 +33,18 @@ def detect(image_path, detector):
 
 def generate_cropped_train_test_val(dataset_path, destination_path, val_fraction, test_fraction, detector,
                                     total_samples):
-    dirs = os.listdir(dataset_path)
+    destination = Path(destination_path).resolve()
+    dataset = Path(dataset_path).resolve()
+    dirs = list(dataset.iterdir())
 
-    """
-    Conto il numero totale di immagini presenti nel dataset_path
-    files = []
-    for current_dir in dirs:
-        current_dir = os.path.join(dataset_path, current_dir)
-        files = files + os.listdir(current_dir)
+    total_len_dirs = len(dirs)
+    val_len_dirs = round(total_len_dirs * val_fraction)
+    test_len_dirs = round(total_len_dirs * test_fraction)
 
-    total_samples = len(files)
-    
-    """
+    random.shuffle(dirs)
+    test_dirs = dirs[:test_len_dirs]
+    val_dirs = dirs[test_len_dirs:test_len_dirs + val_len_dirs]
+    training_dirs = dirs[test_len_dirs + val_len_dirs:]
 
     val_samples = round(total_samples * val_fraction)
     test_samples = round(total_samples * test_fraction)
@@ -51,59 +53,54 @@ def generate_cropped_train_test_val(dataset_path, destination_path, val_fraction
     print("training samples should be " + str(training_samples))
     print("validation samples should be " + str(val_samples))
     print("test samples should be " + str(test_samples))
-    random.shuffle(dirs)
 
-    samples_evaluated = 0
-    true_validation_samples = 0
-    true_test_samples = 0
-    true_training_samples = 0
+    training_set_path = destination / "training_set"
+    test_set_path = destination / "test_set"
+    validation_set_path = destination / "validation_set"
 
-    try:
-        os.mkdir(os.path.join(destination_path, "training_set"))
-        os.mkdir(os.path.join(destination_path, "validation_set"))
-        os.mkdir(os.path.join(destination_path, "test_set"))
-    except OSError:
-        print("Creation of the directories failed")
+    training_set_path.mkdir(parents=True, exist_ok=True)
+    test_set_path.mkdir(exist_ok=True)
+    validation_set_path.mkdir(exist_ok=True)
 
-    for entity in dirs:
-        complete_current_dir = os.path.join(dataset_path, entity)
-        current_images = os.listdir(complete_current_dir)
-        if val_samples > 0:
-            val_samples = val_samples - len(current_images)
-            os.mkdir(os.path.join(destination_path, "validation_set", entity))
-            for image in current_images:
-                true_validation_samples += 1
-                samples_evaluated += 1
-                if (samples_evaluated % 1000) == 0:
-                    print("Evaluated " + str(samples_evaluated) + "images")
-                cropped_image = detect(os.path.join(complete_current_dir, image), detector)
-                cv2.imwrite(os.path.join(destination_path, "validation_set", entity, image), cropped_image)
-        elif test_samples > 0:
-            test_samples = test_samples - len(current_images)
-            os.mkdir(os.path.join(destination_path, "test_set", entity))
-            for image in current_images:
-                true_test_samples += 1
-                samples_evaluated += 1
-                if (samples_evaluated % 1000) == 0:
-                    print("Evaluated " + str(samples_evaluated) + "images")
-                cropped_image = detect(os.path.join(complete_current_dir, image), detector)
-                cv2.imwrite(os.path.join(destination_path, "test_set", entity, image), cropped_image)
-        elif training_samples > 0:
-            training_samples = training_samples - len(current_images)
-            os.mkdir(os.path.join(destination_path, "training_set", entity))
-            for image in current_images:
-                true_training_samples += 1
-                samples_evaluated += 1
-                if (samples_evaluated % 1000) == 0:
-                    print("Evaluated " + str(samples_evaluated) + "images")
-                cropped_image = detect(os.path.join(complete_current_dir, image), detector)
-                cv2.imwrite(os.path.join(destination_path, "training_set", entity, image), cropped_image)
-        else:
-            break
+    extract_cropped_subset(test_set_path, detector, test_dirs, test_samples)
+    extract_cropped_subset(validation_set_path, detector, val_dirs, val_samples)
+    extract_cropped_subset(training_set_path, detector, training_dirs, training_samples)
 
-    print("training samples are " + str(true_training_samples))
-    print("validation samples are " + str(true_validation_samples))
-    print("test samples are " + str(true_test_samples))
+
+def extract_cropped_subset(destination_path, detector, dirs, total_samples):
+    evaluated_samples = 0
+    i = 0
+
+    # iterdir() could return the files in different orders, in order to avoid this, a list of images in
+    # a specific order is saved in memory
+    identity_images = {}
+    for identity in dirs:
+        identity_images[identity] = list(identity.iterdir())
+
+    with tqdm(total=total_samples) as pbar:
+        while evaluated_samples < total_samples:
+            prev_evaluated_samples = evaluated_samples
+            for identity, images in identity_images.items():
+                try:
+                    current_image = images[i]
+                except IndexError:
+                    print(f"Directory {identity.name} exhausted")
+                else:
+                    identity_path = destination_path / identity.name
+                    identity_path.mkdir(exist_ok=True)
+                    cropped_image = detect(str(current_image), detector)
+                    cv2.imwrite(str(identity_path / current_image.name), cropped_image)
+                    evaluated_samples += 1
+                    pbar.update(1)
+                    if evaluated_samples >= total_samples:
+                        break
+
+            i += 1
+            if prev_evaluated_samples == evaluated_samples:
+                print("Directories exhausted before getting all the samples")
+                break
+
+    print(f"For {destination_path.name} evaluated {evaluated_samples} images")
 
 
 def load_labels(labels_path, rounded):
@@ -131,17 +128,21 @@ def load_labels(labels_path, rounded):
 
 def main():
     parser = argparse.ArgumentParser(description='Split dataset in training, validation and test sets.')
-    parser.add_argument('dataset_path', type=str, help='The absolute path of the dataset')
-    # parser.add_argument('label_path', type=str, help='The absolute path of the file containing the labels')
-    parser.add_argument('destination_path', type=str,
-                        help='The absolute path of the folder that will contain the train, test and validation sets')
-    # parser.add_argument('-R', '--round', action='store_true', help='Round the ages to the nearest integer')
+    parser.add_argument('-d', '--dataset_path', type=str, help='The absolute path of the dataset', required=True)
+    parser.add_argument('-l', '--label_path', type=str, help='The absolute path of the file containing the labels',
+                        required=True)
+    parser.add_argument('-o', '--destination_path', type=str,
+                        help='The absolute path of the folder that will contain the train, test and validation sets',
+                        required=True)
+    parser.add_argument('-R', '--round', action='store_true', help='Round the ages to the nearest integer')
 
     args = parser.parse_args()
 
-    # labels = load_labels(args.label_path, args.round)
+    labels = load_labels(args.label_path, args.round)
+
+    print(labels["n000002"])
     detector = FaceDetector()
-    generate_cropped_train_test_val(args.dataset_path, args.destination_path, 0.2, 0.2, detector, 1000)
+    generate_cropped_train_test_val(args.dataset_path, args.destination_path, 0.2, 0.2, detector, 10000)
 
 
 if __name__ == '__main__':
