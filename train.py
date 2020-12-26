@@ -5,6 +5,7 @@ import keras
 import os
 import json
 import argparse
+import tensorflow as tf
 from utils import read_dataset
 
 
@@ -33,7 +34,7 @@ class DataGenerator(keras.utils.Sequence):
         indices = self.indices[index * self.batch_size:(index + 1) * self.batch_size]
 
         batch_X = np.array([self.X[i] for i in indices])
-        batch_y = np.array([self.y[i] for i in indices]) # maybe it depends on the network
+        batch_y = np.array([self.y[i] for i in indices])  # maybe it depends on the network
 
         return batch_X, batch_y
 
@@ -45,8 +46,11 @@ class DataGenerator(keras.utils.Sequence):
             np.random.shuffle(self.indices)
 
 
-def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_train, X_val, Y_val, training_epochs, initial_epoch):
+def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_train, X_val, Y_val, training_epochs,
+                initial_epoch):
     model_name = os.path.basename(model_path)
+
+
 
     model = keras.models.load_model(model_path)
 
@@ -57,32 +61,40 @@ def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_tr
     monitored_val_quantity = metadata["val_metric_name"]
 
     training_data_generator = DataGenerator(X_train, Y_train, batch_size=batch_size)
-    validation_data_generator = DataGenerator(X_val, Y_val) # why not pass the batch size?
+    validation_data_generator = DataGenerator(X_val, Y_val)  # why not pass the batch size?
 
     append = None
     if initial_epoch == 0:
         append = False
     else:
         append = True
-    logger_callback = CSVLogger(os.path.join(output_dir, model_name) + ".log", append=append) # remember to put it to True if continuing a training
+    logger_callback = CSVLogger(os.path.join(output_dir, model_name) + ".log",
+                                append=append)  # remember to put it to True if continuing a training
 
     # divides learning rate by 5 if no improvement is found on validation over 3 epochs.
     # this is made in order to avoid stagnating too much: empirical evidence suggests that reducing learning rate when stagnating
     # can significantly help a model training process. This is probably because it can stagnate because of strange shapes
     # in the loss function which make it impossible for the optimizer to fall in better minima.
     validation_min_delta = 0.1 / 100  # minimum variation of the monitored quantity for it to be considered improved
-    reduce_lr_plateau_callback = ReduceLROnPlateau(monitor=monitored_val_quantity, mode='auto', verbose=1, patience=3, factor=0.2, cooldown=1, min_delta=validation_min_delta)
+    reduce_lr_plateau_callback = ReduceLROnPlateau(monitor=monitored_val_quantity, mode='auto', verbose=1, patience=3,
+                                                   factor=0.2, cooldown=1, min_delta=validation_min_delta)
 
     # Stops training entirely if, after 7 epochs, no improvement is found on the validation metric.
     # This triggers after the previous callback if it fails to make the training "great again".
-    stopping_callback = EarlyStopping(patience=7, verbose=1, restore_best_weights=True, monitor=monitored_val_quantity, mode='auto', min_delta=validation_min_delta)
+    stopping_callback = EarlyStopping(patience=7, verbose=1, restore_best_weights=True, monitor=monitored_val_quantity,
+                                      mode='auto', min_delta=validation_min_delta)
 
-    save_callback = ModelCheckpoint(os.path.join(output_dir, model_name) + ".{epoch:02d}-{" + monitored_val_quantity + ":.4f}.hdf5", verbose=1, save_weights_only=False,
-                                    save_best_only=True, monitor=monitored_val_quantity, mode='auto')
+    save_callback = ModelCheckpoint(
+        os.path.join(output_dir, model_name) + ".{epoch:02d}-{" + monitored_val_quantity + ":.4f}.hdf5", verbose=1,
+        save_weights_only=False,
+        save_best_only=True, monitor=monitored_val_quantity, mode='auto')
 
-    history = model.fit_generator(training_data_generator, validation_data=validation_data_generator, initial_epoch=initial_epoch,
-                                   epochs=training_epochs, callbacks=[save_callback, logger_callback, reduce_lr_plateau_callback, stopping_callback],
-                                   use_multiprocessing=False)
+    history = model.fit_generator(training_data_generator, validation_data=validation_data_generator,
+                                  initial_epoch=initial_epoch,
+                                  epochs=training_epochs,
+                                  callbacks=[save_callback, logger_callback, reduce_lr_plateau_callback,
+                                             stopping_callback],
+                                  use_multiprocessing=False)
 
     with open(os.path.join(output_dir, model_name + "_history"), 'wb') as f:
         print("Saving history ...")
@@ -101,6 +113,7 @@ def main():
     parser.add_argument('-e', '--epochs', type=int, help='Number of epochs', required=True)
     parser.add_argument('-ie', '--initial_epoch', type=int, help='Initial epoch', required=True)
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
+    parser.add_argument('-b', '--batch_size', type=int, help='batch size', required=True)
 
     args = parser.parse_args()
 
@@ -110,11 +123,20 @@ def main():
     X_train, Y_train, f_train = read_dataset(args.training_set_path, args.verbose)
     X_val, Y_val, f_val = read_dataset(args.validation_set_path, args.verbose)
 
-    train_model(args.model_path, args.metadata_path, args.output_dir, X_train, Y_train, X_val, Y_val,
+    train_model(args.model_path, args.metadata_path, args.output_dir, args.batch_size, X_train, Y_train, X_val, Y_val,
                 args.epochs, args.initial_epoch)
 
     f_train.close()
     f_val.close()
+
+    r"""
+        python -model "C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\test\modelli_di_test\resnet50_regression\resnet50_regression_model" 
+        -metadata "C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\test\modelli_di_test\resnet50_regression\resnet50_regression_metadata.txt"
+        -o "C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\test\risultato_training_di_test" 
+        -ts "C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\test\h5_di_test\training_set.h5"
+        -vs "C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\test\h5_di_test\validation_set.h5"
+        -e 10 -ie 0 -v -b 64
+    """
 
 
 if __name__ == '__main__':

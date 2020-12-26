@@ -16,6 +16,7 @@ from keras_vggface.vggface import VGGFace
 import json
 from pathlib import Path
 
+
 def build_structure(backend, input):
     backend_out = backend(input)
 
@@ -39,9 +40,9 @@ def regression_output_function(last_layer):
 
     # I have to consider to implement a custom metric that cast to int the input and then apply
     # the mae
-    metrics = [tf.keras.metrics.MeanAbsoluteError()]
+    metrics = ['mae']
 
-    return output, loss, metrics, "mean_absolute_error"
+    return output, loss, metrics, "mae"
 
 
 AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50"]
@@ -58,7 +59,7 @@ def build_model(backend_name, output_type, output_dir, verbose=True):
 
     input = Input(shape=input_shape)
 
-    optimizer = optimizers.Adam(lr=0.0005) # lr is an hyperparameter
+    optimizer = optimizers.Adam(lr=0.0005)  # lr is an hyperparameter
     output_function = AVAILABLE_OUTPUT_TYPES[output_type]
 
     last_layer = build_structure(backend, input)
@@ -75,27 +76,27 @@ def build_model(backend_name, output_type, output_dir, verbose=True):
     meta_file_name = os.path.join(model_dir, model_name + "_metadata.txt")
     with open(meta_file_name, "w") as f:
         metadata = {"val_metric_name": val_metric_name}
-        f.write(json.dumps(metadata)) # use `json.loads` to do the reversese
+        f.write(json.dumps(metadata))  # use `json.loads` to do the reversese
 
     if verbose:
         model.summary()
-        plot_model(model)
+        # plot_model(model)
 
 
 def main():
     parser = argparse.ArgumentParser(description='Build model')
-    parser.add_argument('-b', '--backend_name', type=str, help='The name of the backend to use (vgg16, resnet50, senet50)', required=True)
-    parser.add_argument('-o', '--output_type', type=str, help='The output type of the network (regression, RvC, multiRvC)', required=True)
+    parser.add_argument('-b', '--backend_name', type=str,
+                        help='The name of the backend to use (vgg16, resnet50, senet50)', required=True)
+    parser.add_argument('-o', '--output_type', type=str,
+                        help='The output type of the network (regression, RvC, multiRvC)', required=True)
     parser.add_argument('-m', '--model_path', type=str, help='The path where to save the compiled model', required=True)
-    parser.add_argument('-v', '--verbose',  action='store_true', help='Verbose')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
 
     args = parser.parse_args()
 
+    print(tf.version)
     build_model(args.backend_name, args.output_type, args.model_path, args.verbose)
+
 
 if __name__ == '__main__':
     main()
-
-
-
-

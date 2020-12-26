@@ -224,13 +224,13 @@ def main():
 
     labels = load_labels(args.label_path, args.round)
 
-    detector = FaceDetector()
-    generate_cropped_train_test_val(args.dataset_path, args.destination_path, val_fraction, test_fraction, detector,
-                                    args.number_of_images, labels)
+    # detector = FaceDetector()
+    # generate_cropped_train_test_val(args.dataset_path, args.destination_path, val_fraction, test_fraction, detector,
+    #                                args.number_of_images, labels)
 
-    """
     generate_h5_dataset(datasets_path=args.destination_path, output_path=args.h5_output_path, dataset_name="test_set",
                         labels=labels, image_width=224, image_height=224)
+    """
     generate_h5_dataset(datasets_path=args.destination_path, output_path=args.h5_output_path,
                         dataset_name="validation_set",
                         labels=labels, image_width=224, image_height=224)
@@ -238,7 +238,6 @@ def main():
                         dataset_name="training_set",
                         labels=labels, image_width=224, image_height=224)
     """
-
 
 if __name__ == '__main__':
     main()
