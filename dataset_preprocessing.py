@@ -1,7 +1,5 @@
-import os
 import argparse
 import random
-import shutil
 import cv2
 import h5py
 from utilities.face_detector import *
