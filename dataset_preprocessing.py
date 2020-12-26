@@ -3,6 +3,7 @@ import argparse
 import random
 import shutil
 import cv2
+import h5py
 from utilities.face_detector import *
 from pathlib import Path
 from tqdm import tqdm
@@ -31,11 +32,28 @@ def detect(image_path, detector):
     return cropped_image
 
 
+def remove_not_labeled_identities(identities, labels):
+    new_identities = []
+    removed_identities = 0
+    for identity in identities:
+        basename_identity = identity.name
+        if basename_identity in labels:
+            new_identities.append(identity)
+        else:
+            removed_identities += 1
+
+    print(f"{removed_identities} removed identities")
+
+    return new_identities
+
+
 def generate_cropped_train_test_val(dataset_path, destination_path, val_fraction, test_fraction, detector,
-                                    total_samples):
+                                    total_samples, labels):
     destination = Path(destination_path).resolve()
     dataset = Path(dataset_path).resolve()
     dirs = list(dataset.iterdir())
+
+    dirs = remove_not_labeled_identities(dirs, labels)
 
     total_len_dirs = len(dirs)
     val_len_dirs = round(total_len_dirs * val_fraction)
@@ -126,6 +144,52 @@ def load_labels(labels_path, rounded):
     return labels
 
 
+def count_dataset_images(dataset_path):
+    identities = list(dataset_path.iterdir())
+    number_of_images = 0
+
+    for identity in identities:
+        images = list(identity.iterdir())
+        for image in images:
+            number_of_images += 1
+
+    return number_of_images
+
+
+def generate_h5_dataset(datasets_path, output_path, dataset_name, labels, image_width, image_height):
+    output_path = Path(output_path).resolve()
+    destination_path = output_path / dataset_name
+
+    # the folder that contains cropped test, validation and training sets
+    datasets_path = Path(datasets_path).resolve()
+
+    dataset_path = datasets_path / dataset_name
+
+    number_of_images = count_dataset_images(dataset_path)
+    print(f"The images in {dataset_name} are {number_of_images}")
+
+    with h5py.File(str(destination_path) + ".h5", 'w') as f:
+        dataset_x = f.create_dataset("X", (number_of_images, image_width, image_height, 3), dtype='u1')
+        dataset_y = f.create_dataset("Y", (number_of_images,), dtype="f")
+
+        identities = list(dataset_path.iterdir())
+        i = 0
+        with tqdm(total=number_of_images) as pbar:
+            for identity in identities:
+                basename_identity = identity.name
+                identity_labels = labels[basename_identity]
+                images = list(identity.iterdir())
+
+                for image in images:
+                    basename_image = image.name
+                    raw_image = cv2.imread(str(image))
+                    resized_raw_image = cv2.resize(raw_image, (image_width, image_height), interpolation=cv2.INTER_AREA)
+                    dataset_x[i] = resized_raw_image
+                    dataset_y[i] = identity_labels[basename_image]
+                    i += 1
+                    pbar.update(1)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Split dataset in training, validation and test sets.')
     parser.add_argument('-d', '--dataset_path', type=str, help='The absolute path of the dataset', required=True)
@@ -135,14 +199,47 @@ def main():
                         help='The absolute path of the folder that will contain the train, test and validation sets',
                         required=True)
     parser.add_argument('-R', '--round', action='store_true', help='Round the ages to the nearest integer')
+    parser.add_argument('--h5_output_path', type=str,
+                        help='The absolute path of the folder that will contain the h5 dataset files',
+                        required=True)
+    parser.add_argument('-n', '--number_of_images', type=int,
+                        help='The number of images that will be taken from the dataset',
+                        required=True)
+    parser.add_argument('-v', '--val_fraction', type=float,
+                        help='The fraction of the dataset that will be used for the validation set',
+                        required=False, default=0.3)
+    parser.add_argument('-t', '--test_fraction', type=float,
+                        help='The fraction of the dataset that will be used for the test set',
+                        required=False, default=0.3)
 
     args = parser.parse_args()
 
+    val_fraction = args.val_fraction
+    if args.val_fraction > 0.3:
+        print(f"the validation fraction can't be more than 0.3, using 0.3")
+        val_fraction = 0.3
+
+    test_fraction = args.test_fraction
+    if args.test_fraction > 0.3:
+        print(f"the test fraction can't be more than 0.3, using 0.3")
+        test_fraction = 0.3
+
     labels = load_labels(args.label_path, args.round)
 
-    print(labels["n000002"])
     detector = FaceDetector()
-    generate_cropped_train_test_val(args.dataset_path, args.destination_path, 0.2, 0.2, detector, 10000)
+    generate_cropped_train_test_val(args.dataset_path, args.destination_path, val_fraction, test_fraction, detector,
+                                    args.number_of_images, labels)
+
+    """
+    generate_h5_dataset(datasets_path=args.destination_path, output_path=args.h5_output_path, dataset_name="test_set",
+                        labels=labels, image_width=224, image_height=224)
+    generate_h5_dataset(datasets_path=args.destination_path, output_path=args.h5_output_path,
+                        dataset_name="validation_set",
+                        labels=labels, image_width=224, image_height=224)
+    generate_h5_dataset(datasets_path=args.destination_path, output_path=args.h5_output_path,
+                        dataset_name="training_set",
+                        labels=labels, image_width=224, image_height=224)
+    """
 
 
 if __name__ == '__main__':
