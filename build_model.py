@@ -42,7 +42,7 @@ def regression_output_function(last_layer):
     # the mae
     metrics = ['mae']
 
-    return output, loss, metrics, "mae"
+    return output, loss, metrics, "val_mae"
 
 
 AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50"]
