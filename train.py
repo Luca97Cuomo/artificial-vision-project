@@ -21,9 +21,10 @@ def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_tr
     monitored_val_quantity = metadata["val_metric_name"]
     normalization_function_name = metadata["normalization_function_name"]
     normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
+    input_shape = metadata["input_shape"]
 
-    training_data_generator = TrainDataGenerator(X_train, Y_train, batch_size=batch_size, normalization_function=normalization_function)
-    validation_data_generator = TrainDataGenerator(X_val, Y_val, batch_size=batch_size, normalization_function=normalization_function)
+    training_data_generator = TrainDataGenerator(X_train, Y_train, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
+    validation_data_generator = TrainDataGenerator(X_val, Y_val, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
 
     append = None
     if initial_epoch == 0:

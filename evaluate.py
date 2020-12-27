@@ -26,7 +26,7 @@ def evaluate_model(model_path, metadata_path, preprocessing_function, X, Y):
     normalization_function_name = metadata["normalization_function_name"]
     normalization_function = NORMALIZATION_FUNCTIONS[normalization_function_name]
 
-    Y_pred = predict_function(model, X, input_shape=input_shape,
+    Y_pred = predict_function(model, data_paths, input_shape=input_shape,
                               preprocessing_function=preprocessing_function,
                               normalization_function=normalization_function)
 
