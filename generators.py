@@ -12,7 +12,7 @@ class TrainDataGenerator(keras.utils.Sequence):
         self.y = y
         self.x = x
         self.shuffle = shuffle
-        self.indices = np.arange(len(self.data_paths))
+        self.indices = np.arange(len(self.x))
         self.normalization_function = normalization_function
         # this is called at initialization in order to create the indices for the subsequent data generation
         self.on_epoch_end()
@@ -53,7 +53,7 @@ class PredictDataGenerator(keras.utils.Sequence):
         self.preprocessing_function = preprocessing_function
         self.normalization_function = normalization_function
         self.shuffle = shuffle
-        self.indices = np.arange(len(self.data_paths))
+        self.indices = np.arange(len(self.x))
         # this is called at initialization in order to create the indices for the subsequent data generation
         self.on_epoch_end()
 
