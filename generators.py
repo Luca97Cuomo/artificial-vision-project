@@ -1,6 +1,7 @@
 import keras
 import numpy as np
 
+
 class TrainDataGenerator(keras.utils.Sequence):
     def __init__(self, X, y, batch_size=32, normalization_function=None, shuffle=True):
         if len(X) != len(y):

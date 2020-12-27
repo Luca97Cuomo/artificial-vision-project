@@ -1,4 +1,5 @@
-from utils import  read_dataset
+from utils import *
+from preprocessing import load_labels
 import json
 import keras
 import numpy as np
@@ -13,7 +14,7 @@ def evaluate(Y, Y_pred):
     return "mae", accuracy
 
 
-def evaluate_model(model_path, metadata_path, preprocessing_function, X, Y):
+def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_test):
     model = keras.models.load_model(model_path)
 
     metadata = None
@@ -26,11 +27,11 @@ def evaluate_model(model_path, metadata_path, preprocessing_function, X, Y):
     normalization_function_name = metadata["normalization_function_name"]
     normalization_function = NORMALIZATION_FUNCTIONS[normalization_function_name]
 
-    Y_pred = predict_function(model, X, input_shape=input_shape,
+    y_pred = predict_function(model, x_test, input_shape=input_shape,
                               preprocessing_function=preprocessing_function,
                               normalization_function=normalization_function)
 
-    accuracy_name, accuracy = evaluate(Y, Y_pred)
+    accuracy_name, accuracy = evaluate(y_test, y_pred)
 
     print(accuracy_name + ": " + str(accuracy))
 
@@ -39,6 +40,7 @@ def main():
     parser = argparse.ArgumentParser(description='Train model')
     parser.add_argument('-model', '--model_path', type=str, help='The path of the model', required=True)
     parser.add_argument('-metadata', '--metadata_path', type=str, help='The pathof the metadata file', required=True)
+    parser.add_argument('-csv', '--csv_path', type=str, help='The path of the csv', required=True)
     parser.add_argument('-ts', '--test_set', type=str, help='The path of the test set', required=True)
     parser.add_argument('-p', '--preprocessing_function_name', type=str,
                         help='The name of the preprocessing function that have to be used in order to preprocess the data.'
@@ -52,11 +54,11 @@ def main():
         raise Exception("The requested preprocessing function is not supported")
     preprocessing_function = preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS[args.preprocessing_function_name]
 
-    X, Y, f = read_dataset(args.training_set_path, args.verbose)
+    labels_dict = load_labels(args.csv, False)
+    x_test, y_test = prepare_data_for_generator(args.ts, labels_dict)
 
-    evaluate_model(args.model_path, args.metadata_path, args.output_dir, preprocessing_function, X, Y)
+    evaluate_model(args.model_path, args.metadata_path, preprocessing_function, x_test, y_test)
 
-    f.close()
 
 if __name__ == '__main__':
     main()
