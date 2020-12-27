@@ -3,6 +3,7 @@ import numpy as np
 from skimage.io import imread
 import cv2
 
+
 class TrainDataGenerator(keras.utils.Sequence):
     def __init__(self, data_paths, labels, input_shape, batch_size=32, normalization_function=None, shuffle=True):
         if len(data_paths) != len(labels):

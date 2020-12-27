@@ -4,12 +4,14 @@ import keras
 import os
 import json
 import argparse
-from utils import read_dataset
+from utils import *
 import models
+from preprocessing import load_labels
 from generators import TrainDataGenerator
 
 
-def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_train, X_val, Y_val, training_epochs, initial_epoch):
+def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_train, x_val, y_val, training_epochs,
+                initial_epoch):
 
     model_name = os.path.basename(model_path)
     model = keras.models.load_model(model_path)
@@ -18,6 +20,7 @@ def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_tr
     with open(metafile_path) as json_file:
         metadata = json.load(json_file)
 
+    input_shape = metadata["input_shape"]
     monitored_val_quantity = metadata["val_metric_name"]
     normalization_function_name = metadata["normalization_function_name"]
     normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
@@ -67,6 +70,7 @@ def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_tr
 def main():
     parser = argparse.ArgumentParser(description='Train model')
     parser.add_argument('-model', '--model_path', type=str, help='The path of the model', required=True)
+    parser.add_argument('-csv', '--csv_path', type=str, help='The path of the csv', required=True)
     parser.add_argument('-metadata', '--metadata_path', type=str, help='The pathof the metadata file', required=True)
     parser.add_argument('-o', '--output_dir', type=str, help='The output dir', required=True)
     parser.add_argument('-ts', '--training_set_path', type=str, help='The path of the training set', required=True)
@@ -81,23 +85,12 @@ def main():
     if args.verbose:
         print("Reading training and validation set")
 
-    X_train, Y_train, f_train = read_dataset(args.training_set_path, args.verbose)
-    X_val, Y_val, f_val = read_dataset(args.validation_set_path, args.verbose)
+    labels_dict = load_labels(args.csv, False)
+    x_train, y_train = prepare_data_for_generator(args.ts, labels_dict)
+    x_val, y_val = prepare_data_for_generator(args.vs, labels_dict)
 
-    train_model(args.model_path, args.metadata_path, args.output_dir, args.batch_size, X_train, Y_train, X_val, Y_val,
+    train_model(args.model_path, args.metadata_path, args.output_dir, args.batch_size, x_train, y_train, x_val, y_val,
                 args.epochs, args.initial_epoch)
-
-    f_train.close()
-    f_val.close()
-
-    r"""
-        python -model "C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\test\modelli_di_test\resnet50_regression\resnet50_regression_model" 
-        -metadata "C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\test\modelli_di_test\resnet50_regression\resnet50_regression_metadata.txt"
-        -o "C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\test\risultato_training_di_test" 
-        -ts "C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\test\h5_di_test\training_set.h5"
-        -vs "C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\test\h5_di_test\validation_set.h5"
-        -e 10 -ie 0 -v -b 64
-    """
 
 
 if __name__ == '__main__':

@@ -1,6 +1,20 @@
 import h5py
+import os
 
-def read_dataset(dataset_path, verbose):
+
+def prepare_data_for_generator(data_path, labels_dict):
+    identities = set(os.listdir(data_path)) & labels_dict.keys()
+    image_paths = []
+    labels = []
+    for identity in identities:
+        for image, age in labels_dict[identity].items():
+            image_paths.append(os.path.join(data_path, identity, image))
+            labels.append(age)
+
+    return image_paths, labels
+
+
+def read_dataset_h5(dataset_path, verbose):
     f = h5py.File(dataset_path, 'r')
 
     if verbose:
