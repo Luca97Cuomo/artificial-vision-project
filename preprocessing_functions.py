@@ -15,9 +15,6 @@ def standard_preprocessing(X, normalization_function=None):
         if detected_image is None:
             detected_image = image
 
-        image_width = input_shape[0]
-        image_height = input_shape[1]
-
         preprocessed_images.append(detected_image)
 
     numpy_preprocessed_images = np.array(preprocessed_images)

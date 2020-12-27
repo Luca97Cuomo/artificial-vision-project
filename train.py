@@ -10,8 +10,7 @@ from preprocessing import load_labels
 from generators import TrainDataGenerator
 
 
-def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_train, x_val, y_val, training_epochs,
-                initial_epoch):
+def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_train, x_val, y_val, training_epochs, initial_epoch):
 
     model_name = os.path.basename(model_path)
     model = keras.models.load_model(model_path)
@@ -20,14 +19,13 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
     with open(metafile_path) as json_file:
         metadata = json.load(json_file)
 
-    input_shape = metadata["input_shape"]
     monitored_val_quantity = metadata["val_metric_name"]
     normalization_function_name = metadata["normalization_function_name"]
     normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
     input_shape = metadata["input_shape"]
 
-    training_data_generator = TrainDataGenerator(X_train, Y_train, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
-    validation_data_generator = TrainDataGenerator(X_val, Y_val, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
+    training_data_generator = TrainDataGenerator(x_train, y_train, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
+    validation_data_generator = TrainDataGenerator(x_val, y_val, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
 
     append = None
     if initial_epoch == 0:

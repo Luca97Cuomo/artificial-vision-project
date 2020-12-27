@@ -1,6 +1,7 @@
 import keras
 import numpy as np
 from skimage.io import imread
+from skimage.transform import resize
 import cv2
 
 
@@ -15,7 +16,7 @@ class TrainDataGenerator(keras.utils.Sequence):
         self.data_paths = data_paths
         self.input_shape = input_shape
         self.shuffle = shuffle
-        self.indices = np.arange(len(self.X))
+        self.indices = np.arange(len(self.data_paths))
         self.normalization_function = normalization_function
         # this is called at initialization in order to create the indices for the subsequent data generation
         self.on_epoch_end()
@@ -32,15 +33,15 @@ class TrainDataGenerator(keras.utils.Sequence):
 
         # np.array creates a deep copy
         # also perform the resize of the image
-        batch_X = np.array([cv2.resize(imread(self.data_paths[i], (self.input_shape[0], self.input_sahape[1]),
-                                              interpolation=cv2.INTER_AREA)) for i in indices])
+        batch_x = np.array([resize(imread(self.data_paths[i]), (self.input_shape[0], self.input_shape[1]),
+                                              anti_aliasing=True) for i in indices])
 
         batch_y = np.array([self.labels[i] for i in indices])
 
         if self.normalization_function is not None:
-            batch_X = self.normalization_function(batch_X)
+            batch_x = self.normalization_function(batch_x)
 
-        return batch_X, batch_y
+        return batch_x, batch_y
 
     def on_epoch_end(self):
         """Updates indices after each epoch. If shuffle was set to True, this also
@@ -58,7 +59,7 @@ class PredictDataGenerator(keras.utils.Sequence):
         self.preprocessing_function = preprocessing_function
         self.normalization_function = normalization_function
         self.shuffle = shuffle
-        self.indices = np.arange(len(self.X))
+        self.indices = np.arange(len(self.data_paths))
         # this is called at initialization in order to create the indices for the subsequent data generation
         self.on_epoch_end()
 
@@ -74,13 +75,13 @@ class PredictDataGenerator(keras.utils.Sequence):
 
         # np.array creates a deep copy
         # also perform the resize of the image
-        batch_X = np.array([cv2.resize(imread(self.data_paths[i], (self.input_shape[0], self.input_sahape[1]),
-                                              interpolation=cv2.INTER_AREA)) for i in indices])
+        batch_x = np.array([resize(imread(self.data_paths[i]), (self.input_shape[0], self.input_shape[1]),
+                                              anti_aliasing=True) for i in indices])
 
         if self.preprocessing_function is not None:
-            batch_X = self.preprocessing_function(batch_X, normalization_function=self.normalization_function)
+            batch_x = self.preprocessing_function(batch_x, normalization_function=self.normalization_function)
 
-        return batch_X
+        return batch_x
 
     def on_epoch_end(self):
         """Updates indices after each epoch. If shuffle was set to True, this also
