@@ -7,9 +7,11 @@ def prepare_data_for_generator(data_path, labels_dict):
     image_paths = []
     labels = []
     for identity in identities:
+        images = set(os.listdir(os.path.join(data_path, identity)))
         for image, age in labels_dict[identity].items():
-            image_paths.append(os.path.join(data_path, identity, image))
-            labels.append(age)
+            if image in images:
+                image_paths.append(os.path.join(data_path, identity, image))
+                labels.append(age)
 
     return image_paths, labels
 
