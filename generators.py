@@ -44,10 +44,12 @@ class TrainDataGenerator(keras.utils.Sequence):
 
 
 class PredictDataGenerator(keras.utils.Sequence):
-    def __init__(self, X, batch_size=32, preprocessing_function=None, shuffle=True):
+    def __init__(self, X, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None, shuffle=True):
         self.X = X
+        self.input_shape = input_shape
         self.batch_size = batch_size
         self.preprocessing_function = preprocessing_function
+        self.normalization_function = normalization_function
         self.shuffle = shuffle
         self.indices = np.arange(len(self.X))
         # this is called at initialization in order to create the indices for the subsequent data generation
@@ -67,7 +69,7 @@ class PredictDataGenerator(keras.utils.Sequence):
         batch_X = np.array([self.X[i] for i in indices])
 
         if self.preprocessing_function is not None:
-            batch_X = self.preprocessing_function(batch_X)
+            batch_X = self.preprocessing_function(batch_X, input_shape=self.input_shape, normalization_function=self.normalization_function)
 
         return batch_X
 

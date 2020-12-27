@@ -4,8 +4,10 @@ from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, Ma
 from generators import PredictDataGenerator
 
 
-def regression_predict_function(model, X, preprocessing_function=None):
-    data_generator = PredictDataGenerator(X, preprocessing_function=preprocessing_function)
+def regression_predict(model, X, input_shape, preprocessing_function=None, normalization_function=None):
+    data_generator = PredictDataGenerator(X, input_shape=input_shape,
+                                          preprocessing_function=preprocessing_function,
+                                          normalization_function=normalization_function)
 
     Y = model.predict(data_generator) # predict should work as predict_generator if a generator is passed
 
@@ -76,4 +78,4 @@ AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50"]
 AVAILABLE_OUTPUT_TYPES = {"regression": regression_output_function}
 NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization, "resnet50_normalization": resnet50_senet50_normalization,
                            "senet50_normalization": resnet50_senet50_normalization}
-PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict_function}
+PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict}

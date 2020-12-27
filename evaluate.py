@@ -4,9 +4,11 @@ import keras
 import numpy as np
 import preprocessing_functions
 import argparse
+from models import NORMALIZATION_FUNCTIONS
+from models import PREDICT_FUNCTIONS
 
 
-def evaluate_function(Y, Y_pred):
+def evaluate(Y, Y_pred):
     accuracy = np.average(abs(np.rint(Y) - np.rint(Y_pred)))
     return "mae", accuracy
 
@@ -18,10 +20,17 @@ def evaluate_model(model_path, metadata_path, preprocessing_function, X, Y):
     with open(metadata_path) as json_file:
         metadata = json.load(json_file)
 
-    predict_function = metadata["predict_function_name"]
+    predict_function_name = metadata["predict_function_name"]
+    predict_function = PREDICT_FUNCTIONS[predict_function_name]
+    input_shape = metadata["input_shape"]
+    normalization_function_name = metadata["normalization_function_name"]
+    normalization_function = NORMALIZATION_FUNCTIONS[normalization_function_name]
 
-    Y_pred = predict_function(model, X, preprocessing_function)
-    accuracy_name, accuracy = evaluate_function(Y, Y_pred)
+    Y_pred = predict_function(model, X, input_shape=input_shape,
+                              preprocessing_function=preprocessing_function,
+                              normalization_function=normalization_function)
+
+    accuracy_name, accuracy = evaluate(Y, Y_pred)
 
     print(accuracy_name + ": " + str(accuracy))
 

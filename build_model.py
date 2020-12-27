@@ -16,6 +16,9 @@ import json
 from pathlib import Path
 import models
 
+# width, height, channels
+INPUT_SHAPE = 224, 224, 3
+
 
 def build_structure(backend, input):
     backend_out = backend(input)
@@ -40,14 +43,12 @@ def build_model(backend_name, output_type, output_dir, verbose=True):
     if predict_function_name not in models.PREDICT_FUNCTIONS:
         raise Exception("The predict function is not available")
 
-    input_shape = 224, 224, 3
-
-    backend = VGGFace(model=backend_name, include_top=False, input_shape=input_shape, weights='vggface')
+    backend = VGGFace(model=backend_name, include_top=False, input_shape=INPUT_SHAPE, weights='vggface')
 
     for layer in backend.layers:
         layer.trainable = False
 
-    input = Input(shape=input_shape)
+    input = Input(shape=INPUT_SHAPE)
 
     optimizer = optimizers.Adam(lr=0.0005)  # lr is an hyperparameter
     output_function = models.AVAILABLE_OUTPUT_TYPES[output_type]
@@ -67,7 +68,8 @@ def build_model(backend_name, output_type, output_dir, verbose=True):
     with open(meta_file_name, "w") as f:
         metadata = {"val_metric_name": val_metric_name,
                     "normalization_function_name": normalization_function_name,
-                    "predict_function_name": predict_function_name}
+                    "predict_function_name": predict_function_name,
+                    "input_shape": INPUT_SHAPE}
         f.write(json.dumps(metadata))  # use `json.loads` to do the reversese
 
     if verbose:

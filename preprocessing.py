@@ -48,19 +48,28 @@ def pose_normalization_image(shape_predictor, image_path, new_image_path, verbos
 """
 
 
-def detect(image_path, detector):
-    image = cv2.imread(image_path)
+def detect_from_image(image, detector):
     height, width, channels = image.shape
     faces = detector.detect(image)
     if len(faces) <= 0:
-        print("Could not find faces for " + image_path)
-        return image
+        return None
     face = findRelevantFace(faces, width, height)
 
     rect = enclosing_square(face['roi'])
     cropped_image = cut(image, rect)
 
     return cropped_image
+
+
+def detect_from_path(image_path, detector):
+    image = cv2.imread(image_path)
+
+    detected_image = detect_from_image(image, detector)
+    if detected_image is None:
+        print("Could not find faces for " + image_path)
+        return image
+
+    return detected_image
 
 
 def remove_not_labeled_identities(identities, labels):
@@ -137,7 +146,7 @@ def extract_cropped_subset(destination_path, detector, dirs, total_samples):
                 else:
                     identity_path = destination_path / identity.name
                     identity_path.mkdir(exist_ok=True)
-                    cropped_image = detect(str(current_image), detector)
+                    cropped_image = detect_from_path(str(current_image), detector)
                     cv2.imwrite(str(identity_path / current_image.name), cropped_image)
                     evaluated_samples += 1
                     pbar.update(1)
