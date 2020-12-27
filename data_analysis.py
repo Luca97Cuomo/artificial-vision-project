@@ -1,4 +1,4 @@
-from dataset_preprocessing import load_labels
+from preprocessing import load_labels
 import collections
 import math
 

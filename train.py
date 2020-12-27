@@ -1,55 +1,12 @@
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau
 import pickle
-import numpy as np
 import keras
 import os
 import json
 import argparse
-import tensorflow as tf
 from utils import read_dataset
-import build_model
-
-
-class DataGenerator(keras.utils.Sequence):
-    def __init__(self, X, y, batch_size=32, normalization_function=None, shuffle=True):
-        if len(X) != len(y):
-            raise ValueError("Inappropriate sizes for the provided data. Check"
-                             " that they are of the same size.")
-
-        self.batch_size = batch_size
-        self.y = y
-        self.X = X
-        self.shuffle = shuffle
-        self.indices = np.arange(len(self.X))
-        self.normalization_function = normalization_function
-        # this is called at initialization in order to create the indices for the subsequent data generation
-        self.on_epoch_end()
-
-    def __len__(self):
-        """Determines the number of steps per epoch. Following
-        https://keras.io/models/model/ advice on this parameter of fit_generator,
-        it is defined as `ceil(len(samples) / batch_size)`"""
-        return int(np.ceil(len(self.X) / self.batch_size))
-
-    def __getitem__(self, index):
-        """Generates one batch of data."""
-        indices = self.indices[index * self.batch_size:(index + 1) * self.batch_size]
-
-        # np.array creates a deep copy
-        batch_X = np.array([self.X[i] for i in indices])
-        batch_y = np.array([self.y[i] for i in indices])
-
-        if self.normalization_function is not None:
-            batch_X = self.normalization_function(batch_X)
-
-        return batch_X, batch_y
-
-    def on_epoch_end(self):
-        """Updates indices after each epoch. If shuffle was set to True, this also
-        shuffles all the indices, in order to create different batches afterwards."""
-        print("Updating indices...")
-        if self.shuffle:
-            np.random.shuffle(self.indices)
+import models
+from generators import TrainDataGenerator
 
 
 def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_train, X_val, Y_val, training_epochs, initial_epoch):
@@ -63,10 +20,10 @@ def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_tr
 
     monitored_val_quantity = metadata["val_metric_name"]
     normalization_function_name = metadata["normalization_function_name"]
-    normalization_function = build_model.NORMALIZATION_FUNCTIONS[normalization_function_name]
+    normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
 
-    training_data_generator = DataGenerator(X_train, Y_train, batch_size=batch_size, normalization_function=normalization_function)
-    validation_data_generator = DataGenerator(X_val, Y_val, batch_size=batch_size, normalization_function=normalization_function)
+    training_data_generator = TrainDataGenerator(X_train, Y_train, batch_size=batch_size, normalization_function=normalization_function)
+    validation_data_generator = TrainDataGenerator(X_val, Y_val, batch_size=batch_size, normalization_function=normalization_function)
 
     append = None
     if initial_epoch == 0:

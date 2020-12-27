@@ -5,7 +5,6 @@
 # You need tensorflow 1, does not work with tensorflow 2
 
 import argparse
-
 import os
 import tensorflow as tf
 from keras.utils import plot_model
@@ -15,53 +14,7 @@ from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, Ma
 from keras_vggface.vggface import VGGFace
 import json
 from pathlib import Path
-import keras.backend as K
-import numpy as np
-
-
-def preprocess_input(x, data_format=None, version):
-    x_temp = np.copy(x, dtype="float32")
-    if data_format is None:
-        data_format = K.image_data_format()
-    assert data_format in {'channels_last', 'channels_first'}
-
-    # VGG16
-    if version == 1:
-        if data_format == 'channels_first':
-            x_temp = x_temp[:, ::-1, ...]
-            x_temp[:, 0, :, :] -= 93.5940
-            x_temp[:, 1, :, :] -= 104.7624
-            x_temp[:, 2, :, :] -= 129.1863
-        else:
-            x_temp = x_temp[..., ::-1]
-            x_temp[..., 0] -= 93.5940
-            x_temp[..., 1] -= 104.7624
-            x_temp[..., 2] -= 129.1863
-
-    # RESNET50, SENET50
-    elif version == 2:
-        if data_format == 'channels_first':
-            x_temp = x_temp[:, ::-1, ...]
-            x_temp[:, 0, :, :] -= 91.4953
-            x_temp[:, 1, :, :] -= 103.8827
-            x_temp[:, 2, :, :] -= 131.0912
-        else:
-            x_temp = x_temp[..., ::-1]
-            x_temp[..., 0] -= 91.4953
-            x_temp[..., 1] -= 103.8827
-            x_temp[..., 2] -= 131.0912
-    else:
-        raise NotImplementedError
-
-    return x_temp
-
-
-def vgg16_normalization(dataset, **kwargs):
-    return preprocess_input(dataset, kwargs["data_format"], 1)
-
-
-def resnet50_senet50_normalization(dataset, **kwargs):
-    return preprocess_input(dataset, kwargs["data_format"], 1)
+import models
 
 
 def build_structure(backend, input):
@@ -78,30 +31,14 @@ def build_structure(backend, input):
     return x
 
 
-def regression_output_function(last_layer):
-    output = Dense(1, activation='relu', kernel_initializer='glorot_normal', name='regression')(last_layer)
-    loss = "mse"
-
-    # Note, the metrics are not used to optimize the weights (the loss function is used)
-    # They are used to judge the perfomance of the model, for example in the validation phase.
-
-    # I have to consider to implement a custom metric that cast to int the input and then apply
-    # the mae
-    metrics = ['mae']
-
-    return output, loss, metrics, "val_mae"
-
-
-AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50"]
-AVAILABLE_OUTPUT_TYPES = {"regression": regression_output_function}
-NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization, "resnet50_normalization": resnet50_senet50_normalization,
-                           "senet50_normalization": resnet50_senet50_normalization}
-
-
 def build_model(backend_name, output_type, output_dir, verbose=True):
     normalization_function_name = backend_name + "_normalization"
-    if normalization_function_name not in NORMALIZATION_FUNCTIONS:
-        raise Exception("The requested output type is not supported")
+    if normalization_function_name not in models.NORMALIZATION_FUNCTIONS:
+        raise Exception("The normalization function is not available")
+
+    predict_function_name = output_type + "_predict_function"
+    if predict_function_name not in models.PREDICT_FUNCTIONS:
+        raise Exception("The predict function is not available")
 
     input_shape = 224, 224, 3
 
@@ -113,7 +50,7 @@ def build_model(backend_name, output_type, output_dir, verbose=True):
     input = Input(shape=input_shape)
 
     optimizer = optimizers.Adam(lr=0.0005)  # lr is an hyperparameter
-    output_function = AVAILABLE_OUTPUT_TYPES[output_type]
+    output_function = models.AVAILABLE_OUTPUT_TYPES[output_type]
 
     last_layer = build_structure(backend, input)
     output, loss, metrics, val_metric_name = output_function(last_layer)
@@ -128,7 +65,9 @@ def build_model(backend_name, output_type, output_dir, verbose=True):
     model.save(os.path.join(model_dir, model_name + "_model"))
     meta_file_name = os.path.join(model_dir, model_name + "_metadata.txt")
     with open(meta_file_name, "w") as f:
-        metadata = {"val_metric_name": val_metric_name, "normalization_function_name": normalization_function_name}
+        metadata = {"val_metric_name": val_metric_name,
+                    "normalization_function_name": normalization_function_name,
+                    "predict_function_name": predict_function_name}
         f.write(json.dumps(metadata))  # use `json.loads` to do the reversese
 
     if verbose:
@@ -147,10 +86,10 @@ def main():
 
     args = parser.parse_args()
 
-    if args.backend_name not in AVAILABLE_BACKENDS:
+    if args.backend_name not in models.AVAILABLE_BACKENDS:
         raise Exception("The requested backend is not supported")
 
-    if args.output_type not in AVAILABLE_OUTPUT_TYPES:
+    if args.output_type not in models.AVAILABLE_OUTPUT_TYPES:
         raise Exception("The requested output type is not supported")
 
     print(tf.version)
