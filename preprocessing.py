@@ -190,6 +190,7 @@ def count_dataset_images(dataset_path):
 def generate_h5_dataset(datasets_path, output_path, dataset_name, labels, image_width, image_height):
     output_path = Path(output_path).resolve()
     destination_path = output_path / dataset_name
+    images_not_in_csv = 0
 
     # the folder that contains cropped test, validation and training sets
     datasets_path = Path(datasets_path).resolve()
@@ -215,10 +216,19 @@ def generate_h5_dataset(datasets_path, output_path, dataset_name, labels, image_
                     basename_image = image.name
                     raw_image = cv2.imread(str(image))
                     resized_raw_image = cv2.resize(raw_image, (image_width, image_height), interpolation=cv2.INTER_AREA)
-                    dataset_x[i] = resized_raw_image
-                    dataset_y[i] = identity_labels[basename_image]
+                    if basename_image in identity_labels:
+                        dataset_x[i] = resized_raw_image
+                        dataset_y[i] = identity_labels[basename_image]
+                    else:
+                        print(
+                            f"The image {basename_image} for the identity {str(identity)} was found in the files of the dataset but not in the csv")
+                        pbar.update(1)
+                        images_not_in_csv += 1
+                        continue
                     i += 1
                     pbar.update(1)
+
+                print(f"{images_not_in_csv} not found in the csv")
 
 
 def main():

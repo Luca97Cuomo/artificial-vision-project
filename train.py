@@ -50,12 +50,11 @@ def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_tr
         save_weights_only=False,
         save_best_only=True, monitor=monitored_val_quantity, mode='auto')
 
-    history = model.fit_generator(training_data_generator, validation_data=validation_data_generator,
-                                  initial_epoch=initial_epoch,
-                                  epochs=training_epochs,
-                                  callbacks=[save_callback, logger_callback, reduce_lr_plateau_callback,
-                                             stopping_callback],
-                                  use_multiprocessing=False)
+    history = model.fit(training_data_generator, validation_data=validation_data_generator,
+                        initial_epoch=initial_epoch,
+                        epochs=training_epochs,
+                        callbacks=[save_callback, logger_callback, reduce_lr_plateau_callback, stopping_callback],
+                        use_multiprocessing=False)
 
     with open(os.path.join(output_dir, model_name + "_history"), 'wb') as f:
         print("Saving history ...")

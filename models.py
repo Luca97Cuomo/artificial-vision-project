@@ -7,14 +7,14 @@ from generators import PredictDataGenerator
 def regression_predict_function(model, X, preprocessing_function=None):
     data_generator = PredictDataGenerator(X, preprocessing_function=preprocessing_function)
 
-    Y = model.predict_generator(data_generator)
+    Y = model.predict(data_generator) # predict should work as predict_generator if a generator is passed
 
     # do not round to int
     return Y
 
 
 def normalize_input_rcmalli(x, version, data_format=None):
-    x_temp = np.copy(x, dtype="float32")
+    x_temp = x.astype(dtype="float32")
     if data_format is None:
         data_format = K.image_data_format()
     assert data_format in {'channels_last', 'channels_first'}
