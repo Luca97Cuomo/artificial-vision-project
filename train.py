@@ -24,8 +24,8 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
     normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
     input_shape = metadata["input_shape"]
 
-    training_data_generator = TrainDataGenerator(x_train, y_train, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
-    validation_data_generator = TrainDataGenerator(x_val, y_val, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
+    training_data_generator = TrainDataGenerator(x_train, y_train, batch_size=batch_size, normalization_function=normalization_function)
+    validation_data_generator = TrainDataGenerator(x_val, y_val, batch_size=batch_size, normalization_function=normalization_function)
 
     append = None
     if initial_epoch == 0:
@@ -68,7 +68,6 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
 def main():
     parser = argparse.ArgumentParser(description='Train model')
     parser.add_argument('-model', '--model_path', type=str, help='The path of the model', required=True)
-    parser.add_argument('-csv', '--csv_path', type=str, help='The path of the csv', required=True)
     parser.add_argument('-metadata', '--metadata_path', type=str, help='The pathof the metadata file', required=True)
     parser.add_argument('-o', '--output_dir', type=str, help='The output dir', required=True)
     parser.add_argument('-ts', '--training_set_path', type=str, help='The path of the training set', required=True)
@@ -83,12 +82,14 @@ def main():
     if args.verbose:
         print("Reading training and validation set")
 
-    labels_dict = load_labels(args.csv_path, False)
-    x_train, y_train = prepare_data_for_generator(args.training_set_path, labels_dict)
-    x_val, y_val = prepare_data_for_generator(args.validation_set_path, labels_dict)
+    x_train, y_train, f_train = read_dataset_h5(args.training_set_path, True)
+    x_val, y_val, f_val = read_dataset_h5(args.validation_set_path, True)
 
     train_model(args.model_path, args.metadata_path, args.output_dir, args.batch_size, x_train, y_train, x_val, y_val,
                 args.epochs, args.initial_epoch)
+
+    f_train.close()
+    f_val.close()
 
 
 if __name__ == '__main__':

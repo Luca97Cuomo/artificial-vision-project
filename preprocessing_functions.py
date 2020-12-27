@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 
-def standard_preprocessing(X, normalization_function=None):
+def standard_preprocessing(X, input_shape, normalization_function=None):
     detector = FaceDetector()
 
     preprocessed_images = []
@@ -15,7 +15,13 @@ def standard_preprocessing(X, normalization_function=None):
         if detected_image is None:
             detected_image = image
 
-        preprocessed_images.append(detected_image)
+        # resize
+        image_width = input_shape[0]
+        image_height = input_shape[1]
+
+        resized_image = cv2.resize(detected_image, (image_width, image_height), interpolation=cv2.INTER_AREA)
+
+        preprocessed_images.append(resized_image)
 
     numpy_preprocessed_images = np.array(preprocessed_images)
 
