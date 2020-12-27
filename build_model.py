@@ -4,6 +4,8 @@
 
 # You need tensorflow 1, does not work with tensorflow 2
 
+# %tensorflow_version 1.x
+
 import argparse
 import os
 import tensorflow as tf
@@ -45,8 +47,8 @@ def build_model(backend_name, output_type, output_dir, verbose=True):
 
     backend = VGGFace(model=backend_name, include_top=False, input_shape=INPUT_SHAPE, weights='vggface')
 
-    for layer in backend.layers:
-        layer.trainable = False
+    # for layer in backend.layers:
+    #    layer.trainable = False
 
     input = Input(shape=INPUT_SHAPE)
 
