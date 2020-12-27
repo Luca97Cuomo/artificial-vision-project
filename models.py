@@ -53,11 +53,11 @@ def normalize_input_rcmalli(x, version, data_format=None):
 
 
 def vgg16_normalization(dataset, **kwargs):
-    return normalize_input_rcmalli(dataset, 1, kwargs["data_format"])
+    return normalize_input_rcmalli(dataset, 1)
 
 
 def resnet50_senet50_normalization(dataset, **kwargs):
-    return normalize_input_rcmalli(dataset, 2, kwargs["data_format"])
+    return normalize_input_rcmalli(dataset, 2)
 
 
 def regression_output_function(last_layer):
