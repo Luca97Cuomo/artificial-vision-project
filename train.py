@@ -7,9 +7,10 @@ import argparse
 from utils import read_dataset
 import models
 from generators import TrainDataGenerator
+import h5py
 
 
-def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_train, X_val, Y_val, training_epochs, initial_epoch):
+def train_model(model_path, metafile_path, output_dir, batch_size, training_path, validation_path, training_epochs, initial_epoch):
 
     model_name = os.path.basename(model_path)
     model = keras.models.load_model(model_path)
@@ -22,8 +23,14 @@ def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_tr
     normalization_function_name = metadata["normalization_function_name"]
     normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
 
-    training_data_generator = TrainDataGenerator(X_train, Y_train, batch_size=batch_size, normalization_function=normalization_function)
-    validation_data_generator = TrainDataGenerator(X_val, Y_val, batch_size=batch_size, normalization_function=normalization_function)
+    with h5py.File(training_path, "r") as f_train:
+        num_training_samples = len(f_train["X"])
+
+    with h5py.File(validation_path, "r") as f_val:
+        num_validation_samples = len(f_val["X"])
+
+    training_data_generator = TrainDataGenerator(training_path, num_training_samples, batch_size=batch_size, normalization_function=normalization_function)
+    validation_data_generator = TrainDataGenerator(validation_path, num_validation_samples, batch_size=batch_size, normalization_function=normalization_function)
 
     append = None
     if initial_epoch == 0:
@@ -54,7 +61,7 @@ def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_tr
                         initial_epoch=initial_epoch,
                         epochs=training_epochs,
                         callbacks=[save_callback, logger_callback, reduce_lr_plateau_callback, stopping_callback],
-                        use_multiprocessing=False)
+                        use_multiprocessing=True, workers=10)
 
     with open(os.path.join(output_dir, model_name + "_history"), 'wb') as f:
         print("Saving history ...")
@@ -80,10 +87,8 @@ def main():
     if args.verbose:
         print("Reading training and validation set")
 
-    X_train, Y_train, f_train = read_dataset(args.training_set_path, args.verbose)
-    X_val, Y_val, f_val = read_dataset(args.validation_set_path, args.verbose)
 
-    train_model(args.model_path, args.metadata_path, args.output_dir, args.batch_size, X_train, Y_train, X_val, Y_val,
+    train_model(args.model_path, args.metadata_path, args.output_dir, args.batch_size, args.training_set_path, args.validation_set_path,
                 args.epochs, args.initial_epoch)
 
     f_train.close()

@@ -1,17 +1,15 @@
 import keras
 import numpy as np
+import h5py
 
 class TrainDataGenerator(keras.utils.Sequence):
-    def __init__(self, X, y, batch_size=32, normalization_function=None, shuffle=True):
-        if len(X) != len(y):
-            raise ValueError("Inappropriate sizes for the provided data. Check"
-                             " that they are of the same size.")
+    def __init__(self, h5_file_path, num_samples, batch_size=32, normalization_function=None, shuffle=True):
 
         self.batch_size = batch_size
-        self.y = y
-        self.X = X
+        self.h5_file_path = h5_file_path
         self.shuffle = shuffle
-        self.indices = np.arange(len(self.X))
+        self.num_samples = num_samples
+        self.indices = np.arange(num_samples)
         self.normalization_function = normalization_function
         # this is called at initialization in order to create the indices for the subsequent data generation
         self.on_epoch_end()
@@ -20,15 +18,18 @@ class TrainDataGenerator(keras.utils.Sequence):
         """Determines the number of steps per epoch. Following
         https://keras.io/models/model/ advice on this parameter of fit_generator,
         it is defined as `ceil(len(samples) / batch_size)`"""
-        return int(np.ceil(len(self.X) / self.batch_size))
+        return int(np.ceil(self.num_samples / self.batch_size))
 
     def __getitem__(self, index):
         """Generates one batch of data."""
         indices = self.indices[index * self.batch_size:(index + 1) * self.batch_size]
 
+        with h5py.File(self.h5_file_path, "r") as h5_file:
+            X = h5_file["X"]
+            y = h5_file["Y"]
         # np.array creates a deep copy
-        batch_X = np.array([self.X[i] for i in indices])
-        batch_y = np.array([self.y[i] for i in indices])
+            batch_X = np.array([X[i] for i in indices])
+            batch_y = np.array([y[i] for i in indices])
 
         if self.normalization_function is not None:
             batch_X = self.normalization_function(batch_X)
