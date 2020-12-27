@@ -55,7 +55,7 @@ def main():
     preprocessing_function = preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS[args.preprocessing_function_name]
 
     labels_dict = load_labels(args.csv_path, False)
-    x_test, y_test = prepare_data_for_generator(args.ts, labels_dict)
+    x_test, y_test = prepare_data_for_generator(args.test_set, labels_dict)
 
     evaluate_model(args.model_path, args.metadata_path, preprocessing_function, x_test, y_test)
 

@@ -84,8 +84,8 @@ def main():
         print("Reading training and validation set")
 
     labels_dict = load_labels(args.csv_path, False)
-    x_train, y_train = prepare_data_for_generator(args.ts, labels_dict)
-    x_val, y_val = prepare_data_for_generator(args.vs, labels_dict)
+    x_train, y_train = prepare_data_for_generator(args.training_set_path, labels_dict)
+    x_val, y_val = prepare_data_for_generator(args.validation_set_path, labels_dict)
 
     train_model(args.model_path, args.metadata_path, args.output_dir, args.batch_size, x_train, y_train, x_val, y_val,
                 args.epochs, args.initial_epoch)
