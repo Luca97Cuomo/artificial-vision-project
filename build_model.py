@@ -15,6 +15,53 @@ from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, Ma
 from keras_vggface.vggface import VGGFace
 import json
 from pathlib import Path
+import keras.backend as K
+import numpy as np
+
+
+def preprocess_input(x, data_format=None, version):
+    x_temp = np.copy(x, dtype="float32")
+    if data_format is None:
+        data_format = K.image_data_format()
+    assert data_format in {'channels_last', 'channels_first'}
+
+    # VGG16
+    if version == 1:
+        if data_format == 'channels_first':
+            x_temp = x_temp[:, ::-1, ...]
+            x_temp[:, 0, :, :] -= 93.5940
+            x_temp[:, 1, :, :] -= 104.7624
+            x_temp[:, 2, :, :] -= 129.1863
+        else:
+            x_temp = x_temp[..., ::-1]
+            x_temp[..., 0] -= 93.5940
+            x_temp[..., 1] -= 104.7624
+            x_temp[..., 2] -= 129.1863
+
+    # RESNET50, SENET50
+    elif version == 2:
+        if data_format == 'channels_first':
+            x_temp = x_temp[:, ::-1, ...]
+            x_temp[:, 0, :, :] -= 91.4953
+            x_temp[:, 1, :, :] -= 103.8827
+            x_temp[:, 2, :, :] -= 131.0912
+        else:
+            x_temp = x_temp[..., ::-1]
+            x_temp[..., 0] -= 91.4953
+            x_temp[..., 1] -= 103.8827
+            x_temp[..., 2] -= 131.0912
+    else:
+        raise NotImplementedError
+
+    return x_temp
+
+
+def vgg16_normalization(dataset, **kwargs):
+    return preprocess_input(dataset, kwargs["data_format"], 1)
+
+
+def resnet50_senet50_normalization(dataset, **kwargs):
+    return preprocess_input(dataset, kwargs["data_format"], 1)
 
 
 def build_structure(backend, input):
@@ -47,9 +94,15 @@ def regression_output_function(last_layer):
 
 AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50"]
 AVAILABLE_OUTPUT_TYPES = {"regression": regression_output_function}
+NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization, "resnet50_normalization": resnet50_senet50_normalization,
+                           "senet50_normalization": resnet50_senet50_normalization}
 
 
 def build_model(backend_name, output_type, output_dir, verbose=True):
+    normalization_function_name = backend_name + "_normalization"
+    if normalization_function_name not in NORMALIZATION_FUNCTIONS:
+        raise Exception("The requested output type is not supported")
+
     input_shape = 224, 224, 3
 
     backend = VGGFace(model=backend_name, include_top=False, input_shape=input_shape, weights='vggface')
@@ -75,7 +128,7 @@ def build_model(backend_name, output_type, output_dir, verbose=True):
     model.save(os.path.join(model_dir, model_name + "_model"))
     meta_file_name = os.path.join(model_dir, model_name + "_metadata.txt")
     with open(meta_file_name, "w") as f:
-        metadata = {"val_metric_name": val_metric_name}
+        metadata = {"val_metric_name": val_metric_name, "normalization_function_name": normalization_function_name}
         f.write(json.dumps(metadata))  # use `json.loads` to do the reversese
 
     if verbose:
@@ -93,6 +146,12 @@ def main():
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
 
     args = parser.parse_args()
+
+    if args.backend_name not in AVAILABLE_BACKENDS:
+        raise Exception("The requested backend is not supported")
+
+    if args.output_type not in AVAILABLE_OUTPUT_TYPES:
+        raise Exception("The requested output type is not supported")
 
     print(tf.version)
     build_model(args.backend_name, args.output_type, args.model_path, args.verbose)

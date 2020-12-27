@@ -7,10 +7,11 @@ import json
 import argparse
 import tensorflow as tf
 from utils import read_dataset
+import build_model
 
 
 class DataGenerator(keras.utils.Sequence):
-    def __init__(self, X, y, batch_size=32, shuffle=True):
+    def __init__(self, X, y, batch_size=32, normalization_function=None, shuffle=True):
         if len(X) != len(y):
             raise ValueError("Inappropriate sizes for the provided data. Check"
                              " that they are of the same size.")
@@ -20,6 +21,7 @@ class DataGenerator(keras.utils.Sequence):
         self.X = X
         self.shuffle = shuffle
         self.indices = np.arange(len(self.X))
+        self.normalization_function = normalization_function
         # this is called at initialization in order to create the indices for the subsequent data generation
         self.on_epoch_end()
 
@@ -33,8 +35,12 @@ class DataGenerator(keras.utils.Sequence):
         """Generates one batch of data."""
         indices = self.indices[index * self.batch_size:(index + 1) * self.batch_size]
 
+        # np.array creates a deep copy
         batch_X = np.array([self.X[i] for i in indices])
-        batch_y = np.array([self.y[i] for i in indices])  # maybe it depends on the network
+        batch_y = np.array([self.y[i] for i in indices])
+
+        if self.normalization_function is not None:
+            batch_X = self.normalization_function(batch_X)
 
         return batch_X, batch_y
 
@@ -46,12 +52,9 @@ class DataGenerator(keras.utils.Sequence):
             np.random.shuffle(self.indices)
 
 
-def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_train, X_val, Y_val, training_epochs,
-                initial_epoch):
+def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_train, X_val, Y_val, training_epochs, initial_epoch):
+
     model_name = os.path.basename(model_path)
-
-
-
     model = keras.models.load_model(model_path)
 
     metadata = None
@@ -59,17 +62,18 @@ def train_model(model_path, metafile_path, output_dir, batch_size, X_train, Y_tr
         metadata = json.load(json_file)
 
     monitored_val_quantity = metadata["val_metric_name"]
+    normalization_function_name = metadata["normalization_function_name"]
+    normalization_function = build_model.NORMALIZATION_FUNCTIONS[normalization_function_name]
 
-    training_data_generator = DataGenerator(X_train, Y_train, batch_size=batch_size)
-    validation_data_generator = DataGenerator(X_val, Y_val)  # why not pass the batch size?
+    training_data_generator = DataGenerator(X_train, Y_train, batch_size=batch_size, normalization_function=normalization_function)
+    validation_data_generator = DataGenerator(X_val, Y_val, batch_size=batch_size, normalization_function=normalization_function)
 
     append = None
     if initial_epoch == 0:
         append = False
     else:
         append = True
-    logger_callback = CSVLogger(os.path.join(output_dir, model_name) + ".log",
-                                append=append)  # remember to put it to True if continuing a training
+    logger_callback = CSVLogger(os.path.join(output_dir, model_name) + ".log", append=append)
 
     # divides learning rate by 5 if no improvement is found on validation over 3 epochs.
     # this is made in order to avoid stagnating too much: empirical evidence suggests that reducing learning rate when stagnating
