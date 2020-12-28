@@ -7,12 +7,13 @@ from pathlib import Path
 from tqdm import tqdm
 # from imutils.face_utils import FaceAligner
 # import dlib
-
+from skimage.transform import resize
+import skimage
+import time
 
 DATASET_DIR = ''
 LABEL_DIR = ''
 random.seed(42)
-
 
 """
 def pose_normalization_image(shape_predictor, image_path, new_image_path, verbose=False):
@@ -94,6 +95,7 @@ def generate_cropped_train_test_val(dataset_path, destination_path, val_fraction
     dirs = list(dataset.iterdir())
 
     dirs = remove_not_labeled_identities(dirs, labels)
+    ##RIMUOVERE LE IMMAGINI CHE NON SONO ASSOCIATE A LABELS
 
     total_len_dirs = len(dirs)
     val_len_dirs = round(total_len_dirs * val_fraction)
@@ -196,6 +198,25 @@ def count_dataset_images(dataset_path):
     return number_of_images
 
 
+def resize_dataset(dataset_path, output_path, image_width, image_height):
+    output_path = Path(output_path).resolve()
+    dataset_path = Path(dataset_path).resolve()
+    number_of_images = count_dataset_images(dataset_path)
+    print(f"The images to resize are {number_of_images}")
+    identities = list(dataset_path.iterdir())
+
+    with tqdm(total=number_of_images) as pbar:
+        for identity in identities:
+            identity_path = output_path / identity.name
+            identity_path.mkdir(exist_ok=True)
+            images = list(identity.iterdir())
+            for image in images:
+                raw_image = cv2.imread(str(image))
+                resized_raw_image = cv2.resize(raw_image, (image_width, image_height), interpolation=cv2.INTER_AREA)
+                cv2.imwrite(str(identity_path / image.name), resized_raw_image)
+                pbar.update(1)
+
+
 def generate_h5_dataset(datasets_path, output_path, dataset_name, labels, image_width, image_height):
     output_path = Path(output_path).resolve()
     destination_path = output_path / dataset_name
@@ -240,6 +261,33 @@ def generate_h5_dataset(datasets_path, output_path, dataset_name, labels, image_
                 print(f"{images_not_in_csv} not found in the csv")
 
 
+def test_time_resize(dataset_path, image_width, image_height, number_of_images):
+    counter = 0
+    dataset_path = Path(dataset_path).resolve()
+    identities = list(dataset_path.iterdir())
+    time_counter = 0
+    time_totale = 0
+    pre_totale = time.perf_counter()
+    with tqdm(total=number_of_images) as pbar:
+        for identity in identities:
+            images = list(identity.iterdir())
+            for image in images:
+                if counter == number_of_images:
+                    post_totale = time.perf_counter()
+                    time_totale = post_totale - pre_totale
+                    print(f"per effettuare il resize di tutte le immagini ho impiegato {time_counter} secondi")
+                    print(f"per fare tutta la sfaccimma ho impiegato {time_totale} secondi")
+                    return
+                raw_image = cv2.imread(str(image))
+                pre = time.perf_counter()
+                resized_raw_image = resize(raw_image, (image_width, image_height), anti_aliasing=True)
+                post = time.perf_counter()
+                time_counter += post - pre
+                pbar.update(1)
+
+                counter += 1
+
+
 def main():
     parser = argparse.ArgumentParser(description='Split dataset in training, validation and test sets.')
     parser.add_argument('-d', '--dataset_path', type=str, help='The absolute path of the dataset', required=True)
@@ -276,20 +324,19 @@ def main():
 
     labels = load_labels(args.label_path, args.round)
 
-    # detector = FaceDetector()
-    # generate_cropped_train_test_val(args.dataset_path, args.destination_path, val_fraction, test_fraction, detector,
-    #                                args.number_of_images, labels)
+    detector = FaceDetector()
+    generate_cropped_train_test_val(args.dataset_path, args.destination_path, val_fraction, test_fraction, detector,
+                                    args.number_of_images, labels)
 
     generate_h5_dataset(datasets_path=args.destination_path, output_path=args.h5_output_path, dataset_name="test_set",
                         labels=labels, image_width=224, image_height=224)
-    """
+
     generate_h5_dataset(datasets_path=args.destination_path, output_path=args.h5_output_path,
                         dataset_name="validation_set",
                         labels=labels, image_width=224, image_height=224)
     generate_h5_dataset(datasets_path=args.destination_path, output_path=args.h5_output_path,
                         dataset_name="training_set",
                         labels=labels, image_width=224, image_height=224)
-    """
 
 
 if __name__ == '__main__':
