@@ -8,12 +8,27 @@ from utils import *
 import models
 from preprocessing import load_labels
 from generators import TrainDataGenerator
+from keras import backend as K
+from pathlib import Path
 
 
-def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_train, x_val, y_val, training_epochs, initial_epoch):
+def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_train, x_val, y_val,
+                training_epochs, initial_epoch, learning_rate=None, verbose=False):
+
+    # create the checkpoints folder in the output folder
+    checkpoints_dir = os.path.join(output_dir, "checkpoints")
+    Path(checkpoints_dir).mkdir(parents=True, exist_ok=True)
 
     model_name = os.path.basename(model_path)
     model = keras.models.load_model(model_path)
+
+    if learning_rate is not None:
+        if verbose:
+            print("Changing the learning rate")
+            print(f"The old learning is {K.eval(model.optimizer.lr)}")
+        K.set_value(model.optimizer.learning_rate, learning_rate)
+        if verbose:
+            print(f"The new learning is {K.eval(model.optimizer.lr)}")
 
     metadata = None
     with open(metafile_path) as json_file:
@@ -24,8 +39,8 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
     normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
     input_shape = metadata["input_shape"]
 
-    training_data_generator = TrainDataGenerator(x_train, y_train, batch_size=batch_size, normalization_function=normalization_function)
-    validation_data_generator = TrainDataGenerator(x_val, y_val, batch_size=batch_size, normalization_function=normalization_function)
+    training_data_generator = TrainDataGenerator(x_train, y_train, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
+    validation_data_generator = TrainDataGenerator(x_val, y_val, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
 
     append = None
     if initial_epoch == 0:
@@ -48,7 +63,7 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
                                       mode='auto', min_delta=validation_min_delta)
 
     save_callback = ModelCheckpoint(
-        os.path.join(output_dir, model_name) + ".{epoch:02d}-{" + monitored_val_quantity + ":.4f}.hdf5", verbose=1,
+        os.path.join(checkpoints_dir, model_name) + ".{epoch:02d}-{" + monitored_val_quantity + ":.4f}.hdf5", verbose=1,
         save_weights_only=False,
         save_best_only=True, monitor=monitored_val_quantity, mode='auto')
 
@@ -59,7 +74,8 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
                         use_multiprocessing=False)
 
     with open(os.path.join(output_dir, model_name + "_history"), 'wb') as f:
-        print("Saving history ...")
+        if verbose:
+            print("Saving history ...")
         pickle.dump(history, f)
 
     model.save(os.path.join(output_dir, model_name + "_completed_training"))
@@ -68,28 +84,31 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
 def main():
     parser = argparse.ArgumentParser(description='Train model')
     parser.add_argument('-model', '--model_path', type=str, help='The path of the model', required=True)
+    parser.add_argument('-csv', '--csv_path', type=str, help='The path of the csv', required=True)
     parser.add_argument('-metadata', '--metadata_path', type=str, help='The pathof the metadata file', required=True)
     parser.add_argument('-o', '--output_dir', type=str, help='The output dir', required=True)
     parser.add_argument('-ts', '--training_set_path', type=str, help='The path of the training set', required=True)
     parser.add_argument('-vs', '--validation_set_path', type=str, help='The path of the validation set', required=True)
+    parser.add_argument('-nts', '--num_training_samples', type=int, help='The number of the training samples', required=True)
+    parser.add_argument('-vts', '--num_validation_samples', type=int, help='The number of the validation samples', required=True)
     parser.add_argument('-e', '--epochs', type=int, help='Number of epochs', required=True)
     parser.add_argument('-ie', '--initial_epoch', type=int, help='Initial epoch', required=True)
+    parser.add_argument('-lr', '--learning_rate', type=float, help='The learning rate to be used', required=False, default=None)
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
     parser.add_argument('-b', '--batch_size', type=int, help='batch size', required=True)
 
     args = parser.parse_args()
 
     if args.verbose:
+        print(f"The learning rate parameter is {args.learning_rate}")
         print("Reading training and validation set")
 
-    x_train, y_train, f_train = read_dataset_h5(args.training_set_path, True)
-    x_val, y_val, f_val = read_dataset_h5(args.validation_set_path, True)
+    labels_dict = load_labels(args.csv_path, False)
+    x_train, y_train = prepare_data_for_generator(args.training_set_path, labels_dict, args.num_training_samples)
+    x_val, y_val = prepare_data_for_generator(args.validation_set_path, labels_dict, args.num_validation_samples)
 
     train_model(args.model_path, args.metadata_path, args.output_dir, args.batch_size, x_train, y_train, x_val, y_val,
-                args.epochs, args.initial_epoch)
-
-    f_train.close()
-    f_val.close()
+                args.epochs, args.initial_epoch, args.learning_rate, args.verbose)
 
 
 if __name__ == '__main__':

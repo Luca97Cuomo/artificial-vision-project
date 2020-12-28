@@ -1,18 +1,22 @@
 import keras
 import numpy as np
+import cv2
+from google.colab.patches import cv2_imshow
+import sys
 
 
 class TrainDataGenerator(keras.utils.Sequence):
-    def __init__(self, x, y, batch_size=32, normalization_function=None, shuffle=True):
-        if len(x) != len(y):
+    def __init__(self, data_paths, labels, input_shape, batch_size=32, normalization_function=None, shuffle=True):
+        if len(data_paths) != len(labels):
             raise ValueError("Inappropriate sizes for the provided data. Check"
                              " that they are of the same size.")
 
         self.batch_size = batch_size
-        self.y = y
-        self.x = x
+        self.labels = labels
+        self.data_paths = data_paths
+        self.input_shape = input_shape
         self.shuffle = shuffle
-        self.indices = np.arange(len(self.x))
+        self.indices = np.arange(len(self.data_paths))
         self.normalization_function = normalization_function
         # this is called at initialization in order to create the indices for the subsequent data generation
         self.on_epoch_end()
@@ -21,16 +25,16 @@ class TrainDataGenerator(keras.utils.Sequence):
         """Determines the number of steps per epoch. Following
         https://keras.io/models/model/ advice on this parameter of fit_generator,
         it is defined as `ceil(len(samples) / batch_size)`"""
-        return int(np.ceil(len(self.x) / self.batch_size))
+        return int(np.ceil(len(self.data_paths) / self.batch_size))
 
     def __getitem__(self, index):
         """Generates one batch of data."""
         indices = self.indices[index * self.batch_size:(index + 1) * self.batch_size]
 
         # np.array creates a deep copy
-        # also perform the resize of the image
-        batch_x = np.array([self.x[i] for i in indices])
-        batch_y = np.array([self.y[i] for i in indices])
+        batch_x = np.array([cv2.imread(self.data_paths[i]) for i in indices])
+
+        batch_y = np.array([self.labels[i] for i in indices])
 
         if self.normalization_function is not None:
             batch_x = self.normalization_function(batch_x)
@@ -46,14 +50,14 @@ class TrainDataGenerator(keras.utils.Sequence):
 
 
 class PredictDataGenerator(keras.utils.Sequence):
-    def __init__(self, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None, shuffle=True):
-        self.x = x
+    def __init__(self, data_paths, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None, shuffle=True):
+        self.data_paths = data_paths
         self.input_shape = input_shape
         self.batch_size = batch_size
         self.preprocessing_function = preprocessing_function
         self.normalization_function = normalization_function
         self.shuffle = shuffle
-        self.indices = np.arange(len(self.x))
+        self.indices = np.arange(len(self.data_paths))
         # this is called at initialization in order to create the indices for the subsequent data generation
         self.on_epoch_end()
 
@@ -61,18 +65,17 @@ class PredictDataGenerator(keras.utils.Sequence):
         """Determines the number of steps per epoch. Following
         https://keras.io/models/model/ advice on this parameter of fit_generator,
         it is defined as `ceil(len(samples) / batch_size)`"""
-        return int(np.ceil(len(self.x) / self.batch_size))
+        return int(np.ceil(len(self.data_paths) / self.batch_size))
 
     def __getitem__(self, index):
         """Generates one batch of data."""
         indices = self.indices[index * self.batch_size:(index + 1) * self.batch_size]
 
         # np.array creates a deep copy
-        # also perform the resize of the image
-        batch_x = np.array([self.x[i] for i in indices])
+        batch_x = np.array([cv2.imread(self.data_paths[i]) for i in indices])
 
         if self.preprocessing_function is not None:
-            batch_x = self.preprocessing_function(batch_x, input_shape=self.input_shape, normalization_function=self.normalization_function)
+            batch_x = self.preprocessing_function(batch_x, self.input_shape, normalization_function=self.normalization_function)
 
         return batch_x
 
