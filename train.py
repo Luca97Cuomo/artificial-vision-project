@@ -9,10 +9,15 @@ import models
 from preprocessing import load_labels
 from generators import TrainDataGenerator
 from keras import backend as K
+from pathlib import Path
 
 
 def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_train, x_val, y_val,
                 training_epochs, initial_epoch, learning_rate=None, verbose=False):
+
+    # create the checkpoints folder in the output folder
+    checkpoints_dir = os.path.join(output_dir, "checkpoints")
+    Path(checkpoints_dir).mkdir(parents=True, exist_ok=True)
 
     model_name = os.path.basename(model_path)
     model = keras.models.load_model(model_path)
@@ -58,7 +63,7 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
                                       mode='auto', min_delta=validation_min_delta)
 
     save_callback = ModelCheckpoint(
-        os.path.join(output_dir, model_name) + ".{epoch:02d}-{" + monitored_val_quantity + ":.4f}.hdf5", verbose=1,
+        os.path.join(checkpoints_dir, model_name) + ".{epoch:02d}-{" + monitored_val_quantity + ":.4f}.hdf5", verbose=1,
         save_weights_only=False,
         save_best_only=True, monitor=monitored_val_quantity, mode='auto')
 
@@ -84,8 +89,8 @@ def main():
     parser.add_argument('-o', '--output_dir', type=str, help='The output dir', required=True)
     parser.add_argument('-ts', '--training_set_path', type=str, help='The path of the training set', required=True)
     parser.add_argument('-vs', '--validation_set_path', type=str, help='The path of the validation set', required=True)
-    parser.add_argument('-nts', '--num_training_samples', type=str, help='The number of the training samples', required=True)
-    parser.add_argument('-vts', '--num_validation_samples', type=str, help='The number of the validation samples', required=True)
+    parser.add_argument('-nts', '--num_training_samples', type=int, help='The number of the training samples', required=True)
+    parser.add_argument('-vts', '--num_validation_samples', type=int, help='The number of the validation samples', required=True)
     parser.add_argument('-e', '--epochs', type=int, help='Number of epochs', required=True)
     parser.add_argument('-ie', '--initial_epoch', type=int, help='Initial epoch', required=True)
     parser.add_argument('-lr', '--learning_rate', type=float, help='The learning rate to be used', required=False, default=None)

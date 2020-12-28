@@ -42,7 +42,7 @@ def main():
     parser.add_argument('-metadata', '--metadata_path', type=str, help='The pathof the metadata file', required=True)
     parser.add_argument('-csv', '--csv_path', type=str, help='The path of the csv', required=True)
     parser.add_argument('-ts', '--test_set', type=str, help='The path of the test set', required=True)
-    parser.add_argument('-nts', '--num_test_samples', type=str, help='The number of the test samples', required=True)
+    parser.add_argument('-nts', '--num_test_samples', type=int, help='The number of the test samples', required=True)
     parser.add_argument('-p', '--preprocessing_function_name', type=str,
                         help='The name of the preprocessing function that have to be used in order to preprocess the data.'
                         'The preprocessing function should apply the same preprocessing applied to the data in the training phase',
