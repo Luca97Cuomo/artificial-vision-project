@@ -29,6 +29,8 @@ def prepare_data_for_generator(data_path, labels_dict, num_samples):
                     image_paths.append(os.path.join(data_path, identity, current_image))
                     labels.append(age)
                     count += 1
+                    if count >= num_samples:
+                        break
 
         if prec == count:
             print("Directories exhausted before getting all the samples")
