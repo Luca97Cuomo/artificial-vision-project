@@ -8,12 +8,22 @@ from utils import *
 import models
 from preprocessing import load_labels
 from generators import TrainDataGenerator
+from keras import backend as K
 
 
-def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_train, x_val, y_val, training_epochs, initial_epoch):
+def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_train, x_val, y_val,
+                training_epochs, initial_epoch, learning_rate=None, verbose=False):
 
     model_name = os.path.basename(model_path)
     model = keras.models.load_model(model_path)
+
+    if learning_rate is not None:
+        if verbose:
+            print("Changing the learning rate")
+            print(f"The old learning is {model.optimizer.learning_rate}")
+        K.set_value(model.optimizer.learning_rate, learning_rate)
+        if verbose:
+            print(f"The new learning is {model.optimizer.learning_rate}")
 
     metadata = None
     with open(metafile_path) as json_file:
@@ -59,7 +69,8 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
                         use_multiprocessing=False)
 
     with open(os.path.join(output_dir, model_name + "_history"), 'wb') as f:
-        print("Saving history ...")
+        if verbose:
+            print("Saving history ...")
         pickle.dump(history, f)
 
     model.save(os.path.join(output_dir, model_name + "_completed_training"))
@@ -77,6 +88,7 @@ def main():
     parser.add_argument('-vts', '--num_validation_samples', type=str, help='The number of the validation samples', required=True)
     parser.add_argument('-e', '--epochs', type=int, help='Number of epochs', required=True)
     parser.add_argument('-ie', '--initial_epoch', type=int, help='Initial epoch', required=True)
+    parser.add_argument('-lr', '--learning_rate', type=float, help='The learning rate to be used', required=False, default=None)
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
     parser.add_argument('-b', '--batch_size', type=int, help='batch size', required=True)
 
@@ -84,13 +96,14 @@ def main():
 
     if args.verbose:
         print("Reading training and validation set")
+        print(f"The learning rate parameter is {args.learning_rate}")
 
     labels_dict = load_labels(args.csv_path, False)
     x_train, y_train = prepare_data_for_generator(args.training_set_path, labels_dict, args.num_training_samples)
     x_val, y_val = prepare_data_for_generator(args.validation_set_path, labels_dict, args.num_validation_samples)
 
     train_model(args.model_path, args.metadata_path, args.output_dir, args.batch_size, x_train, y_train, x_val, y_val,
-                args.epochs, args.initial_epoch)
+                args.epochs, args.initial_epoch, args.learning_rate, args.verbose)
 
 
 if __name__ == '__main__':
