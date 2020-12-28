@@ -7,9 +7,6 @@ from pathlib import Path
 from tqdm import tqdm
 # from imutils.face_utils import FaceAligner
 # import dlib
-from skimage.transform import resize
-import skimage
-import time
 
 DATASET_DIR = ''
 LABEL_DIR = ''
@@ -259,33 +256,6 @@ def generate_h5_dataset(datasets_path, output_path, dataset_name, labels, image_
                     pbar.update(1)
 
                 print(f"{images_not_in_csv} not found in the csv")
-
-
-def test_time_resize(dataset_path, image_width, image_height, number_of_images):
-    counter = 0
-    dataset_path = Path(dataset_path).resolve()
-    identities = list(dataset_path.iterdir())
-    time_counter = 0
-    time_totale = 0
-    pre_totale = time.perf_counter()
-    with tqdm(total=number_of_images) as pbar:
-        for identity in identities:
-            images = list(identity.iterdir())
-            for image in images:
-                if counter == number_of_images:
-                    post_totale = time.perf_counter()
-                    time_totale = post_totale - pre_totale
-                    print(f"per effettuare il resize di tutte le immagini ho impiegato {time_counter} secondi")
-                    print(f"per fare tutta la sfaccimma ho impiegato {time_totale} secondi")
-                    return
-                raw_image = cv2.imread(str(image))
-                pre = time.perf_counter()
-                resized_raw_image = resize(raw_image, (image_width, image_height), anti_aliasing=True)
-                post = time.perf_counter()
-                time_counter += post - pre
-                pbar.update(1)
-
-                counter += 1
 
 
 def main():
