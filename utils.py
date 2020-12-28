@@ -20,7 +20,7 @@ def prepare_data_for_generator(data_path, labels_dict, num_samples):
             try:
                 current_image = images[i]
             except IndexError:
-                print(f"Directory {identity} exhausted")
+                # print(f"Directory {identity} exhausted")
             else:
                 # search age in the labels_dict
                 if current_image in labels_dict[identity]:
