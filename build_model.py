@@ -36,7 +36,7 @@ def build_structure(backend, input):
     return x
 
 
-def build_model(backend_name, output_type, output_dir, verbose=True):
+def build_model(backend_name, output_type, output_dir, learning_rate, verbose=True):
     normalization_function_name = backend_name + "_normalization"
     if normalization_function_name not in models.NORMALIZATION_FUNCTIONS:
         raise Exception("The normalization function is not available")
@@ -52,7 +52,7 @@ def build_model(backend_name, output_type, output_dir, verbose=True):
 
     input = Input(shape=INPUT_SHAPE)
 
-    optimizer = optimizers.Adam(lr=0.005)  # lr is an hyperparameter
+    optimizer = optimizers.Adam(lr=learning_rate)  # lr is an hyperparameter
     output_function = models.AVAILABLE_OUTPUT_TYPES[output_type]
 
     last_layer = build_structure(backend, input)
@@ -86,6 +86,7 @@ def main():
     parser.add_argument('-o', '--output_type', type=str,
                         help='The output type of the network (regression, RvC, multiRvC)', required=True)
     parser.add_argument('-m', '--model_path', type=str, help='The path where to save the compiled model', required=True)
+    parser.add_argument('-lr', '--learning_rate', type=float, help='The learnig rate used by the model', required=True)
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
 
     args = parser.parse_args()
@@ -96,8 +97,11 @@ def main():
     if args.output_type not in models.AVAILABLE_OUTPUT_TYPES:
         raise Exception("The requested output type is not supported")
 
+    # debug
+    print(f"The learning rate is {args.learning_rate}")
+
     print(tf.version)
-    build_model(args.backend_name, args.output_type, args.model_path, args.verbose)
+    build_model(args.backend_name, args.output_type, args.model_path, args.learning_rate, args.verbose)
 
 
 if __name__ == '__main__':

@@ -73,6 +73,8 @@ def main():
     parser.add_argument('-o', '--output_dir', type=str, help='The output dir', required=True)
     parser.add_argument('-ts', '--training_set_path', type=str, help='The path of the training set', required=True)
     parser.add_argument('-vs', '--validation_set_path', type=str, help='The path of the validation set', required=True)
+    parser.add_argument('-nts', '--num_training_samples', type=str, help='The number of the training samples', required=True)
+    parser.add_argument('-vts', '--num_validation_samples', type=str, help='The number of the validation samples', required=True)
     parser.add_argument('-e', '--epochs', type=int, help='Number of epochs', required=True)
     parser.add_argument('-ie', '--initial_epoch', type=int, help='Initial epoch', required=True)
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
@@ -84,8 +86,8 @@ def main():
         print("Reading training and validation set")
 
     labels_dict = load_labels(args.csv_path, False)
-    x_train, y_train = prepare_data_for_generator(args.training_set_path, labels_dict)
-    x_val, y_val = prepare_data_for_generator(args.validation_set_path, labels_dict)
+    x_train, y_train = prepare_data_for_generator(args.training_set_path, labels_dict, args.num_training_samples)
+    x_val, y_val = prepare_data_for_generator(args.validation_set_path, labels_dict, args.num_validation_samples)
 
     train_model(args.model_path, args.metadata_path, args.output_dir, args.batch_size, x_train, y_train, x_val, y_val,
                 args.epochs, args.initial_epoch)
