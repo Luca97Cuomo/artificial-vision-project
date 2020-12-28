@@ -2,6 +2,7 @@ import keras
 import numpy as np
 import cv2
 from google.colab.patches import cv2_imshow
+import sys
 
 
 class TrainDataGenerator(keras.utils.Sequence):
@@ -35,6 +36,8 @@ class TrainDataGenerator(keras.utils.Sequence):
 
         print(batch_x[0])
         cv2_imshow(batch_x[0])
+
+        sys.exit(0)
 
         batch_y = np.array([self.labels[i] for i in indices])
 
