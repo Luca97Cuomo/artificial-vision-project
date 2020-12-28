@@ -52,7 +52,7 @@ def build_model(backend_name, output_type, output_dir, verbose=True):
 
     input = Input(shape=INPUT_SHAPE)
 
-    optimizer = optimizers.Adam(lr=0.0005)  # lr is an hyperparameter
+    optimizer = optimizers.Adam(lr=0.005)  # lr is an hyperparameter
     output_function = models.AVAILABLE_OUTPUT_TYPES[output_type]
 
     last_layer = build_structure(backend, input)

@@ -13,8 +13,6 @@ def prepare_data_for_generator(data_path, labels_dict):
                 image_paths.append(os.path.join(data_path, identity, image))
                 labels.append(age)
 
-    print(image_paths)
-
     return image_paths, labels
 
 
