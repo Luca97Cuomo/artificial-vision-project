@@ -1,6 +1,7 @@
 import keras
 import numpy as np
 import cv2
+from google.colab.patches import cv2_imshow
 
 
 class TrainDataGenerator(keras.utils.Sequence):
@@ -30,7 +31,10 @@ class TrainDataGenerator(keras.utils.Sequence):
         indices = self.indices[index * self.batch_size:(index + 1) * self.batch_size]
 
         # np.array creates a deep copy
-        batch_x = np.array([cv2.imread(str(self.data_paths[i])) for i in indices])
+        batch_x = np.array([cv2.imread(self.data_paths[i]) for i in indices])
+
+        print(batch_x[0])
+        cv2_imshow(batch_x[0])
 
         batch_y = np.array([self.labels[i] for i in indices])
 
@@ -70,7 +74,7 @@ class PredictDataGenerator(keras.utils.Sequence):
         indices = self.indices[index * self.batch_size:(index + 1) * self.batch_size]
 
         # np.array creates a deep copy
-        batch_x = np.array([cv2.imread(str(self.data_paths[i])) for i in indices])
+        batch_x = np.array([cv2.imread(self.data_paths[i]) for i in indices])
 
         if self.preprocessing_function is not None:
             batch_x = self.preprocessing_function(batch_x, self.input_shape, normalization_function=self.normalization_function)
