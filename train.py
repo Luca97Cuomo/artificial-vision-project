@@ -25,10 +25,10 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
     if learning_rate is not None:
         if verbose:
             print("Changing the learning rate")
-            print(f"The old learning is {model.optimizer.learning_rate}")
+            print(f"The old learning is {K.eval(model.optimizer.lr)}")
         K.set_value(model.optimizer.learning_rate, learning_rate)
         if verbose:
-            print(f"The new learning is {model.optimizer.learning_rate}")
+            print(f"The new learning is {K.eval(model.optimizer.lr)}")
 
     metadata = None
     with open(metafile_path) as json_file:
