@@ -34,16 +34,10 @@ class TrainDataGenerator(keras.utils.Sequence):
         # np.array creates a deep copy
         batch_x = np.array([cv2.imread(self.data_paths[i]) for i in indices])
 
-        cv2_imshow(batch_x[0])
-
         batch_y = np.array([self.labels[i] for i in indices])
 
         if self.normalization_function is not None:
             batch_x = self.normalization_function(batch_x)
-
-        cv2_imshow(batch_x[0])
-
-        sys.exit(0)
 
         return batch_x, batch_y
 
