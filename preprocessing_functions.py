@@ -4,11 +4,10 @@ import cv2
 import numpy as np
 
 
-def standard_preprocessing(X, input_shape, normalization_function=None):
+def standard_preprocessing(X, input_shape):
     # preprocessing pipeline
     # 1) face detection
     # 2) resize
-    # 3) normalization
 
     detector = FaceDetector()
 
@@ -26,10 +25,6 @@ def standard_preprocessing(X, input_shape, normalization_function=None):
         preprocessed_images.append(resized_image)
 
     numpy_preprocessed_images = np.array(preprocessed_images)
-
-    # normalization
-    if normalization_function is not None:
-        return normalization_function(numpy_preprocessed_images)
 
     return numpy_preprocessed_images
 

@@ -2,6 +2,7 @@ from preprocessing import load_labels
 import collections
 import math
 
+
 def data_distribution_by_age(labels_path, age_interval_width=10, verbose=False):
     labels = load_labels(labels_path, True)
 
@@ -33,13 +34,13 @@ def data_distribution_by_age(labels_path, age_interval_width=10, verbose=False):
 
     ordered_dict = collections.OrderedDict(sorted(ages.items()))
     for interval_start_age in ordered_dict:
-        print("age inteval: [" + str(interval_start_age) + ",  " + str(interval_start_age + age_interval_width - 1) + "] - occurrences: " + str(ordered_dict[interval_start_age]) +" - percentage: " + str(ordered_dict[interval_start_age] / count))
+        print("age interval: [" + str(interval_start_age) + ",  " + str(interval_start_age + age_interval_width - 1) + "] - occurrences: " + str(ordered_dict[interval_start_age]) +" - percentage: " + str(ordered_dict[interval_start_age] / count))
 
     print("min age is: ", str(min_age))
     print("max age is: ", str(max_age))
 
 
 def _get_age_interval(age, age_interval_width, start_age):
-    "Returns the first element of the age interval"
+    """Returns the first element of the age interval"""
 
     return math.floor(((age - start_age) / age_interval_width)) * age_interval_width + start_age
