@@ -47,15 +47,18 @@ def main():
     parser.add_argument('-p', '--preprocessing_function_name', type=str,
                         help='The name of the preprocessing function that have to be used in order to preprocess the data.'
                         'The preprocessing function should apply the same preprocessing applied to the data in the training phase',
-                        required=True)
+                        required=False, default=None)
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
     parser.add_argument('-b', '--batch_size', type=int, help='batch size', required=True)
 
     args = parser.parse_args()
 
-    if args.preprocessing_function_name not in preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS:
+    if args.preprocessing_function_name is None:
+        preprocessing_function = None
+    elif args.preprocessing_function_name not in preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS:
         raise Exception("The requested preprocessing function is not supported")
-    preprocessing_function = preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS[args.preprocessing_function_name]
+    else:
+        preprocessing_function = preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS[args.preprocessing_function_name]
 
     labels_dict = load_labels(args.csv_path, False)
     x_test, y_test = prepare_data_for_generator(args.test_set, labels_dict, args.num_test_samples)
