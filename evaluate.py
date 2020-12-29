@@ -64,7 +64,9 @@ def main():
                         'The preprocessing function should apply the same preprocessing applied to the data in the training phase',
                         required=False, default=None)
     parser.add_argument('-o', '--output_path', type=str, help='The path where to save the predictions.'
-                                                              'If not asserted the predictions will not be saved', required=False, default=None)
+                                                              'If not asserted the predictions will not be saved'
+                                                              'For each image it saves the path, the predicted age and the real age',
+                                                              required=False, default=None)
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
     parser.add_argument('-b', '--batch_size', type=int, help='batch size', required=True)
 
