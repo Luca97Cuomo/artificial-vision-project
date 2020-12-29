@@ -10,8 +10,9 @@ from models import PREDICT_FUNCTIONS
 
 
 def evaluate(Y, Y_pred):
-    accuracy = np.average(abs(np.rint(Y) - np.rint(Y_pred)))
-    return "mae", accuracy
+    mae_int = np.average(abs(np.rint(Y) - np.rint(Y_pred)))
+    mae_float = np.average(abs(Y - Y_pred))
+    return mae_int, mae_float
 
 
 def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_test, batch_size):
@@ -31,9 +32,9 @@ def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_
                               preprocessing_function=preprocessing_function,
                               normalization_function=normalization_function)
 
-    accuracy_name, accuracy = evaluate(y_test, y_pred)
+    mae_int, mae_float = evaluate(y_test, y_pred)
 
-    print(accuracy_name + ": " + str(accuracy))
+    print(f"MAE int: {mae_int}\nMAE float {mae_float}")
 
 
 def main():
