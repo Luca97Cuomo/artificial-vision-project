@@ -9,6 +9,7 @@ from PIL import Image
 import skimage as sk
 from skimage.filters import gaussian
 from io import BytesIO
+
 from wand.image import Image as WandImage
 from wand.api import library as wandlibrary
 import wand.color as WandColor
@@ -40,6 +41,7 @@ def disk(radius, alias_blur=0.1, dtype=np.float32):
 
 
 # Tell Python about the C method
+
 wandlibrary.MagickMotionBlurImage.argtypes = (ctypes.c_void_p,  # wand
                                               ctypes.c_double,  # radius
                                               ctypes.c_double,  # sigma

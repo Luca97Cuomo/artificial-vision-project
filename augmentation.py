@@ -1,7 +1,13 @@
 import random
 import typing
 import numpy as np
-from utilities.corruptions import brightness_minus, brightness_plus
+from numpy.random import RandomState
+from PIL import Image
+from io import BytesIO
+from wand.image import Image as WandImage
+from wand.api import library as wandlibrary
+import wand.color as WandColor
+from utilities.corruptions import brightness_minus, brightness_plus, MotionImage
 
 
 def contrast(x, severity):
@@ -24,6 +30,36 @@ def brightness(x, severity):
     return brightness_plus(x, severity)
 
 
+def gaussian_noise(x, severity, randomness):
+    c = [.08, .12, 0.18, 0.24, 0.30][severity - 1]
+
+    x = np.array(x) / 255.
+    return np.clip(x + randomness.normal(size=x.shape, scale=c), 0, 1) * 255
+
+
+def motion_blur(x, severity, randomness):
+    c = [(10, 3), (15, 5), (15, 8), (15, 12), (20, 15)][severity - 1]
+    c = tuple([item / 48 * x.shape[0] for item in c])
+    if len(x.shape) == 3 and x.shape[2] == 1:
+        x = np.squeeze(x, 2)
+
+    x = Image.fromarray(x[..., [2, 1, 0]])
+
+    output = BytesIO()
+    x.save(output, format='PNG')
+    x = MotionImage(blob=output.getvalue())
+
+    x.motion_blur(radius=c[0] // 3, sigma=c[1] // 3,
+                  angle=randomness.uniform(-45, 45))
+
+    x = cv2.imdecode(np.fromstring(x.make_blob(), np.uint8),
+                     cv2.IMREAD_UNCHANGED)
+
+    if len(x.shape) == 2:
+        x = np.expand_dims(x, 2)
+    return np.clip(x, 0, 255)
+
+
 class AbstractAugmentation:
     def __init__(self,
                  augmenter: typing.Optional['AbstractAugmentation'] = None,
@@ -36,7 +72,7 @@ class AbstractAugmentation:
         if augmenter is None and type(self) != TypecastAugmentation:
             augmenter = TypecastAugmentation()
         self.augmenter = augmenter
-        self.randomness = random.Random(seed)
+        self.randomness = RandomState(seed)
 
     def __call__(self, image):
         if self.randomness.random() < self.probability:
@@ -90,38 +126,33 @@ class FlipAugmentation(AbstractAugmentation):
     def _augmentation(self, image):
         return image[..., ::-1, :]
 
+
+class GaussianNoiseAugmentation(SeverityAugmentation):
+    def __init__(self, *args, **kwargs):
+        if kwargs.get("severity_values") is None:
+            kwargs["severity_values"] = [1, 2]
+
+        super(GaussianNoiseAugmentation, self).__init__(*args, **kwargs)
+
+    def _augmentation(self, image):
+        return gaussian_noise(image, self.severity, self.randomness)
+
+
+class MotionBlurAugmentation(SeverityAugmentation):
+    def __init__(self, *args, **kwargs):
+        if kwargs.get("severity_values") is None:
+            kwargs["severity_values"] = [1]
+
+        super(MotionBlurAugmentation, self).__init__(*args, **kwargs)
+
+    def _augmentation(self, image):
+        return motion_blur(image, self.severity, self.randomness)
+
+
 import cv2
 
-# from utilities.corruptions import *
-#
-#
-# def contrast_brightness_plus(x, severity):
-#     sb, sc = [(1, 1), (2, 1), (2, 2), (2, 3), (3, 4)][severity - 1]
-#     return contrast(brightness_plus(x, sb), sc)
-#
-#
-# def contrast_brightness_minus(x, severity):
-#     sb, sc = [(1, 1), (2, 1), (2, 2), (2, 3), (3, 4)][severity - 1]
-#     return contrast(brightness_minus(x, sb), sc)
-#
-#
-# def gaussian_noise_contrast_brightness_minus(x, severity):
-#     sg, sb, sc = [(1, 1, 1), (2, 2, 1), (2, 2, 2), (3, 2, 3), (3, 2, 4)][severity - 1]
-#     return contrast(brightness_minus(gaussian_noise(x, sg), sb), sc)
-#
-#
-# def pixelate_contrast_brightness_minus(x, severity):
-#     sp, sb, sc = [(1, 1, 1), (2, 2, 1), (3, 2, 2), (4, 2, 1), (4, 3, 3)][severity - 1]
-#     return contrast(brightness_minus(pixelate(x, sp), sb), sc)
-#
-#
-# def motion_blur_contrast_brightness_minus(x, severity):
-#     sm, sb, sc = [(2, 1, 1), (3, 1, 1), (4, 2, 2), (5, 2, 1), (5, 2, 3)][severity - 1]
-#     return contrast(brightness_minus(motion_blur(x, sm), sb), sc)
-#
-#
-# orientation
-augmentation = ContrastAugmentation(FlipAugmentation(BrightnessAugmentation()))
+augmentation = MotionBlurAugmentation(
+    GaussianNoiseAugmentation(FlipAugmentation(BrightnessAugmentation(ContrastAugmentation()))))
 
 lukino = cv2.imread('luchino_stanchino_forzutino.png')
 
@@ -136,8 +167,3 @@ lukino = augmentation(lukino)
 cv2.imshow('testlukino', lukino)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-# resolution
-# brightness
-
-# class FlipAugmentation(AbstractAugmentation):
-#   def __call__(self, image):
