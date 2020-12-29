@@ -155,7 +155,7 @@ if __name__ == '__main__':
     import cv2
 
     for i in range(20):
-        lukino = cv2.imread("luchino_stanchino_forzutino.png")
+        lukino = cv2.imread("utilities/luchino_stanchino_forzutino.png")
         lukino = augmenter(lukino)
         cv2.imshow(r"test {i}", lukino)
 

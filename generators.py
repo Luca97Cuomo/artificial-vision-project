@@ -4,6 +4,7 @@ from numpy.random import RandomState
 import cv2
 import augmentation
 
+
 class DataGenerator(keras.utils.Sequence):
     def __init__(self, data_paths, labels, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None, shuffle=True, random_seed=42,
                  augmenter=None):
@@ -21,15 +22,12 @@ class DataGenerator(keras.utils.Sequence):
         self.batch_size = batch_size
         self.preprocessing_function = preprocessing_function
         self.normalization_function = normalization_function
-        self.shuffle = shuffle # note, If labels is None, the data does not be shuffled, because the generator has to be used in predict mode
+        # if labels is None, the shuffle must not be performed in order to not lose correspondence with the input
+        self.shuffle = shuffle
         self.randomness = RandomState(random_seed)
 
         if augmenter is None:
-            augmenter = augmentation.MotionBlurAugmentation(probability=0.05, seed=random_seed)
-            augmenter = augmentation.GaussianNoiseAugmentation(augmenter, probability=0.05, seed=random_seed)
-            augmenter = augmentation.FlipAugmentation(augmenter, probability=0.2, seed=random_seed)
-            augmenter = augmentation.BrightnessAugmentation(augmenter, probability=0.2, seed=random_seed)
-            augmenter = augmentation.ContrastAugmentation(augmenter, probability=0.15, seed=random_seed)
+            augmenter = augmentation.NullAugmentation()
 
         self.augmenter = augmenter
         self.indices = np.arange(len(self.data_paths))
