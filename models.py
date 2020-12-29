@@ -8,7 +8,7 @@ def regression_predict(model, X, input_shape, batch_size=32, preprocessing_funct
                                    preprocessing_function=preprocessing_function,
                                    normalization_function=normalization_function)
 
-    Y = model.predict(data_generator)  # predict should work as predict_generator if a generator is passed
+    Y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
 
     # do not round to int
     return Y
