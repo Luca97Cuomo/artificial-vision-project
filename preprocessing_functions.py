@@ -24,6 +24,8 @@ def standard_preprocessing(X, input_shape):
 
         preprocessed_images.append(resized_image)
 
+    print(f"preprocessed images type {type(preprocessed_images)}")
+
     numpy_preprocessed_images = np.array(preprocessed_images)
 
     return numpy_preprocessed_images
