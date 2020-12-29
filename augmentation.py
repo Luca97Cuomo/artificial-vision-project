@@ -4,6 +4,7 @@ from numpy.random import RandomState
 from PIL import Image
 from io import BytesIO
 from utilities.corruptions import brightness_minus, brightness_plus, MotionImage
+import cv2
 
 
 def contrast(x, severity):
