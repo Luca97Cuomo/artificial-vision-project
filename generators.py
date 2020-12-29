@@ -18,7 +18,7 @@ class DataGenerator(keras.utils.Sequence):
         self.batch_size = batch_size
         self.preprocessing_function = preprocessing_function
         self.normalization_function = normalization_function
-        self.shuffle = shuffle
+        self.shuffle = shuffle # note, If labels is None, the data does not be shuffled, because the generator has to be used in predict mode
 
         self.indices = np.arange(len(self.data_paths))
         # this is called at initialization in order to create the indices for the subsequent data generation
@@ -54,5 +54,5 @@ class DataGenerator(keras.utils.Sequence):
         """Updates indices after each epoch. If shuffle was set to True, this also
         shuffles all the indices, in order to create different batches afterwards."""
         print("Updating indices...")
-        if self.shuffle:
+        if self.shuffle and self.labels is not None:
             np.random.shuffle(self.indices)
