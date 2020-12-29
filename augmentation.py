@@ -43,7 +43,8 @@ def motion_blur(x, severity, randomness):
     if len(x.shape) == 3 and x.shape[2] == 1:
         x = np.squeeze(x, 2)
 
-    x = Image.fromarray(x[..., [2, 1, 0]])
+
+    x = Image.fromarray(x[..., [2, 1, 0]].astype(np.uint8))
 
     output = BytesIO()
     x.save(output, format='PNG')
@@ -52,7 +53,7 @@ def motion_blur(x, severity, randomness):
     x.motion_blur(radius=c[0] // 3, sigma=c[1] // 3,
                   angle=randomness.uniform(-45, 45))
 
-    x = cv2.imdecode(np.fromstring(x.make_blob(), np.uint8),
+    x = cv2.imdecode(np.frombuffer(x.make_blob(), np.uint8),
                      cv2.IMREAD_UNCHANGED)
 
     if len(x.shape) == 2:
@@ -149,21 +150,10 @@ class MotionBlurAugmentation(SeverityAugmentation):
         return motion_blur(image, self.severity, self.randomness)
 
 
-import cv2
+augmentation = MotionBlurAugmentation(probability=0.2)
+augmentation = GaussianNoiseAugmentation(augmentation, probability=0.2)
+augmentation = FlipAugmentation(augmentation, probability=0.2)
+augmentation = BrightnessAugmentation(augmentation, probability=0.2)
+augmentation = ContrastAugmentation(augmentation, probability=0.2)
 
-augmentation = MotionBlurAugmentation(
-    GaussianNoiseAugmentation(FlipAugmentation(BrightnessAugmentation(ContrastAugmentation()))))
 
-lukino = cv2.imread('luchino_stanchino_forzutino.png')
-
-lukino = augmentation(lukino)
-cv2.imshow('testlukino', lukino)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-lukino = cv2.imread('luchino_stanchino_forzutino.png')
-
-lukino = augmentation(lukino)
-cv2.imshow('testlukino', lukino)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
