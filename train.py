@@ -41,8 +41,8 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
 
     if augmentations:
         random_seed = 42
-        augmenter = augmentation.MotionBlurAugmentation(probability=0.05, seed=random_seed)
-        augmenter = augmentation.GaussianNoiseAugmentation(augmenter, probability=0.05, seed=random_seed)
+        # augmenter = augmentation.MotionBlurAugmentation(probability=0.05, seed=random_seed)
+        augmenter = augmentation.GaussianNoiseAugmentation(probability=0.05, seed=random_seed)
         augmenter = augmentation.FlipAugmentation(augmenter, probability=0.2, seed=random_seed)
         augmenter = augmentation.BrightnessAugmentation(augmenter, probability=0.2, seed=random_seed)
         augmenter = augmentation.ContrastAugmentation(augmenter, probability=0.15, seed=random_seed)
