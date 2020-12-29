@@ -5,6 +5,8 @@ import h5py
 from utilities.face_detector import *
 from pathlib import Path
 from tqdm import tqdm
+import shutil
+
 # from imutils.face_utils import FaceAligner
 # import dlib
 
@@ -214,6 +216,25 @@ def resize_dataset(dataset_path, output_path, image_width, image_height):
                 pbar.update(1)
 
 
+def extract_virgin_dataset(virgin_dataset_path, dataset_to_extract_path, output_path):
+    output_path = Path(output_path).resolve()
+    virgin_dataset_path = Path(virgin_dataset_path).resolve()
+    dataset_path = Path(dataset_to_extract_path).resolve()
+    number_of_images = count_dataset_images(dataset_path)
+    print(f"The images to resize are {number_of_images}")
+    identities = list(dataset_path.iterdir())
+
+    with tqdm(total=number_of_images) as pbar:
+        for identity in identities:
+            identity_destination_path = output_path / identity.name
+            identity_destination_path.mkdir(exist_ok=True)
+            images = list(identity.iterdir())
+            for image in images:
+                shutil.copy(str(virgin_dataset_path / identity.name / image.name),
+                            str(identity_destination_path / image.name))
+                pbar.update(1)
+
+
 def generate_h5_dataset(datasets_path, output_path, dataset_name, labels, image_width, image_height):
     output_path = Path(output_path).resolve()
     destination_path = output_path / dataset_name
@@ -310,4 +331,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    extract_virgin_dataset(r"C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\vggface2_train\train",
+                           r"C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\cropped_dataset\test_set",
+                           r"C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\virgin_datasets\virgin_test_set")
