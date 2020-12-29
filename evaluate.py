@@ -10,6 +10,10 @@ from models import PREDICT_FUNCTIONS
 
 
 def evaluate(Y, Y_pred):
+    """
+    Y and Y_pred have to be list or numpy arrays
+    """
+
     print(f"Y test {Y} type: {type(Y)}")
     print(f"Y pred {Y_pred} type: {type(Y_pred)}")
 

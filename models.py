@@ -1,6 +1,7 @@
 import keras.backend as K
 from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, MaxPooling2D, GlobalAveragePooling2D
 from generators import DataGenerator
+import numpy as np
 
 
 def regression_predict(model, X, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
@@ -11,7 +12,7 @@ def regression_predict(model, X, input_shape, batch_size=32, preprocessing_funct
     Y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
 
     # do not round to int
-    return Y
+    return np.reshape(Y, -1)
 
 
 def normalize_input_rcmalli(x, version, data_format=None):
