@@ -1,10 +1,11 @@
 import keras
 import numpy as np
+from numpy.random import RandomState
 import cv2
 
 
 class DataGenerator(keras.utils.Sequence):
-    def __init__(self, data_paths, labels, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None, shuffle=True):
+    def __init__(self, data_paths, labels, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None, shuffle=True, random_seed=42):
         """
         If labels is None it means that the generator has to be used in predict mode where the labels are not required
         """
@@ -19,6 +20,7 @@ class DataGenerator(keras.utils.Sequence):
         self.preprocessing_function = preprocessing_function
         self.normalization_function = normalization_function
         self.shuffle = shuffle # note, If labels is None, the data does not be shuffled, because the generator has to be used in predict mode
+        self.randomness = RandomState(random_seed)
 
         self.indices = np.arange(len(self.data_paths))
         # this is called at initialization in order to create the indices for the subsequent data generation
@@ -55,4 +57,4 @@ class DataGenerator(keras.utils.Sequence):
         shuffles all the indices, in order to create different batches afterwards."""
         print("Updating indices...")
         if self.shuffle and self.labels is not None:
-            np.random.shuffle(self.indices)
+            self.randomness.shuffle(self.indices)
