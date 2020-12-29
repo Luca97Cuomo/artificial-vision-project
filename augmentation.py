@@ -43,7 +43,6 @@ def motion_blur(x, severity, randomness):
     if len(x.shape) == 3 and x.shape[2] == 1:
         x = np.squeeze(x, 2)
 
-
     x = Image.fromarray(x[..., [2, 1, 0]].astype(np.uint8))
 
     output = BytesIO()
@@ -115,6 +114,7 @@ class TypecastAugmentation(AbstractAugmentation):
 
 class ContrastAugmentation(SeverityAugmentation):
     def _augmentation(self, image):
+        print(self.severity)
         return contrast(image, self.severity)
 
 
@@ -149,7 +149,20 @@ class MotionBlurAugmentation(SeverityAugmentation):
     def _augmentation(self, image):
         return motion_blur(image, self.severity, self.randomness)
 
+"""
+augmenter = MotionBlurAugmentation(probability=0.05)
+augmenter = GaussianNoiseAugmentation(augmenter, probability=0.05)
+augmenter = FlipAugmentation(augmenter, probability=0.2)
+augmenter = BrightnessAugmentation(augmenter, probability=0.2)
+augmenter = ContrastAugmentation(augmenter, probability=0.15)
 
+import cv2
 
+for i in range(20):
+    lukino = cv2.imread("luchino_stanchino_forzutino.png")
+    lukino = augmenter(lukino)
+    cv2.imshow(r"test {i}", lukino)
 
-
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+"""
