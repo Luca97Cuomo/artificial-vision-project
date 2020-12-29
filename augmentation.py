@@ -74,6 +74,7 @@ class AbstractAugmentation:
     def __call__(self, image):
         if self.randomness.random() < self.probability:
             image = self._augmentation(image)
+            print(f"image shape {image.shape}. Type: {type(self)}")
         return self.augmenter(image) if self.augmenter else image
 
     def _augmentation(self, image):
@@ -159,6 +160,8 @@ if __name__ == '__main__':
         lukino = cv2.imread("utilities/luchino_stanchino_forzutino.png")
         lukino = augmenter(lukino)
         cv2.imshow(r"test {i}", lukino)
+
+        print(lukino.shape)
 
         cv2.waitKey(0)
         cv2.destroyAllWindows()
