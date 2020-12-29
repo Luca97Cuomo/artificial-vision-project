@@ -1,12 +1,8 @@
-import random
 import typing
 import numpy as np
 from numpy.random import RandomState
 from PIL import Image
 from io import BytesIO
-from wand.image import Image as WandImage
-from wand.api import library as wandlibrary
-import wand.color as WandColor
 from utilities.corruptions import brightness_minus, brightness_plus, MotionImage
 
 
@@ -114,7 +110,6 @@ class TypecastAugmentation(AbstractAugmentation):
 
 class ContrastAugmentation(SeverityAugmentation):
     def _augmentation(self, image):
-        print(self.severity)
         return contrast(image, self.severity)
 
 
@@ -149,20 +144,20 @@ class MotionBlurAugmentation(SeverityAugmentation):
     def _augmentation(self, image):
         return motion_blur(image, self.severity, self.randomness)
 
-"""
-augmenter = MotionBlurAugmentation(probability=0.05)
-augmenter = GaussianNoiseAugmentation(augmenter, probability=0.05)
-augmenter = FlipAugmentation(augmenter, probability=0.2)
-augmenter = BrightnessAugmentation(augmenter, probability=0.2)
-augmenter = ContrastAugmentation(augmenter, probability=0.15)
 
-import cv2
+if __name__ == '__main__':
+    augmenter = MotionBlurAugmentation(probability=0.05)
+    augmenter = GaussianNoiseAugmentation(augmenter, probability=0.05)
+    augmenter = FlipAugmentation(augmenter, probability=0.2)
+    augmenter = BrightnessAugmentation(augmenter, probability=0.2)
+    augmenter = ContrastAugmentation(augmenter, probability=0.15)
 
-for i in range(20):
-    lukino = cv2.imread("luchino_stanchino_forzutino.png")
-    lukino = augmenter(lukino)
-    cv2.imshow(r"test {i}", lukino)
+    import cv2
 
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-"""
+    for i in range(20):
+        lukino = cv2.imread("utilities/luchino_stanchino_forzutino.png")
+        lukino = augmenter(lukino)
+        cv2.imshow(r"test {i}", lukino)
+
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()

@@ -3,6 +3,8 @@ import pickle
 import keras
 import json
 import argparse
+
+import augmentation
 from utils import *
 import models
 from preprocessing import load_labels
@@ -12,7 +14,7 @@ from pathlib import Path
 
 
 def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_train, x_val, y_val,
-                training_epochs, initial_epoch, learning_rate=None, verbose=False):
+                training_epochs, initial_epoch, learning_rate=None, verbose=False, augmentations=True):
 
     # create the checkpoints folder in the output folder
     checkpoints_dir = os.path.join(output_dir, "checkpoints")
@@ -29,7 +31,6 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
         if verbose:
             print(f"The new learning rate is {K.eval(model.optimizer.lr)}")
 
-    metadata = None
     with open(metafile_path) as json_file:
         metadata = json.load(json_file)
 
@@ -38,10 +39,21 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
     normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
     input_shape = metadata["input_shape"]
 
-    training_data_generator = DataGenerator(x_train, y_train, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
-    validation_data_generator = DataGenerator(x_val, y_val, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
+    if augmentations:
+        random_seed = 42
+        augmenter = augmentation.MotionBlurAugmentation(probability=0.05, seed=random_seed)
+        augmenter = augmentation.GaussianNoiseAugmentation(augmenter, probability=0.05, seed=random_seed)
+        augmenter = augmentation.FlipAugmentation(augmenter, probability=0.2, seed=random_seed)
+        augmenter = augmentation.BrightnessAugmentation(augmenter, probability=0.2, seed=random_seed)
+        augmenter = augmentation.ContrastAugmentation(augmenter, probability=0.15, seed=random_seed)
+    else:
+        augmenter = None  # or augmentation.NullAugmentation()
 
-    append = None
+    training_data_generator = DataGenerator(x_train, y_train, input_shape=input_shape, batch_size=batch_size,
+                                            normalization_function=normalization_function, augmenter=augmenter)
+    validation_data_generator = DataGenerator(x_val, y_val, input_shape=input_shape, batch_size=batch_size,
+                                              normalization_function=normalization_function)
+
     if initial_epoch == 0:
         append = False
     else:
@@ -93,6 +105,7 @@ def main():
     parser.add_argument('-e', '--epochs', type=int, help='Number of epochs', required=True)
     parser.add_argument('-ie', '--initial_epoch', type=int, help='Initial epoch', required=True)
     parser.add_argument('-lr', '--learning_rate', type=float, help='The learning rate to be used', required=False, default=None)
+    parser.add_argument('-a', '--augmentations', action='store_true', help='Choose whether to augment the training data with custom corruptions', required=False)
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
     parser.add_argument('-b', '--batch_size', type=int, help='batch size', required=True)
 
@@ -107,7 +120,7 @@ def main():
     x_val, y_val = prepare_data_for_generator(args.validation_set_path, labels_dict, args.num_validation_samples)
 
     train_model(args.model_path, args.metadata_path, args.output_dir, args.batch_size, x_train, y_train, x_val, y_val,
-                args.epochs, args.initial_epoch, args.learning_rate, args.verbose)
+                args.epochs, args.initial_epoch, args.learning_rate, args.verbose, args.augmentations)
 
 
 if __name__ == '__main__':

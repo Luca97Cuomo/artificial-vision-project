@@ -22,7 +22,6 @@ def evaluate(Y, Y_pred):
 def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_test, batch_size, output_path=None):
     model = keras.models.load_model(model_path)
 
-    metadata = None
     with open(metadata_path) as json_file:
         metadata = json.load(json_file)
 
@@ -60,7 +59,7 @@ def main():
     parser.add_argument('-ts', '--test_set', type=str, help='The path of the test set', required=True)
     parser.add_argument('-nts', '--num_test_samples', type=int, help='The number of the test samples', required=True)
     parser.add_argument('-p', '--preprocessing_function_name', type=str,
-                        help='The name of the preprocessing function that have to be used in order to preprocess the data.'
+                        help='The name of the preprocessing function that has to be used in order to preprocess the data.'
                         'The preprocessing function should apply the same preprocessing applied to the data in the training phase',
                         required=False, default=None)
     parser.add_argument('-o', '--output_path', type=str, help='The path where to save the predictions.'
