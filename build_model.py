@@ -4,12 +4,9 @@
 
 # You need tensorflow 1, does not work with tensorflow 2
 
-# %tensorflow_version 1.x
-
 import argparse
 import os
 import tensorflow as tf
-from keras.utils import plot_model
 from keras import optimizers
 from keras.models import Model
 from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, MaxPooling2D, GlobalAveragePooling2D
@@ -48,19 +45,19 @@ def build_model(backend_name, output_type, output_dir, learning_rate, verbose=Tr
     backend = VGGFace(model=backend_name, include_top=False, input_shape=INPUT_SHAPE, weights='vggface')
 
     for layer in backend.layers:
-       layer.trainable = False
+        layer.trainable = False
 
-    input = Input(shape=INPUT_SHAPE)
+    model_input = Input(shape=INPUT_SHAPE)
 
     optimizer = optimizers.Adam(lr=learning_rate)  # lr is an hyperparameter
     output_function = models.AVAILABLE_OUTPUT_TYPES[output_type]
 
-    last_layer = build_structure(backend, input)
+    last_layer = build_structure(backend, model_input)
     output, loss, metrics, val_metric_name = output_function(last_layer)
 
     model_name = backend_name + "_" + output_type
 
-    model = Model(inputs=input, outputs=output, name=model_name)
+    model = Model(inputs=model_input, outputs=output, name=model_name)
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
     model_dir = os.path.join(output_dir, model_name)
@@ -76,7 +73,6 @@ def build_model(backend_name, output_type, output_dir, learning_rate, verbose=Tr
 
     if verbose:
         model.summary()
-        # plot_model(model)
 
 
 def main():

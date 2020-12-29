@@ -104,7 +104,7 @@ def cut(frame, roi):
 
 
 def findRelevantFace(objs, W, H):
-    # ritorna l'oggetto che sta più al centro dell'immagine.
+    # Returns the nearest object to the center of the image.
     mindistcenter = None
     minobj = None
     for o in objs:

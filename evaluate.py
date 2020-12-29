@@ -14,7 +14,7 @@ def evaluate(Y, Y_pred):
     return "mae", accuracy
 
 
-def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_test):
+def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_test, batch_size):
     model = keras.models.load_model(model_path)
 
     metadata = None
@@ -27,7 +27,7 @@ def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_
     normalization_function_name = metadata["normalization_function_name"]
     normalization_function = NORMALIZATION_FUNCTIONS[normalization_function_name]
 
-    y_pred = predict_function(model, x_test, input_shape=input_shape,
+    y_pred = predict_function(model, x_test, input_shape=input_shape, batch_size=batch_size,
                               preprocessing_function=preprocessing_function,
                               normalization_function=normalization_function)
 
@@ -39,7 +39,7 @@ def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_
 def main():
     parser = argparse.ArgumentParser(description='Train model')
     parser.add_argument('-model', '--model_path', type=str, help='The path of the model', required=True)
-    parser.add_argument('-metadata', '--metadata_path', type=str, help='The pathof the metadata file', required=True)
+    parser.add_argument('-metadata', '--metadata_path', type=str, help='The path of the metadata file', required=True)
     parser.add_argument('-csv', '--csv_path', type=str, help='The path of the csv', required=True)
     parser.add_argument('-ts', '--test_set', type=str, help='The path of the test set', required=True)
     parser.add_argument('-nts', '--num_test_samples', type=int, help='The number of the test samples', required=True)
@@ -48,6 +48,7 @@ def main():
                         'The preprocessing function should apply the same preprocessing applied to the data in the training phase',
                         required=True)
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
+    parser.add_argument('-b', '--batch_size', type=int, help='batch size', required=True)
 
     args = parser.parse_args()
 
@@ -58,7 +59,7 @@ def main():
     labels_dict = load_labels(args.csv_path, False)
     x_test, y_test = prepare_data_for_generator(args.test_set, labels_dict, args.num_test_samples)
 
-    evaluate_model(args.model_path, args.metadata_path, preprocessing_function, x_test, y_test)
+    evaluate_model(args.model_path, args.metadata_path, preprocessing_function, x_test, y_test, args.batch_size)
 
 
 if __name__ == '__main__':

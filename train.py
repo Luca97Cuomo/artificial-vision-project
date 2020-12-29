@@ -1,13 +1,12 @@
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau
 import pickle
 import keras
-import os
 import json
 import argparse
 from utils import *
 import models
 from preprocessing import load_labels
-from generators import TrainDataGenerator
+from generators import DataGenerator
 from keras import backend as K
 from pathlib import Path
 
@@ -39,8 +38,8 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
     normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
     input_shape = metadata["input_shape"]
 
-    training_data_generator = TrainDataGenerator(x_train, y_train, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
-    validation_data_generator = TrainDataGenerator(x_val, y_val, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
+    training_data_generator = DataGenerator(x_train, y_train, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
+    validation_data_generator = DataGenerator(x_val, y_val, input_shape=input_shape, batch_size=batch_size, normalization_function=normalization_function)
 
     append = None
     if initial_epoch == 0:
