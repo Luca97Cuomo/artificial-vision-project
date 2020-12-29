@@ -41,9 +41,15 @@ def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_
 
     # saving predictions if the path is not None
     if output_path is not None:
+        print(f"Saving predictions to {output_path}")
         with open(output_path, 'w') as f:
             for i in range(len(x_test)):
-                f.write(f'{x_test[i]},{int(round(y_pred[i]))},{int(round(y_test[i]))}')
+                x_splitted = x_test[i].split("/")
+                identity = x_splitted[-2]
+                image = x_splitted[-1]
+                path = identity + "/" + image
+                f.write(f'{path},{int(round(y_pred[i]))},{int(round(y_test[i]))}\r\n')
+        print("Predictions saved")
 
 
 def main():
