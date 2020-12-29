@@ -73,8 +73,9 @@ class AbstractAugmentation:
 
     def __call__(self, image):
         if self.randomness.random() < self.probability:
+            print(f"before augmentation image shape {image.shape}. Type: {type(self)}")
             image = self._augmentation(image)
-            print(f"image shape {image.shape}. Type: {type(self)}")
+            print(f"after augmentation image shape {image.shape}. Type: {type(self)}")
         return self.augmenter(image) if self.augmenter else image
 
     def _augmentation(self, image):
