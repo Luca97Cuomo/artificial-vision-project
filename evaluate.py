@@ -10,6 +10,9 @@ from models import PREDICT_FUNCTIONS
 
 
 def evaluate(Y, Y_pred):
+    print(f"Y test {Y}")
+    print(f"Y pred {Y_pred}")
+
     mae_int = np.average(abs(np.rint(Y) - np.rint(Y_pred)))
     mae_float = np.average(abs(Y - Y_pred))
     return mae_int, mae_float
