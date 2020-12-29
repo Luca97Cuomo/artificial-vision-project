@@ -15,7 +15,7 @@ def evaluate(Y, Y_pred):
     """
 
     mae_int = np.average(abs(np.rint(Y) - np.rint(Y_pred)))
-    mae_float = np.average(abs(Y - Y_pred))
+    mae_float = np.mean(abs(Y - Y_pred))
     return mae_int, mae_float
 
 
