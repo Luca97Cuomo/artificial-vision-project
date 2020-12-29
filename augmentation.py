@@ -150,10 +150,6 @@ class MotionBlurAugmentation(SeverityAugmentation):
         return motion_blur(image, self.severity, self.randomness)
 
 
-augmentation = MotionBlurAugmentation(probability=0.2)
-augmentation = GaussianNoiseAugmentation(augmentation, probability=0.2)
-augmentation = FlipAugmentation(augmentation, probability=0.2)
-augmentation = BrightnessAugmentation(augmentation, probability=0.2)
-augmentation = ContrastAugmentation(augmentation, probability=0.2)
+
 
 

@@ -2,12 +2,14 @@ import keras
 import numpy as np
 from numpy.random import RandomState
 import cv2
-
+import augmentation
 
 class DataGenerator(keras.utils.Sequence):
-    def __init__(self, data_paths, labels, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None, shuffle=True, random_seed=42):
+    def __init__(self, data_paths, labels, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None, shuffle=True, random_seed=42,
+                 augmenter=None):
         """
         If labels is None it means that the generator has to be used in predict mode where the labels are not required
+        if augmentation is not desired an instance of NullAugmentation should be passed
         """
         if labels is not None:
             if len(data_paths) != len(labels):
@@ -22,6 +24,14 @@ class DataGenerator(keras.utils.Sequence):
         self.shuffle = shuffle # note, If labels is None, the data does not be shuffled, because the generator has to be used in predict mode
         self.randomness = RandomState(random_seed)
 
+        if augmenter is None:
+            augmenter = augmentation.MotionBlurAugmentation(probability=0.05, seed=random_seed)
+            augmenter = augmentation.GaussianNoiseAugmentation(augmenter, probability=0.05, seed=random_seed)
+            augmenter = augmentation.FlipAugmentation(augmenter, probability=0.2, seed=random_seed)
+            augmenter = augmentation.BrightnessAugmentation(augmenter, probability=0.2, seed=random_seed)
+            augmenter = augmentation.ContrastAugmentation(augmenter, probability=0.15, seed=random_seed)
+
+        self.augmenter = augmenter
         self.indices = np.arange(len(self.data_paths))
         # this is called at initialization in order to create the indices for the subsequent data generation
         self.on_epoch_end()
@@ -37,7 +47,7 @@ class DataGenerator(keras.utils.Sequence):
         indices = self.indices[index * self.batch_size:(index + 1) * self.batch_size]
 
         # np.array creates a deep copy
-        batch_x = np.array([cv2.imread(self.data_paths[i]) for i in indices])
+        batch_x = np.array([self.augmenter(cv2.imread(self.data_paths[i])) for i in indices])
 
         if self.preprocessing_function is not None:
             batch_x = self.preprocessing_function(batch_x, self.input_shape)
