@@ -5,8 +5,8 @@ import cv2
 import augmentation
 
 class DataGenerator(keras.utils.Sequence):
-    def __init__(self, data_paths, labels, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None, shuffle=True, random_seed=42,
-                 augmenter=None):
+    def __init__(self, data_paths, labels, input_shape, batch_size=32, preprocessing_function=None,
+                 normalization_function=None, shuffle=True, random_seed=42, augmenter=None):
         """
         If labels is None it means that the generator has to be used in predict mode where the labels are not required
         if augmentation is not desired an instance of NullAugmentation should be passed
