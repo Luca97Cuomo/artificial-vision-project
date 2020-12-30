@@ -5,6 +5,8 @@ import keras
 import numpy as np
 import preprocessing_functions
 import argparse
+
+import configuration
 from models import NORMALIZATION_FUNCTIONS
 from models import PREDICT_FUNCTIONS
 
@@ -19,16 +21,36 @@ def evaluate(Y, Y_pred):
     return mae_int, mae_float
 
 
-def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_test, batch_size, output_path=None):
+def evaluate_model(configuration_file_path):
+# def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_test, batch_size, output_path=None):
+    conf = configuration.read_configuration(configuration_file_path)
+
+    model_path = conf["train_model_path"]
+    preprocessing_function_name = conf["preprocessing_function_name"]
+    enable_preprocessing = conf["enable_preprocessing"]
+    test_set_path = conf["test_set_path"]
+    num_test_samples = conf["num_test_samples"]
+    batch_size = conf["batch_size"]
+    save_predictions = conf["save_prediction"]
+    save_predictions_path = conf["save_predictions_path"]
+    csv_path = conf["csv_path"]
+    predict_function_name = conf["predict_function_name"]
+    input_shape = conf["input_shape"]
+    normalization_function_name = conf["normalization_function_name"]
+
+    if not enable_preprocessing:
+        preprocessing_function = None
+    elif preprocessing_function_name not in preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS:
+        raise Exception("The requested preprocessing function is not supported")
+    else:
+        preprocessing_function = preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS[preprocessing_function_name]
+
+    labels_dict = load_labels(csv_path, False)
+    x_test, y_test = prepare_data_for_generator(test_set_path, labels_dict, num_test_samples)
+
     model = keras.models.load_model(model_path)
 
-    with open(metadata_path) as json_file:
-        metadata = json.load(json_file)
-
-    predict_function_name = metadata["predict_function_name"]
     predict_function = PREDICT_FUNCTIONS[predict_function_name]
-    input_shape = metadata["input_shape"]
-    normalization_function_name = metadata["normalization_function_name"]
     normalization_function = NORMALIZATION_FUNCTIONS[normalization_function_name]
 
     y_pred = predict_function(model, x_test, input_shape=input_shape, batch_size=batch_size,
@@ -39,9 +61,9 @@ def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_
     print(f"MAE int: {mae_int}\nMAE float {mae_float}")
 
     # saving predictions if the path is not None
-    if output_path is not None:
-        print(f"Saving predictions to {output_path}")
-        with open(output_path, 'w') as f:
+    if save_predictions:
+        print(f"Saving predictions to {save_predictions_path}")
+        with open(save_predictions_path, 'w') as f:
             for i in range(len(x_test)):
                 x_splitted = x_test[i].split("/")
                 identity = x_splitted[-2]
@@ -53,35 +75,11 @@ def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_
 
 def main():
     parser = argparse.ArgumentParser(description='Evaluate model')
-    parser.add_argument('-model', '--model_path', type=str, help='The path of the model', required=True)
-    parser.add_argument('-metadata', '--metadata_path', type=str, help='The path of the metadata file', required=True)
-    parser.add_argument('-csv', '--csv_path', type=str, help='The path of the csv', required=True)
-    parser.add_argument('-ts', '--test_set', type=str, help='The path of the test set', required=True)
-    parser.add_argument('-nts', '--num_test_samples', type=int, help='The number of the test samples', required=True)
-    parser.add_argument('-p', '--preprocessing_function_name', type=str,
-                        help='The name of the preprocessing function that has to be used in order to preprocess the data.'
-                        'The preprocessing function should apply the same preprocessing applied to the data in the training phase',
-                        required=False, default=None)
-    parser.add_argument('-o', '--output_path', type=str, help='The path where to save the predictions.'
-                                                              'If not asserted the predictions will not be saved'
-                                                              'For each image it saves the path, the predicted age and the real age',
-                                                              required=False, default=None)
-    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
-    parser.add_argument('-b', '--batch_size', type=int, help='batch size', required=True)
+    parser.add_argument('-c', '--configuration_file_path', type=str, help='The path of the configuration file', required=True)
 
     args = parser.parse_args()
 
-    if args.preprocessing_function_name is None:
-        preprocessing_function = None
-    elif args.preprocessing_function_name not in preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS:
-        raise Exception("The requested preprocessing function is not supported")
-    else:
-        preprocessing_function = preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS[args.preprocessing_function_name]
-
-    labels_dict = load_labels(args.csv_path, False)
-    x_test, y_test = prepare_data_for_generator(args.test_set, labels_dict, args.num_test_samples)
-
-    evaluate_model(args.model_path, args.metadata_path, preprocessing_function, x_test, y_test, args.batch_size, args.output_path)
+    evaluate_model(args.configuration_file_path)
 
 
 if __name__ == '__main__':

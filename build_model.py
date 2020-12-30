@@ -13,7 +13,9 @@ from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, Ma
 from keras_vggface.vggface import VGGFace
 import json
 from pathlib import Path
+
 import models
+import configuration
 
 # width, height, channels
 INPUT_SHAPE = 224, 224, 3
@@ -33,7 +35,15 @@ def build_structure(backend, input):
     return x
 
 
-def build_model(backend_name, output_type, output_dir, learning_rate, verbose=True):
+def build_model(configuration_file_path):
+    conf = configuration.read_configuration(configuration_file_path)
+
+    backend_name = conf["backend_name"]
+    output_type = conf["output_type"]
+    output_dir = conf["build_model_dir"]
+    learning_rate = conf["build_learning_rate"]
+    verbose = conf["verbose"]
+
     normalization_function_name = backend_name + "_normalization"
     if normalization_function_name not in models.NORMALIZATION_FUNCTIONS:
         raise Exception("The normalization function is not available")
@@ -63,13 +73,13 @@ def build_model(backend_name, output_type, output_dir, learning_rate, verbose=Tr
     model_dir = os.path.join(output_dir, model_name)
     Path(model_dir).mkdir(parents=True, exist_ok=True)
     model.save(os.path.join(model_dir, model_name + "_model"))
-    meta_file_name = os.path.join(model_dir, model_name + "_metadata.txt")
-    with open(meta_file_name, "w") as f:
-        metadata = {"val_metric_name": val_metric_name,
-                    "normalization_function_name": normalization_function_name,
-                    "predict_function_name": predict_function_name,
-                    "input_shape": INPUT_SHAPE}
-        f.write(json.dumps(metadata))  # use `json.loads` to do the reversese
+
+    conf["val_metric_name"] = val_metric_name
+    conf["normalization_function_name"] = normalization_function_name
+    conf["predict_function_name"] = predict_function_name
+    conf["input_shape"] = INPUT_SHAPE
+    with open(configuration_file_path, "w") as f:
+        f.write(json.dumps(conf))
 
     if verbose:
         model.summary()
@@ -77,27 +87,11 @@ def build_model(backend_name, output_type, output_dir, learning_rate, verbose=Tr
 
 def main():
     parser = argparse.ArgumentParser(description='Build model')
-    parser.add_argument('-b', '--backend_name', type=str,
-                        help='The name of the backend to use (vgg16, resnet50, senet50)', required=True)
-    parser.add_argument('-o', '--output_type', type=str,
-                        help='The output type of the network (regression, RvC, multiRvC)', required=True)
-    parser.add_argument('-m', '--model_path', type=str, help='The path where to save the compiled model', required=True)
-    parser.add_argument('-lr', '--learning_rate', type=float, help='The learnig rate used by the model', required=True)
-    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
+    parser.add_argument('-c', '--configuration_file_path', type=str, help='The path of the configuration file', required=True)
 
     args = parser.parse_args()
 
-    if args.backend_name not in models.AVAILABLE_BACKENDS:
-        raise Exception("The requested backend is not supported")
-
-    if args.output_type not in models.AVAILABLE_OUTPUT_TYPES:
-        raise Exception("The requested output type is not supported")
-
-    # debug
-    print(f"The learning rate is {args.learning_rate}")
-
-    print(tf.version)
-    build_model(args.backend_name, args.output_type, args.model_path, args.learning_rate, args.verbose)
+    build_model(args.configuration_file_path)
 
 
 if __name__ == '__main__':
