@@ -11,6 +11,7 @@ from preprocessing import load_labels
 from generators import DataGenerator
 from keras import backend as K
 from pathlib import Path
+from augmentations import augmentation
 
 
 def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_train, x_val, y_val,
@@ -41,11 +42,14 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
 
     if augmentations:
         random_seed = 42
-        # augmenter = augmentation.MotionBlurAugmentation(probability=0.05, seed=random_seed)
-        augmenter = augmentation.GaussianNoiseAugmentation(probability=0.05, seed=random_seed)
-        augmenter = augmentation.FlipAugmentation(augmenter, probability=0.2, seed=random_seed)
-        augmenter = augmentation.BrightnessAugmentation(augmenter, probability=0.2, seed=random_seed)
-        augmenter = augmentation.ContrastAugmentation(augmenter, probability=0.15, seed=random_seed)
+        augmenter = augmentation.HorizontalMotionBlurAugmentation(probability=0.05)
+        augmenter = augmentation.VerticalMotionBlurAugmentation(augmenter, probability=0.05)
+        augmenter = augmentation.PixelateAugmentation(augmenter, probability=0.02)
+        augmenter = augmentation.GaussianNoiseAugmentation(augmenter, probability=0.05)
+        augmenter = augmentation.FlipAugmentation(augmenter, probability=0.2)
+        augmenter = augmentation.BrightnessAugmentation(augmenter, probability=0.1)
+        augmenter = augmentation.ContrastAugmentation(augmenter, probability=0.1)
+
     else:
         augmenter = None  # or augmentation.NullAugmentation()
 
