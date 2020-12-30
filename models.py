@@ -92,9 +92,7 @@ def rvc_output_function(last_layer):
 
 def rvc_mae(y_true, y_pred):
     absolute_errors = []
-    print(f'y_true shape = {K.int_shape(y_true)}')
-
-    for i in range(K.int_shape(y_true)[0]):
+    for i in range(y_true.shape):
         label = round(y_true[i])
         predicted = np.argmax(y_pred[i])
         current_error = abs(label - predicted)
@@ -105,9 +103,8 @@ def rvc_mae(y_true, y_pred):
 def rvc_categorical_crossentropy(y_true, y_pred):
     cce = tf.keras.losses.CategoricalCrossentropy()
     errors = []
-    print(f'y_true shape = {K.int_shape(y_true)}')
-    for i in range(K.int_shape(y_true)[0]):
-        label = round(y_true[i])
+    for i in range(y_true.shape):
+        label = round(y_true)
         formatted_label = np.zeros(101)
         formatted_label[label] = 1
         formatted_label = np.array(formatted_label)
