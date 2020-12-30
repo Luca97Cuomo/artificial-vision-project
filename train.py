@@ -4,7 +4,7 @@ import keras
 import json
 import argparse
 
-import augmentation
+from augmentations import augmentation
 from utils import *
 import models
 from preprocessing import load_labels

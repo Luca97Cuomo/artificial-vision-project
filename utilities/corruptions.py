@@ -10,9 +10,6 @@ import skimage as sk
 from skimage.filters import gaussian
 from io import BytesIO
 
-from wand.image import Image as WandImage
-from wand.api import library as wandlibrary
-import wand.color as WandColor
 import ctypes
 from PIL import Image as PILImage
 import cv2
@@ -38,20 +35,6 @@ def disk(radius, alias_blur=0.1, dtype=np.float32):
 
     # supersample disk to antialias
     return cv2.GaussianBlur(aliased_disk, ksize=ksize, sigmaX=alias_blur)
-
-
-# Tell Python about the C method
-
-wandlibrary.MagickMotionBlurImage.argtypes = (ctypes.c_void_p,  # wand
-                                              ctypes.c_double,  # radius
-                                              ctypes.c_double,  # sigma
-                                              ctypes.c_double)  # angle
-
-
-# Extend wand.image.Image class to include method signature
-class MotionImage(WandImage):
-    def motion_blur(self, radius=0.0, sigma=0.0, angle=0.0):
-        wandlibrary.MagickMotionBlurImage(self.wand, radius, sigma, angle)
 
 
 # modification of https://github.com/FLHerne/mapgen/blob/master/diamondsquare.py
@@ -395,13 +378,6 @@ def contrast(x, severity=1):
     means = np.mean(x, axis=(0, 1), keepdims=True)
     return np.clip((x - means) * c + means, 0, 1) * 255
 
-
-def brightness_plus(x, severity=1):
-    c = [.1, .2, .3, .4, .5][severity - 1]
-    return brightness(x, c)
-def brightness_minus(x, severity=1):
-    c = [.1, .2, .3, .4, .5][severity - 1]
-    return brightness(x, -c)
 
 def brightness(x, c):
     x = np.array(x) / 255.

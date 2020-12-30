@@ -61,7 +61,7 @@ def resnet50_senet50_normalization(dataset, **kwargs):
 
 
 def regression_output_function(last_layer):
-    output = Dense(1, activation='relu', kernel_initializer='glorot_normal', name='regression')(last_layer)
+    output = Dense(1, activation='relu', kernel_initializer='glorot_normal', name='regression')(last_layer) #todo prob meglio HE_NORMAL
     loss = "mse"
 
     # Note, the metrics are not used to optimize the weights (the loss function is used)

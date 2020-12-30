@@ -2,7 +2,7 @@ import keras
 import numpy as np
 from numpy.random import RandomState
 import cv2
-import augmentation
+from augmentations import augmentation
 
 
 class DataGenerator(keras.utils.Sequence):
