@@ -19,21 +19,16 @@ import models
 INPUT_SHAPE = 224, 224, 3
 
 
-def build_structure(backend, input):
+def build_structure(input, backend, dense_layer_structure):
     backend_out = backend(input)
 
-    global_pool = GlobalAveragePooling2D()
-    x = global_pool(backend_out)
-
-    # dense
-    x = Dense(4096, activation='relu', kernel_initializer='he_normal')(x)
-    x = Dense(2048, activation='relu', kernel_initializer='he_normal')(x)
-    x = Dense(1024, activation='relu', kernel_initializer='he_normal')(x)
+    x = dense_layer_structure(backend_out)
 
     return x
 
 
-def build_model(backend_name, output_type, output_dir, learning_rate, verbose=True):
+def build_model(backend_name, output_type, output_dir, learning_rate,
+                dense_layer_structure="standard_dense_layer_structure", verbose=True):
     normalization_function_name = backend_name + "_normalization"
     if normalization_function_name not in models.NORMALIZATION_FUNCTIONS:
         raise Exception("The normalization function is not available")
@@ -41,6 +36,9 @@ def build_model(backend_name, output_type, output_dir, learning_rate, verbose=Tr
     predict_function_name = output_type + "_predict_function"
     if predict_function_name not in models.PREDICT_FUNCTIONS:
         raise Exception("The predict function is not available")
+
+    if dense_layer_structure not in models.AVAILABLE_FINAL_DENSE_STRUCTURE:
+        raise Exception("The dense layer structure is not available")
 
     backend = VGGFace(model=backend_name, include_top=False, input_shape=INPUT_SHAPE, weights='vggface')
 
@@ -50,9 +48,12 @@ def build_model(backend_name, output_type, output_dir, learning_rate, verbose=Tr
     model_input = Input(shape=INPUT_SHAPE)
 
     optimizer = optimizers.Adam(lr=learning_rate)  # lr is an hyperparameter
+
+    dense_layer_structure = models.AVAILABLE_FINAL_DENSE_STRUCTURE[dense_layer_structure]
     output_function = models.AVAILABLE_OUTPUT_TYPES[output_type]
 
-    last_layer = build_structure(backend, model_input)
+    last_layer = build_structure(model_input, backend, dense_layer_structure)
+
     output, loss, metrics, val_metric_name = output_function(last_layer)
 
     model_name = backend_name + "_" + output_type
