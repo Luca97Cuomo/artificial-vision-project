@@ -28,7 +28,7 @@ def build_structure(input, backend, dense_layer_structure):
 
 
 def build_model(backend_name, output_type, output_dir, learning_rate,
-                dense_layer_structure="standard_dense_layer_structure", verbose=True):
+                dense_layer_structure_name="standard_dense_layer_structure", verbose=True):
     normalization_function_name = backend_name + "_normalization"
     if normalization_function_name not in models.NORMALIZATION_FUNCTIONS:
         raise Exception("The normalization function is not available")
@@ -37,7 +37,7 @@ def build_model(backend_name, output_type, output_dir, learning_rate,
     if predict_function_name not in models.PREDICT_FUNCTIONS:
         raise Exception("The predict function is not available")
 
-    if dense_layer_structure not in models.AVAILABLE_FINAL_DENSE_STRUCTURE:
+    if dense_layer_structure_name not in models.AVAILABLE_FINAL_DENSE_STRUCTURE:
         raise Exception("The dense layer structure is not available")
 
     backend = VGGFace(model=backend_name, include_top=False, input_shape=INPUT_SHAPE, weights='vggface')
@@ -49,7 +49,7 @@ def build_model(backend_name, output_type, output_dir, learning_rate,
 
     optimizer = optimizers.Adam(lr=learning_rate)  # lr is an hyperparameter
 
-    dense_layer_structure = models.AVAILABLE_FINAL_DENSE_STRUCTURE[dense_layer_structure]
+    dense_layer_structure = models.AVAILABLE_FINAL_DENSE_STRUCTURE[dense_layer_structure_name]
     output_function = models.AVAILABLE_OUTPUT_TYPES[output_type]
 
     last_layer = build_structure(model_input, backend, dense_layer_structure)

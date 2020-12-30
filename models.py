@@ -60,8 +60,10 @@ def vgg16_normalization(dataset, **kwargs):
 def resnet50_senet50_normalization(dataset, **kwargs):
     return normalize_input_rcmalli(dataset, 2)
 
+
 def rvc_predict():
     raise Exception("Not implemented yet")
+
 
 def regression_output_function(last_layer):
     output = Dense(1, activation='relu', kernel_initializer='glorot_normal', name='regression')(
@@ -79,11 +81,11 @@ def regression_output_function(last_layer):
 
 
 def rvc_output_function(last_layer):
-    output = Dense(100, activation='softmax', kernel_initializer='glorot_normal', name='rvc_classification')(last_layer)
+    output = Dense(101, activation='softmax', kernel_initializer='glorot_normal', name='rvc')(last_layer)
 
     loss = rvc_categorical_crossentropy
 
-    metrics = rvc_mae
+    metrics = [rvc_mae]
 
     return output, loss, metrics, "val_rvc_mae"
 
@@ -103,7 +105,7 @@ def rvc_categorical_crossentropy(y_true, y_pred):
     errors = []
     for i in range(len(y_true)):
         label = round(y_true[i])
-        formatted_label = np.zeros(100)
+        formatted_label = np.zeros(101)
         formatted_label[label] = 1
         formatted_label = np.array(formatted_label)
 
@@ -130,8 +132,7 @@ AVAILABLE_FINAL_DENSE_STRUCTURE = {'standard_dense_layer_structure': standard_de
 AVAILABLE_OUTPUT_TYPES = {"regression": regression_output_function,
                           'rvc': rvc_output_function}
 
-
 NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization,
                            "resnet50_normalization": resnet50_senet50_normalization,
                            "senet50_normalization": resnet50_senet50_normalization}
-PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict, "rvc_predict_function" : rvc_predict}
+PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict, "rvc_predict_function": rvc_predict}
