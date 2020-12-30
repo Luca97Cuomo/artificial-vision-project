@@ -15,7 +15,6 @@ from augmentations import augmentation
 
 def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_train, x_val, y_val,
                 training_epochs, initial_epoch, learning_rate=None, verbose=False, augmentations=True):
-
     # create the checkpoints folder in the output folder
     checkpoints_dir = os.path.join(output_dir, "checkpoints")
     Path(checkpoints_dir).mkdir(parents=True, exist_ok=True)
@@ -41,13 +40,13 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
 
     if augmentations:
         random_seed = 42
-        augmenter = augmentation.HorizontalMotionBlurAugmentation(probability=0.05)
-        augmenter = augmentation.VerticalMotionBlurAugmentation(augmenter, probability=0.05)
-        augmenter = augmentation.PixelateAugmentation(augmenter, probability=0.02)
-        augmenter = augmentation.GaussianNoiseAugmentation(augmenter, probability=0.05)
-        augmenter = augmentation.FlipAugmentation(augmenter, probability=0.2)
-        augmenter = augmentation.BrightnessAugmentation(augmenter, probability=0.1)
-        augmenter = augmentation.ContrastAugmentation(augmenter, probability=0.1)
+        augmenter = augmentation.HorizontalMotionBlurAugmentation(probability=0.05, seed=random_seed)
+        augmenter = augmentation.VerticalMotionBlurAugmentation(augmenter, probability=0.05, seed=random_seed)
+        augmenter = augmentation.PixelateAugmentation(augmenter, probability=0.02, seed=random_seed)
+        augmenter = augmentation.GaussianNoiseAugmentation(augmenter, probability=0.05, seed=random_seed)
+        augmenter = augmentation.FlipAugmentation(augmenter, probability=0.2, seed=random_seed)
+        augmenter = augmentation.BrightnessAugmentation(augmenter, probability=0.1, seed=random_seed)
+        augmenter = augmentation.ContrastAugmentation(augmenter, probability=0.1, seed=random_seed)
 
     else:
         augmenter = None  # or augmentation.NullAugmentation()
@@ -103,12 +102,16 @@ def main():
     parser.add_argument('-o', '--output_dir', type=str, help='The output dir', required=True)
     parser.add_argument('-ts', '--training_set_path', type=str, help='The path of the training set', required=True)
     parser.add_argument('-vs', '--validation_set_path', type=str, help='The path of the validation set', required=True)
-    parser.add_argument('-nts', '--num_training_samples', type=int, help='The number of the training samples', required=True)
-    parser.add_argument('-vts', '--num_validation_samples', type=int, help='The number of the validation samples', required=True)
+    parser.add_argument('-nts', '--num_training_samples', type=int, help='The number of the training samples',
+                        required=True)
+    parser.add_argument('-vts', '--num_validation_samples', type=int, help='The number of the validation samples',
+                        required=True)
     parser.add_argument('-e', '--epochs', type=int, help='Number of epochs', required=True)
     parser.add_argument('-ie', '--initial_epoch', type=int, help='Initial epoch', required=True)
-    parser.add_argument('-lr', '--learning_rate', type=float, help='The learning rate to be used', required=False, default=None)
-    parser.add_argument('-a', '--augmentations', action='store_true', help='Choose whether to augment the training data with custom corruptions', required=False)
+    parser.add_argument('-lr', '--learning_rate', type=float, help='The learning rate to be used', required=False,
+                        default=None)
+    parser.add_argument('-a', '--augmentations', action='store_true',
+                        help='Choose whether to augment the training data with custom corruptions', required=False)
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
     parser.add_argument('-b', '--batch_size', type=int, help='batch size', required=True)
 
