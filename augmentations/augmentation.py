@@ -1,7 +1,7 @@
 import typing
 import numpy as np
 from numpy.random import RandomState
-import transforms
+import augmentations.transforms
 
 
 class AbstractAugmentation:
@@ -60,12 +60,12 @@ class TypecastAugmentation(AbstractAugmentation):
 
 class ContrastAugmentation(SeverityAugmentation):
     def _augmentation(self, image):
-        return transforms.contrast(image, self.severity)
+        return augmentations.transforms.contrast(image, self.severity)
 
 
 class BrightnessAugmentation(SeverityAugmentation):
     def _augmentation(self, image):
-        return transforms.brightness(image, self.severity)
+        return augmentations.transforms.brightness(image, self.severity)
 
 
 class FlipAugmentation(AbstractAugmentation):
@@ -81,7 +81,7 @@ class GaussianNoiseAugmentation(SeverityAugmentation):
         super(GaussianNoiseAugmentation, self).__init__(*args, **kwargs)
 
     def _augmentation(self, image):
-        return transforms.gaussian_noise(image, self.severity, self.randomness)
+        return augmentations.transforms.gaussian_noise(image, self.severity, self.randomness)
 
 
 class HorizontalMotionBlurAugmentation(SeverityAugmentation):
@@ -92,7 +92,7 @@ class HorizontalMotionBlurAugmentation(SeverityAugmentation):
         super(HorizontalMotionBlurAugmentation, self).__init__(*args, **kwargs)
 
     def _augmentation(self, image):
-        return transforms.motion_blur(image, self.severity, False, True)
+        return augmentations.transforms.motion_blur(image, self.severity, False, True)
 
 
 class VerticalMotionBlurAugmentation(SeverityAugmentation):
@@ -103,7 +103,7 @@ class VerticalMotionBlurAugmentation(SeverityAugmentation):
         super(VerticalMotionBlurAugmentation, self).__init__(*args, **kwargs)
 
     def _augmentation(self, image):
-        return transforms.motion_blur(image, self.severity, True, False)
+        return augmentations.transforms.motion_blur(image, self.severity, True, False)
 
 
 class PixelateAugmentation(SeverityAugmentation):
@@ -114,7 +114,7 @@ class PixelateAugmentation(SeverityAugmentation):
         super(PixelateAugmentation, self).__init__(*args, **kwargs)
 
     def _augmentation(self, image):
-        return transforms.motion_blur(image, self.severity, True, True)
+        return augmentations.transforms.motion_blur(image, self.severity, True, True)
 
 
 if __name__ == '__main__':
