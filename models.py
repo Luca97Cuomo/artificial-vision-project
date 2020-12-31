@@ -9,15 +9,29 @@ import utils
 NUMBER_OF_RVC_CLASSES = 101
 
 
-def regression_predict(model, X, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
-    data_generator = DataGenerator(X, labels=None, input_shape=input_shape, batch_size=batch_size,
+def regression_predict(model, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
+    data_generator = DataGenerator(x, labels=None, input_shape=input_shape, batch_size=batch_size,
                                    preprocessing_function=preprocessing_function,
                                    normalization_function=normalization_function)
 
-    Y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
+    y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
+
+    # y_pred = [[3, 7, 8], [5, 8, 9], [7, 6, 8]]
 
     # do not round to int
-    return np.reshape(Y, -1)
+    return np.reshape(y, -1)
+
+
+def rvc_predict(model, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
+    data_generator = DataGenerator(x, labels=None, input_shape=input_shape, batch_size=batch_size,
+                                   preprocessing_function=preprocessing_function,
+                                   normalization_function=normalization_function)
+
+    y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
+
+    y_processed = tf.map_fn(lambda element: tf.math.argmax(element), y, dtype=tf.dtypes.int64)
+
+    return y_processed.numpy()
 
 
 def normalize_input_rcmalli(x, version, data_format=None):
@@ -63,10 +77,6 @@ def vgg16_normalization(dataset, **kwargs):
 
 def resnet50_senet50_normalization(dataset, **kwargs):
     return normalize_input_rcmalli(dataset, 2)
-
-
-def rvc_predict():
-    raise Exception("Not implemented yet")
 
 
 def regression_output_function(last_layer):

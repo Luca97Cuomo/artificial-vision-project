@@ -9,62 +9,76 @@ import argparse
 import configuration
 from models import NORMALIZATION_FUNCTIONS
 from models import PREDICT_FUNCTIONS
+from models import CUSTOM_OBJECTS
 from data_analysis import get_age_interval
 
 
 def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
+    error_by_interval = {}
     for i in range(len(y)):
+        interval_start_age = get_age_interval(y[i], age_interval_width, 0)
 
-    ages = {}
-    count = 0
+        error = round(y[i]) - round(y_pred[i])
+        abs_error = abs(error)
 
-    max_age = -1
-    min_age = 1000
+        current = error_by_interval.setdefault(interval_start_age, {"error_sum": 0,
+                                                                    "count": 0,
+                                                                    "overestimate_error_sum": 0,
+                                                                    "underestimate_error_sum": 0,
+                                                                    "overstimate_count": 0,
+                                                                    "underestimate_count": 0})
+
+        current["error_sum"] += abs_error
+        current["count"] += 1
+
+        if error > 0:
+            current["underestimate_error_sum"] += abs_error
+            current["underestimate_count"] += 1
+        elif error < 0:
+            current["overestimate_error_sum"] += abs_error
+            current["overstimate_count"] += 1
+        # if error == 0 discard
+
+    ret = []
+    for key, value in error_by_interval.items():
+        mae = value["error_sum"] / value["count"]
+        overestimate_error = value["overestimate_error_sum"] / value["overstimate_count"]
+        underestimate_error = value["underestimate_error_sum"] / value["underestimate_count"]
+
+        label = f"[{key}-{key + age_interval_width - 1}]"
+
+        ret.append({"start_age": key,
+                    "mae": mae,
+                    "overestimate_mae": overestimate_error,
+                    "underestimate_mae": underestimate_error,
+                    "count": value["count"],
+                    "overstimate_count": value["overstimate_count"],
+                    "underestimate_count": value["underestimate_count"],
+                    "age_interval_label": label,
+                    })
+
+    if verbose:
+        print(ret)
+
+    return ret
 
 
-
-    for identity in labels:
-        for image in labels[identity]:
-            age = labels[identity][image]
-
-            if age < min_age:
-                min_age = age
-            if age > max_age:
-                max_age = age
-
-            interval_start_age = get_age_interval(age, age_interval_width, 0)
-
-            if interval_start_age in ages:
-                ages[interval_start_age] += 1
-            else:
-                ages[interval_start_age] = 1
-            count += 1
-            if verbose:
-                if count % 10000 == 0:
-                    print("Processed " + str(count) + " labels")
-
-    ordered_dict = collections.OrderedDict(sorted(ages.items()))
-    for interval_start_age in ordered_dict:
-        print("age interval: [" + str(interval_start_age) + ",  " + str(interval_start_age + age_interval_width - 1) + "] - occurrences: " + str(ordered_dict[interval_start_age]) +" - percentage: " + str(ordered_dict[interval_start_age] / count))
-
-
-
-def evaluate(Y, Y_pred, verbose=True):
+def evaluate(y, y_pred, verbose=True):
     """
-    Y and Y_pred have to be list or numpy arrays
+    y and y_pred have to be list or numpy arrays
     """
 
-    mae_int = np.average(abs(np.rint(Y) - np.rint(Y_pred)))
-    mae_float = np.mean(abs(Y - Y_pred))
+    mae_int = np.mean(abs(np.rint(y) - np.rint(y_pred)))
+    mae_float = np.mean(abs(y - y_pred))
 
-    print(f"MAE int: {mae_int}")
-    print(f"MAE float: {mae_float}")
+    if verbose:
+        print(f"MAE int: {mae_int}")
+        print(f"MAE float: {mae_float}")
 
     return mae_int, mae_float
 
 
 def evaluate_model(configuration_file_path):
-# def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_test, batch_size, output_path=None):
     conf = configuration.read_configuration(configuration_file_path)
 
     model_path = conf["model_path"]
@@ -107,7 +121,7 @@ def evaluate_model(configuration_file_path):
     labels_dict = load_labels(csv_path, False)
     x_test, y_test = prepare_data_for_generator(test_set_path, labels_dict, num_test_samples)
 
-    model = keras.models.load_model(model_path)
+    model = keras.models.load_model(model_path, custom_objects=CUSTOM_OBJECTS)
 
     predict_function = PREDICT_FUNCTIONS[predict_function_name]
     normalization_function = NORMALIZATION_FUNCTIONS[normalization_function_name]
@@ -120,6 +134,7 @@ def evaluate_model(configuration_file_path):
 
     if evaluate_by_age_intervals:
         evaluate_by_age_intervals(age_interval_width, y_test, y_pred, True)
+
 
     # saving predictions if the path is not None
     if save_predictions:
