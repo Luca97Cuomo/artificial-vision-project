@@ -90,7 +90,7 @@ def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
                     "overestimate_mae": overestimate_error,
                     "underestimate_mae": underestimate_error,
                     "count": value["count"],
-                    "overestimate_count": value["overstimate_count"],
+                    "overestimate_count": value["overestimate_count"],
                     "underestimate_count": value["underestimate_count"],
                     "age_interval_label": label,
                     })
