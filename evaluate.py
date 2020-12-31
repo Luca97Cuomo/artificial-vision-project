@@ -9,15 +9,56 @@ import argparse
 import configuration
 from models import NORMALIZATION_FUNCTIONS
 from models import PREDICT_FUNCTIONS
+from data_analysis import get_age_interval
 
 
-def evaluate(Y, Y_pred):
+def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
+    for i in range()
+
+    ages = {}
+    count = 0
+
+    max_age = -1
+    min_age = 1000
+
+
+
+    for identity in labels:
+        for image in labels[identity]:
+            age = labels[identity][image]
+
+            if age < min_age:
+                min_age = age
+            if age > max_age:
+                max_age = age
+
+            interval_start_age = get_age_interval(age, age_interval_width, 0)
+
+            if interval_start_age in ages:
+                ages[interval_start_age] += 1
+            else:
+                ages[interval_start_age] = 1
+            count += 1
+            if verbose:
+                if count % 10000 == 0:
+                    print("Processed " + str(count) + " labels")
+
+    ordered_dict = collections.OrderedDict(sorted(ages.items()))
+    for interval_start_age in ordered_dict:
+        print("age interval: [" + str(interval_start_age) + ",  " + str(interval_start_age + age_interval_width - 1) + "] - occurrences: " + str(ordered_dict[interval_start_age]) +" - percentage: " + str(ordered_dict[interval_start_age] / count))
+
+
+def evaluate(Y, Y_pred, verbose=True):
     """
     Y and Y_pred have to be list or numpy arrays
     """
 
     mae_int = np.average(abs(np.rint(Y) - np.rint(Y_pred)))
     mae_float = np.mean(abs(Y - Y_pred))
+
+    print(f"MAE int: {mae_int}")
+    print(f"MAE float: {mae_float}")
+
     return mae_int, mae_float
 
 
@@ -25,18 +66,27 @@ def evaluate_model(configuration_file_path):
 # def evaluate_model(model_path, metadata_path, preprocessing_function, x_test, y_test, batch_size, output_path=None):
     conf = configuration.read_configuration(configuration_file_path)
 
-    model_path = conf["train_model_path"]
+    model_path = conf["model_path"]
+
     preprocessing_function_name = conf["preprocessing_function_name"]
     enable_preprocessing = conf["enable_preprocessing"]
+
     test_set_path = conf["test_set_path"]
     num_test_samples = conf["num_test_samples"]
+
     batch_size = conf["batch_size"]
+
     save_predictions = conf["save_prediction"]
     save_predictions_path = conf["save_predictions_path"]
-    csv_path = conf["csv_path"]
     predict_function_name = conf["predict_function_name"]
-    input_shape = conf["input_shape"]
+
     normalization_function_name = conf["normalization_function_name"]
+
+    csv_path = conf["csv_path"]
+    input_shape = conf["input_shape"]
+
+    evaluate_by_age_intervals = conf["evaluate_by_age_intervals"]
+    age_interval_width = conf["age_interval_width"]
 
     if not enable_preprocessing:
         preprocessing_function = None
@@ -57,8 +107,10 @@ def evaluate_model(configuration_file_path):
                               preprocessing_function=preprocessing_function,
                               normalization_function=normalization_function)
 
-    mae_int, mae_float = evaluate(y_test, y_pred)
-    print(f"MAE int: {mae_int}\nMAE float {mae_float}")
+    evaluate(y_test, y_pred, True)
+
+    if evaluate_by_age_intervals:
+        evaluate_by_age_intervals(age_interval_width, y_test, y_pred, True)
 
     # saving predictions if the path is not None
     if save_predictions:

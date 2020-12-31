@@ -21,7 +21,7 @@ def data_distribution_by_age(labels_path, age_interval_width=10, verbose=False):
             if age > max_age:
                 max_age = age
 
-            interval_start_age = _get_age_interval(age, age_interval_width, 0)
+            interval_start_age = get_age_interval(age, age_interval_width, 0)
 
             if interval_start_age in ages:
                 ages[interval_start_age] += 1
@@ -40,7 +40,7 @@ def data_distribution_by_age(labels_path, age_interval_width=10, verbose=False):
     print("max age is: ", str(max_age))
 
 
-def _get_age_interval(age, age_interval_width, start_age):
+def get_age_interval(age, age_interval_width, start_age):
     """Returns the first element of the age interval"""
 
     return math.floor(((age - start_age) / age_interval_width)) * age_interval_width + start_age

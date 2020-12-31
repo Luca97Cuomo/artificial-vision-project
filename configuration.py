@@ -42,6 +42,9 @@ def save_configuration_template(path, verbose=False):
                      "save_predictions": False,
                      "save_predictions_path": "/models/vgg16_regression/predictions.txt",
 
+                     "evaluate_by_age_intervals": True,
+                     "age_interval_width": 10,
+
                      "verbose": True}
 
     with open(path, 'w') as f:
