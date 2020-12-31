@@ -108,7 +108,7 @@ def evaluate_model(configuration_file_path):
 
     age_intervals_evaluation = eval_dict["age_intervals_evaluation"]
 
-    evaluate_by_age_intervals = age_intervals_evaluation["enabled"]
+    evaluate_by_age_intervals_flag = age_intervals_evaluation["enabled"]
     age_interval_width = age_intervals_evaluation["age_interval_width"]
 
     if not enable_preprocessing:
@@ -132,7 +132,7 @@ def evaluate_model(configuration_file_path):
 
     evaluate(y_test, y_pred, True)
 
-    if evaluate_by_age_intervals:
+    if evaluate_by_age_intervals_flag:
         evaluate_by_age_intervals(age_interval_width, y_test, y_pred, True)
 
 
