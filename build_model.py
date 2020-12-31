@@ -87,7 +87,7 @@ def build_model(configuration_file_path):
     model.save(os.path.join(model_dir, model_name + "_model"))
 
     train = conf["train"]
-    evaluate = conf["evaluation"]
+    evaluate = conf["evaluate"]
 
     train["monitored_quantity"] = val_metric_name
     conf["normalization_function_name"] = normalization_function_name
