@@ -1,26 +1,55 @@
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau
-import pickle
+from keras import backend as K
 import keras
-import json
 import argparse
+import pickle
+
 
 from utils import *
 import models
 from preprocessing import load_labels
 from generators import DataGenerator
-from keras import backend as K
 from pathlib import Path
 from augmentations import augmentation
+import configuration
 
 
-def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_train, x_val, y_val,
-                training_epochs, initial_epoch, learning_rate=None, verbose=False, augmentations=True):
+def train_model(configuration_file_path):
+    conf = configuration.read_configuration(configuration_file_path)
+
+    csv_path = conf["csv_path"]
+    training_set_path = conf["training_set_path"]
+    num_training_samples= conf["num_training_samples"]
+    validation_set_path = conf["validation_set_path"]
+    num_validation_samples = conf["num_validation_samples"]
+
+    output_dir = ["output_training_dir"]
+    model_path = ["model_path"]
+
+    print("Reading training and validation set")
+    labels_dict = load_labels(csv_path, False)
+    x_train, y_train = prepare_data_for_generator(training_set_path, labels_dict, num_training_samples)
+    x_val, y_val = prepare_data_for_generator(validation_set_path, labels_dict, num_validation_samples)
+
     # create the checkpoints folder in the output folder
     checkpoints_dir = os.path.join(output_dir, "checkpoints")
     Path(checkpoints_dir).mkdir(parents=True, exist_ok=True)
 
     model_name = os.path.basename(model_path)
     model = keras.models.load_model(model_path)
+
+    learning_rate = ["train_learning_rate"]
+    batch_size = ["batch_size"]
+    initial_epoch = ["initial_epoch"]
+
+    monitored_val_quantity = conf["val_metric_name"]
+    normalization_function_name = conf["normalization_function_name"]
+    input_shape = conf["input_shape"]
+    training_epochs = conf["epochs"]
+
+    augmentations = conf["augmentations"]
+
+    verbose = ["verbose"]
 
     if learning_rate is not None:
         if verbose:
@@ -30,13 +59,7 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
         if verbose:
             print(f"The new learning rate is {K.eval(model.optimizer.lr)}")
 
-    with open(metafile_path) as json_file:
-        metadata = json.load(json_file)
-
-    monitored_val_quantity = metadata["val_metric_name"]
-    normalization_function_name = metadata["normalization_function_name"]
     normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
-    input_shape = metadata["input_shape"]
 
     if augmentations:
         random_seed = 42
@@ -96,37 +119,11 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
 
 def main():
     parser = argparse.ArgumentParser(description='Train model')
-    parser.add_argument('-model', '--model_path', type=str, help='The path of the model', required=True)
-    parser.add_argument('-csv', '--csv_path', type=str, help='The path of the csv', required=True)
-    parser.add_argument('-metadata', '--metadata_path', type=str, help='The pathof the metadata file', required=True)
-    parser.add_argument('-o', '--output_dir', type=str, help='The output dir', required=True)
-    parser.add_argument('-ts', '--training_set_path', type=str, help='The path of the training set', required=True)
-    parser.add_argument('-vs', '--validation_set_path', type=str, help='The path of the validation set', required=True)
-    parser.add_argument('-nts', '--num_training_samples', type=int, help='The number of the training samples',
-                        required=True)
-    parser.add_argument('-vts', '--num_validation_samples', type=int, help='The number of the validation samples',
-                        required=True)
-    parser.add_argument('-e', '--epochs', type=int, help='Number of epochs', required=True)
-    parser.add_argument('-ie', '--initial_epoch', type=int, help='Initial epoch', required=True)
-    parser.add_argument('-lr', '--learning_rate', type=float, help='The learning rate to be used', required=False,
-                        default=None)
-    parser.add_argument('-a', '--augmentations', action='store_true',
-                        help='Choose whether to augment the training data with custom corruptions', required=False)
-    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
-    parser.add_argument('-b', '--batch_size', type=int, help='batch size', required=True)
+    parser.add_argument('-c', '--configuration_file_path', type=str, help='The path of the configuration file', required=True)
 
     args = parser.parse_args()
 
-    if args.verbose:
-        print(f"The learning rate parameter is {args.learning_rate}")
-        print("Reading training and validation set")
-
-    labels_dict = load_labels(args.csv_path, False)
-    x_train, y_train = prepare_data_for_generator(args.training_set_path, labels_dict, args.num_training_samples)
-    x_val, y_val = prepare_data_for_generator(args.validation_set_path, labels_dict, args.num_validation_samples)
-
-    train_model(args.model_path, args.metadata_path, args.output_dir, args.batch_size, x_train, y_train, x_val, y_val,
-                args.epochs, args.initial_epoch, args.learning_rate, args.verbose, args.augmentations)
+    train_model(args.configuration_file_path)
 
 
 if __name__ == '__main__':
