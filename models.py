@@ -31,7 +31,8 @@ def rvc_predict(model, x, input_shape, batch_size=32, preprocessing_function=Non
 
     y_processed = tf.map_fn(lambda element: tf.math.argmax(element), y, dtype=tf.dtypes.int64)
 
-    return y_processed.numpy()
+    with tf.Session().as_default():
+        return y_processed.eval()
 
 
 def normalize_input_rcmalli(x, version, data_format=None):
