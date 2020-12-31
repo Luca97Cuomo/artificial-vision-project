@@ -3,6 +3,7 @@ from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, Ma
 from generators import DataGenerator
 import numpy as np
 import tensorflow as tf
+import utils
 
 
 def regression_predict(model, X, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
@@ -83,7 +84,7 @@ def regression_output_function(last_layer):
 def rvc_output_function(last_layer):
     output = Dense(101, activation='softmax', kernel_initializer='glorot_normal', name='rvc')(last_layer)
 
-    loss = rvc_categorical_crossentropy
+    loss = "categorical_crossentropy"
 
     metrics = [rvc_mae]
 
@@ -91,29 +92,10 @@ def rvc_output_function(last_layer):
 
 
 def rvc_mae(y_true, y_pred):
-    absolute_errors = []
-    print(f'shape : {len(y_true)}')
-    for i in range(len(y_true)):
-        label = round(y_true[i])
-        predicted = np.argmax(y_pred[i])
-        current_error = abs(label - predicted)
-        absolute_errors.append(current_error)
-    return np.array(absolute_errors)
+    y_true = tf.map_fn(lambda element: tf.math.argmax(element), y_true)
+    y_pred = tf.map_fn(lambda element: tf.math.argmax(element), y_pred)
 
-
-def rvc_categorical_crossentropy(y_true, y_pred):
-    cce = tf.keras.losses.CategoricalCrossentropy()
-    errors = []
-    for i in range(len(y_true)):
-        label = round(y_true)
-        formatted_label = np.zeros(101)
-        formatted_label[label] = 1
-        formatted_label = np.array(formatted_label)
-
-        current_error = cce(formatted_label, y_pred[i]).numpy()
-        errors.append(current_error)
-
-    return np.array(errors)
+    return tf.keras.losses.MAE(y_true, y_pred)
 
 
 def standard_dense_layer_structure(backbone):

@@ -1,5 +1,6 @@
 import h5py
 import os
+import numpy as np
 
 
 def prepare_data_for_generator(data_path, labels_dict, num_samples):
@@ -60,3 +61,15 @@ def read_dataset_h5(dataset_path, verbose):
 
     # Not close the file here
     # f.close()
+
+
+def one_hot_encoded_labels(labels, number_of_classes):
+    hot_encoded_labels = []
+    for i in range(len(labels)):
+        label = round(labels[i])
+        formatted_label = np.zeros(number_of_classes)
+        formatted_label[label] = 1
+
+        hot_encoded_labels.append(formatted_label)
+
+    return np.array(hot_encoded_labels)

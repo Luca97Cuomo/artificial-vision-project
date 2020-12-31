@@ -69,7 +69,8 @@ def build_model(backend_name, output_type, output_dir, learning_rate,
         metadata = {"val_metric_name": val_metric_name,
                     "normalization_function_name": normalization_function_name,
                     "predict_function_name": predict_function_name,
-                    "input_shape": INPUT_SHAPE}
+                    "input_shape": INPUT_SHAPE,
+                    "output_type": output_type}
         f.write(json.dumps(metadata))  # use `json.loads` to do the reversese
 
     if verbose:
@@ -81,10 +82,11 @@ def main():
     parser.add_argument('-b', '--backend_name', type=str,
                         help='The name of the backend to use (vgg16, resnet50, senet50)', required=True)
     parser.add_argument('-o', '--output_type', type=str,
-                        help='The output type of the network (regression, RvC, multiRvC)', required=True)
+                        help='The output type of the network (regression, rvc, multirvc)', required=True)
     parser.add_argument('-m', '--model_path', type=str, help='The path where to save the compiled model', required=True)
     parser.add_argument('-lr', '--learning_rate', type=float, help='The learnig rate used by the model', required=True)
-    parser.add_argument('-d', '--dense_layer_structure', type=str, help='Structure of the finals dense layers', default='standard_dense_layer_structure')
+    parser.add_argument('-d', '--dense_layer_structure', type=str, help='Structure of the finals dense layers',
+                        default='standard_dense_layer_structure')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
 
     args = parser.parse_args()
@@ -95,7 +97,8 @@ def main():
     if args.output_type not in models.AVAILABLE_OUTPUT_TYPES:
         raise Exception("The requested output type is not supported")
 
-    build_model(args.backend_name, args.output_type, args.model_path, args.learning_rate, args.dense_layer_structure, args.verbose)
+    build_model(args.backend_name, args.output_type, args.model_path, args.learning_rate, args.dense_layer_structure,
+                args.verbose)
 
 
 if __name__ == '__main__':

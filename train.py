@@ -12,6 +12,8 @@ from keras import backend as K
 from pathlib import Path
 from augmentations import augmentation
 
+NUMBER_OF_RVC_CLASSES = 101
+
 
 def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_train, x_val, y_val,
                 training_epochs, initial_epoch, learning_rate=None, verbose=False, augmentations=True):
@@ -37,6 +39,11 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
     normalization_function_name = metadata["normalization_function_name"]
     normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
     input_shape = metadata["input_shape"]
+    output_type = metadata["output_type"]
+
+    if output_type == "rvc":
+        y_train = one_hot_encoded_labels(y_train, NUMBER_OF_RVC_CLASSES)
+        y_val = one_hot_encoded_labels(y_val, NUMBER_OF_RVC_CLASSES)
 
     if augmentations:
         random_seed = 42
