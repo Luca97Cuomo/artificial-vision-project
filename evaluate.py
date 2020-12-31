@@ -50,7 +50,7 @@ def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
         error = round(y[i]) - round(y_pred[i])
         abs_error = abs(error)
 
-        type(abs_error)
+        print(f"type: abs_error: {type(abs_error)}")
 
         current = error_by_interval.setdefault(interval_start_age, {"error_sum": 0,
                                                                     "count": 0,
