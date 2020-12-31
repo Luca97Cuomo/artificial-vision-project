@@ -19,7 +19,7 @@ def save_configuration_template(path, verbose=False):
         "verbose": True,
 
         "preprocessing": {
-            "enable": False,
+            "enabled": False,
             "preprocessing_function_name": "standard_preprocessing_function",
         },
 

@@ -87,7 +87,7 @@ def evaluate_model(configuration_file_path):
     evaluate = conf["evaluate"]
 
     preprocessing_function_name = preprocessing["preprocessing_function_name"]
-    enable_preprocessing = preprocessing["enable"]
+    enable_preprocessing = preprocessing["enabled"]
 
     test_set_path = evaluate["test_set_path"]
     num_test_samples = evaluate["num_test_samples"]
@@ -96,7 +96,7 @@ def evaluate_model(configuration_file_path):
 
     save_predictions_dict = evaluate["save_predictions"]
 
-    save_predictions = save_predictions_dict["save_prediction"]
+    save_predictions = save_predictions_dict["enabled"]
     save_predictions_path = save_predictions_dict["save_predictions_path"]
 
     predict_function_name = evaluate["predict_function_name"]

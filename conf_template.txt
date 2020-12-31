@@ -1,5 +1,6 @@
 {
   "output_type": "regression",
+  "model_name": "vgg16_regression_model",
   "model_path": "/models/vgg16_regression/vgg16_regression_model",
   "csv_path": "/train.age_detected.csv",
   "batch_size": 256,
@@ -16,9 +17,12 @@
   },
   "build": {
     "build_model_dir": "/models/",
-    "dense_layer_structure_name": "standard_dense_layer_structure",
     "build_learning_rate": 0.0001,
-    "backend_name": "vgg16"
+    "dense_layer_structure_name": "standard_dense_layer_structure",
+    "backend": {
+      "name": "vgg16",
+      "unlock_layers": "none"
+    }
   },
   "train": {
     "training_set_path": "/content/training_set_resized",
