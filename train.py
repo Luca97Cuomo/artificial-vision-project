@@ -18,26 +18,30 @@ def train_model(configuration_file_path):
     conf = configuration.read_configuration(configuration_file_path)
 
     csv_path = conf["csv_path"]
-    training_set_path = conf["training_set_path"]
-    num_training_samples= conf["num_training_samples"]
-    validation_set_path = conf["validation_set_path"]
-    num_validation_samples = conf["num_validation_samples"]
 
-    output_dir = conf["output_training_dir"]
+    train = conf["train"]
+
+    training_set_path = train["training_set_path"]
+    num_training_samples= train["num_training_samples"]
+    validation_set_path = train["validation_set_path"]
+    num_validation_samples = train["num_validation_samples"]
+
+    output_dir = train["output_training_dir"]
     model_path = conf["model_path"]
+    model_name = conf["model_name"]
 
-    learning_rate = conf["train_learning_rate"]
+    learning_rate = train["train_learning_rate"]
     batch_size = conf["batch_size"]
-    initial_epoch = conf["initial_epoch"]
+    initial_epoch = train["initial_epoch"]
 
-    monitored_val_quantity = conf["val_metric_name"]
+    monitored_quantity = train["monitored_quantity"]
     normalization_function_name = conf["normalization_function_name"]
-    training_epochs = conf["epochs"]
+    training_epochs = train["epochs"]
 
     input_shape = conf["input_shape"]
     output_type = conf["output_type"]
 
-    augmentations = conf["augmentations"]
+    augmentations = train["augmentations"]
 
     verbose = conf["verbose"]
 
@@ -50,7 +54,6 @@ def train_model(configuration_file_path):
     checkpoints_dir = os.path.join(output_dir, "checkpoints")
     Path(checkpoints_dir).mkdir(parents=True, exist_ok=True)
 
-    model_name = os.path.basename(model_path)
     model = keras.models.load_model(model_path, custom_objects=models.CUSTOM_OBJECTS)
 
     if learning_rate is not None:

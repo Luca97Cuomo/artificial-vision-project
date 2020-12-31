@@ -1,0 +1,48 @@
+{
+  "output_type": "regression",
+  "model_path": "/models/vgg16_regression/vgg16_regression_model",
+  "csv_path": "/train.age_detected.csv",
+  "batch_size": 256,
+  "normalization_function_name": "vgg16_normalization",
+  "input_shape": [
+    224,
+    224,
+    3
+  ],
+  "verbose": true,
+  "preprocessing": {
+    "enable": false,
+    "preprocessing_function_name": "standard_preprocessing_function"
+  },
+  "build": {
+    "build_model_dir": "/models/",
+    "dense_layer_structure_name": "standard_dense_layer_structure",
+    "build_learning_rate": 0.0001,
+    "backend_name": "vgg16"
+  },
+  "train": {
+    "training_set_path": "/content/training_set_resized",
+    "validation_set_path": "/content/validation_set_resized",
+    "num_training_samples": 300000,
+    "num_validation_samples": 30000,
+    "monitored_quantity": "val_mae",
+    "augmentations": false,
+    "epochs": 20,
+    "initial_epoch": 0,
+    "train_learning_rate": null,
+    "output_training_dir": "/models/vgg16_regression/"
+  },
+  "evaluate": {
+    "test_set_path": "/content/test_set_resized",
+    "num_test_samples": 100000,
+    "save_predictions": {
+      "enabled": false,
+      "save_predictions_path": "/models/vgg16_regression/predictions.txt"
+    },
+    "age_intervals_evaluation": {
+      "enabled": true,
+      "age_interval_width": 10
+    },
+    "predict_function_name": "regression_predict"
+  }
+}

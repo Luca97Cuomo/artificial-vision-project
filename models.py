@@ -122,6 +122,7 @@ NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization,
                            "resnet50_normalization": resnet50_senet50_normalization,
                            "senet50_normalization": resnet50_senet50_normalization}
 PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict, "rvc_predict_function": rvc_predict}
+
 CUSTOM_OBJECTS = {
     "rvc_mae": rvc_mae
 }

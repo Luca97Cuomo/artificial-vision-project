@@ -13,7 +13,7 @@ from data_analysis import get_age_interval
 
 
 def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
-    for i in range()
+    for i in range(len(y)):
 
     ages = {}
     count = 0
@@ -48,6 +48,7 @@ def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
         print("age interval: [" + str(interval_start_age) + ",  " + str(interval_start_age + age_interval_width - 1) + "] - occurrences: " + str(ordered_dict[interval_start_age]) +" - percentage: " + str(ordered_dict[interval_start_age] / count))
 
 
+
 def evaluate(Y, Y_pred, verbose=True):
     """
     Y and Y_pred have to be list or numpy arrays
@@ -68,25 +69,33 @@ def evaluate_model(configuration_file_path):
 
     model_path = conf["model_path"]
 
-    preprocessing_function_name = conf["preprocessing_function_name"]
-    enable_preprocessing = conf["enable_preprocessing"]
+    preprocessing = conf["preprocessing"]
+    evaluate = ["evaluate"]
 
-    test_set_path = conf["test_set_path"]
-    num_test_samples = conf["num_test_samples"]
+    preprocessing_function_name = preprocessing["preprocessing_function_name"]
+    enable_preprocessing = preprocessing["enable"]
+
+    test_set_path = evaluate["test_set_path"]
+    num_test_samples = evaluate["num_test_samples"]
 
     batch_size = conf["batch_size"]
 
-    save_predictions = conf["save_prediction"]
-    save_predictions_path = conf["save_predictions_path"]
-    predict_function_name = conf["predict_function_name"]
+    save_predictions_dict = evaluate["save_predictions"]
+
+    save_predictions = save_predictions_dict["save_prediction"]
+    save_predictions_path = save_predictions_dict["save_predictions_path"]
+
+    predict_function_name = evaluate["predict_function_name"]
 
     normalization_function_name = conf["normalization_function_name"]
 
     csv_path = conf["csv_path"]
     input_shape = conf["input_shape"]
 
-    evaluate_by_age_intervals = conf["evaluate_by_age_intervals"]
-    age_interval_width = conf["age_interval_width"]
+    age_intervals_evaluation = evaluate["age_intervals_evaluation"]
+
+    evaluate_by_age_intervals = age_intervals_evaluation["enabled"]
+    age_interval_width = age_intervals_evaluation["age_interval_width"]
 
     if not enable_preprocessing:
         preprocessing_function = None

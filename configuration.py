@@ -3,55 +3,76 @@ import json
 
 
 def save_configuration_template(path, verbose=False):
-    configuration = {"backend_name": "vgg16",
-                     "output_type": "regression",
+    configuration = {
+        "output_type": "regression",
 
-                     "build_model_dir": "/models/",
-                     "model_path": "/models/vgg16_regression/vgg16_regression_model",
-                     "output_training_dir": "/models/vgg16_regression/",
-                     "csv_path": "/train.age_detected.csv",
+        "model_name": "vgg16_regression_model",
+        "model_path": "/models/vgg16_regression/vgg16_regression_model",
+        "csv_path": "/train.age_detected.csv",
 
-                     "build_learning_rate": 0.0001,
-                     # train_learning_rate: if not None the learning rate of model will be changed
-                     "train_learning_rate": None,
-                     "batch_size": 256,
-                     "epochs": 20,
-                     "initial_epoch": 0,
-                     "augmentations": False,
+        "batch_size": 256,
 
-                     # old metadata parameters
-                     # They are set by the build_model script
-                     "val_metric_name": "val_mae",
-                     "normalization_function_name": "vgg16_normalization",
-                     "predict_function_name": "regression_predict",
-                     "input_shape": (224, 224, 3),
+        "normalization_function_name": "vgg16_normalization",
 
-                     "training_set_path": "/content/training_set_resized",
-                     "validation_set_path": "/content/validation_set_resized",
-                     "test_set_path": "/content/test_set_resized",
+        "input_shape": (224, 224, 3),
 
-                     "num_training_samples": 300000,
-                     "num_validation_samples": 30000,
-                     "num_test_samples": 100000,
+        "verbose": True,
 
-                     "dense_layer_structure_name": "standard_dense_layer_structure",
+        "preprocessing": {
+            "enable": False,
+            "preprocessing_function_name": "standard_preprocessing_function",
+        },
 
-                     "enable_preprocessing": False,
-                     "preprocessing_function_name": "standard_preprocessing_function",
+        "build": {
+            "build_model_dir": "/models/",
+            "build_learning_rate": 0.0001,
 
-                     "save_predictions": False,
-                     "save_predictions_path": "/models/vgg16_regression/predictions.txt",
+            "dense_layer_structure_name": "standard_dense_layer_structure",
 
-                     "evaluate_by_age_intervals": True,
-                     "age_interval_width": 10,
+            "backend": {
+                "name": "vgg16",
+                "unlock_layers": "none" # ["none", "all", 1, 2, ...]
+            },
+        },
 
-                     "verbose": True}
+        "train": {
+            "training_set_path": "/content/training_set_resized",
+            "validation_set_path": "/content/validation_set_resized",
+            "num_training_samples": 300000,
+            "num_validation_samples": 30000,
+            "monitored_quantity": "val_mae",
+            "augmentations": False,
+            "epochs": 20,
+            "initial_epoch": 0,
+            # train_learning_rate: if not None the learning rate of model will be changed
+            "train_learning_rate": None,
+            "output_training_dir": "/models/vgg16_regression/"
+        },
+
+        "evaluate": {
+            "test_set_path": "/content/test_set_resized",
+            "num_test_samples": 100000,
+
+            "save_predictions": {
+                "enabled": False,
+                "save_predictions_path": "/models/vgg16_regression/predictions.txt"
+            },
+
+            "age_intervals_evaluation": {
+                "enabled": True,
+                "age_interval_width": 10
+            },
+
+            "predict_function_name": "regression_predict"
+
+        },
+    }
 
     with open(path, 'w') as f:
         f.write(json.dumps(configuration, indent=2))
 
     if verbose:
-        print(configuration)
+        dump_configuration(configuration)
 
 
 def read_configuration(path):
@@ -59,7 +80,7 @@ def read_configuration(path):
         configuration = json.load(f)
 
     if configuration["verbose"]:
-        print(configuration)
+        dump_configuration(configuration)
 
     return configuration
 
@@ -69,9 +90,14 @@ def save_configuration(path, configuration):
         f.write(json.dumps(configuration, indent=2))
 
 
+def dump_configuration(configuration):
+    print(json.dumps(configuration, indent=2))
+
+
 def main():
     parser = argparse.ArgumentParser(description='Configuration')
-    parser.add_argument('-p', '--path', type=str, help='Tha path of the file where to save the configuration template', required=True)
+    parser.add_argument('-p', '--path', type=str, help='Tha path of the file where to save the configuration template',
+                        required=True)
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
 
     args = parser.parse_args()

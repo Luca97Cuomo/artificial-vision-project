@@ -31,12 +31,19 @@ def build_structure(input, backend, dense_layer_structure):
 def build_model(configuration_file_path):
     conf = configuration.read_configuration(configuration_file_path)
 
-    backend_name = conf["backend_name"]
+    build = conf["build"]
+
+    backend = build["backend"]
+    backend_name = backend["name"]
+    unlock_layers = backend["unlock_layers"]
+
     output_type = conf["output_type"]
-    output_dir = conf["build_model_dir"]
-    learning_rate = conf["build_learning_rate"]
+    output_dir = build["build_model_dir"]
+    learning_rate = build["build_learning_rate"]
+    dense_layer_structure_name = build["dense_layer_structure_name"]
+    model_name = conf["model_name"]
+
     verbose = conf["verbose"]
-    dense_layer_structure_name = conf["dense_layer_structure_name"]
 
     normalization_function_name = backend_name + "_normalization"
     if normalization_function_name not in models.NORMALIZATION_FUNCTIONS:
@@ -51,8 +58,15 @@ def build_model(configuration_file_path):
 
     backend = VGGFace(model=backend_name, include_top=False, input_shape=INPUT_SHAPE, weights='vggface')
 
-    for layer in backend.layers:
-        layer.trainable = False
+    if unlock_layers == "none":
+        for layer in backend.layers:
+            layer.trainable = False
+    elif unlock_layers == "all":
+        for layer in backend.layers:
+            layer.trainable = True
+    else:
+        for layer in backend.layers[:-unlock_layers]:
+            layer.trainable = False
 
     model_input = Input(shape=INPUT_SHAPE)
 
@@ -65,8 +79,6 @@ def build_model(configuration_file_path):
 
     output, loss, metrics, val_metric_name = output_function(last_layer)
 
-    model_name = backend_name + "_" + output_type
-
     model = Model(inputs=model_input, outputs=output, name=model_name)
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
@@ -74,12 +86,15 @@ def build_model(configuration_file_path):
     Path(model_dir).mkdir(parents=True, exist_ok=True)
     model.save(os.path.join(model_dir, model_name + "_model"))
 
-    conf["val_metric_name"] = val_metric_name
+    train = conf["train"]
+    evaluate = conf["evaluation"]
+
+    train["monitored_quantity"] = val_metric_name
     conf["normalization_function_name"] = normalization_function_name
-    conf["predict_function_name"] = predict_function_name
+    evaluate["predict_function_name"] = predict_function_name
     conf["input_shape"] = INPUT_SHAPE
-    with open(configuration_file_path, "w") as f:
-        f.write(json.dumps(conf))
+
+    configuration.save_configuration(configuration_file_path, conf)
 
     if verbose:
         model.summary()
