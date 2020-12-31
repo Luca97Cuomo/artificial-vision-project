@@ -31,6 +31,7 @@ def print_error_by_age_intervals(error_list):
         overstimate_count = element["overstimate_count"]
         underestimate_count = element["underestimate_count"]
 
+        print("\n")
         print(f"interval: {age_interval_label}")
         print(f"mae: {mae}")
         print(f"overestimate_mae: {overestimate_mae}")
@@ -38,6 +39,7 @@ def print_error_by_age_intervals(error_list):
         print(f"count: {count}")
         print(f"overstimate_count: {overstimate_count}")
         print(f"underestimate_count: {underestimate_count}")
+        print("\n")
 
 
 def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
@@ -108,8 +110,10 @@ def evaluate(y, y_pred, verbose=True):
     mae_float = np.mean(abs(y - y_pred))
 
     if verbose:
+        print("\n")
         print(f"MAE int: {mae_int}")
         print(f"MAE float: {mae_float}")
+        print("\n")
 
     return mae_int, mae_float
 
