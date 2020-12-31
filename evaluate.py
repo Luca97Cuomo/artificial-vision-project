@@ -84,29 +84,29 @@ def evaluate_model(configuration_file_path):
     model_path = conf["model_path"]
 
     preprocessing = conf["preprocessing"]
-    evaluate = conf["evaluate"]
+    eval_dict = conf["evaluate"]
 
     preprocessing_function_name = preprocessing["preprocessing_function_name"]
     enable_preprocessing = preprocessing["enabled"]
 
-    test_set_path = evaluate["test_set_path"]
-    num_test_samples = evaluate["num_test_samples"]
+    test_set_path = eval_dict["test_set_path"]
+    num_test_samples = eval_dict["num_test_samples"]
 
     batch_size = conf["batch_size"]
 
-    save_predictions_dict = evaluate["save_predictions"]
+    save_predictions_dict = eval_dict["save_predictions"]
 
     save_predictions = save_predictions_dict["enabled"]
     save_predictions_path = save_predictions_dict["save_predictions_path"]
 
-    predict_function_name = evaluate["predict_function_name"]
+    predict_function_name = eval_dict["predict_function_name"]
 
     normalization_function_name = conf["normalization_function_name"]
 
     csv_path = conf["csv_path"]
     input_shape = conf["input_shape"]
 
-    age_intervals_evaluation = evaluate["age_intervals_evaluation"]
+    age_intervals_evaluation = eval_dict["age_intervals_evaluation"]
 
     evaluate_by_age_intervals = age_intervals_evaluation["enabled"]
     age_interval_width = age_intervals_evaluation["age_interval_width"]
