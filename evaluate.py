@@ -77,7 +77,7 @@ def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
         if value["count"] != 0:
             mae = value["error_sum"] / value["count"]
 
-        if value["overstimate_count"] != 0:
+        if value["overestimate_count"] != 0:
             overestimate_error = value["overestimate_error_sum"] / value["overestimate_count"]
 
         if value["underestimate_count"] != 0:
