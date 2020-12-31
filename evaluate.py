@@ -84,7 +84,7 @@ def evaluate_model(configuration_file_path):
     model_path = conf["model_path"]
 
     preprocessing = conf["preprocessing"]
-    evaluate = ["evaluate"]
+    evaluate = conf["evaluate"]
 
     preprocessing_function_name = preprocessing["preprocessing_function_name"]
     enable_preprocessing = preprocessing["enable"]
