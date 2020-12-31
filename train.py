@@ -51,7 +51,7 @@ def train_model(configuration_file_path):
     Path(checkpoints_dir).mkdir(parents=True, exist_ok=True)
 
     model_name = os.path.basename(model_path)
-    model = keras.models.load_model(model_path)
+    model = keras.models.load_model(model_path, custom_objects=models.CUSTOM_OBJECTS)
 
     if learning_rate is not None:
         if verbose:
@@ -96,18 +96,18 @@ def train_model(configuration_file_path):
     # can significantly help a model training process. This is probably because it can stagnate because of strange shapes
     # in the loss function which make it impossible for the optimizer to fall in better minima.
     validation_min_delta = 0.1 / 100  # minimum variation of the monitored quantity for it to be considered improved
-    reduce_lr_plateau_callback = ReduceLROnPlateau(monitor=monitored_val_quantity, mode='auto', verbose=1, patience=3,
+    reduce_lr_plateau_callback = ReduceLROnPlateau(monitor=monitored_quantity, mode='auto', verbose=1, patience=3,
                                                    factor=0.2, cooldown=1, min_delta=validation_min_delta)
 
     # Stops training entirely if, after 7 epochs, no improvement is found on the validation metric.
     # This triggers after the previous callback if it fails to make the training "great again".
-    stopping_callback = EarlyStopping(patience=7, verbose=1, restore_best_weights=True, monitor=monitored_val_quantity,
+    stopping_callback = EarlyStopping(patience=7, verbose=1, restore_best_weights=True, monitor=monitored_quantity,
                                       mode='auto', min_delta=validation_min_delta)
 
     save_callback = ModelCheckpoint(
-        os.path.join(checkpoints_dir, model_name) + ".{epoch:02d}-{" + monitored_val_quantity + ":.4f}.hdf5", verbose=1,
+        os.path.join(checkpoints_dir, model_name) + ".{epoch:02d}-{" + monitored_quantity + ":.4f}.hdf5", verbose=1,
         save_weights_only=False,
-        save_best_only=True, monitor=monitored_val_quantity, mode='auto')
+        save_best_only=True, monitor=monitored_quantity, mode='auto')
 
     history = model.fit(training_data_generator, validation_data=validation_data_generator,
                         initial_epoch=initial_epoch,

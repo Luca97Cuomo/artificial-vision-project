@@ -95,8 +95,8 @@ def rvc_output_function(last_layer):
 
 
 def rvc_mae(y_true, y_pred):
-    y_true = tf.map_fn(lambda element: tf.math.argmax(element), y_true)
-    y_pred = tf.map_fn(lambda element: tf.math.argmax(element), y_pred)
+    y_true = tf.map_fn(lambda element: tf.math.argmax(element), y_true, dtype=tf.dtypes.int64)
+    y_pred = tf.map_fn(lambda element: tf.math.argmax(element), y_pred, dtype=tf.dtypes.int64)
 
     return tf.keras.losses.MAE(y_true, y_pred)
 
@@ -122,3 +122,6 @@ NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization,
                            "resnet50_normalization": resnet50_senet50_normalization,
                            "senet50_normalization": resnet50_senet50_normalization}
 PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict, "rvc_predict_function": rvc_predict}
+CUSTOM_OBJECTS = {
+    "rvc_mae": rvc_mae
+}
