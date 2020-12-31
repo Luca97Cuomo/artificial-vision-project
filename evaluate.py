@@ -29,7 +29,7 @@ def print_error_by_age_intervals(error_list):
         overestimate_mae = element["overestimate_mae"]
         underestimate_mae = element["underestimate_mae"]
         count = element["count"]
-        overstimate_count = element["overstimate_count"]
+        overestimate_count = element["overestimate_count"]
         underestimate_count = element["underestimate_count"]
 
         print(f"interval: {age_interval_label}")
@@ -37,7 +37,7 @@ def print_error_by_age_intervals(error_list):
         print(f"overestimate_mae: {overestimate_mae}")
         print(f"underestimate_mae: {underestimate_mae}")
         print(f"count: {count}")
-        print(f"overstimate_count: {overstimate_count}")
+        print(f"overestimate_count: {overestimate_count}")
         print(f"underestimate_count: {underestimate_count}")
         print("")
 
@@ -54,7 +54,7 @@ def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
                                                                     "count": 0,
                                                                     "overestimate_error_sum": 0,
                                                                     "underestimate_error_sum": 0,
-                                                                    "overstimate_count": 0,
+                                                                    "overestimate_count": 0,
                                                                     "underestimate_count": 0})
 
         current["error_sum"] += abs_error
@@ -65,7 +65,7 @@ def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
             current["underestimate_count"] += 1
         elif error < 0:
             current["overestimate_error_sum"] += abs_error
-            current["overstimate_count"] += 1
+            current["overestimate_count"] += 1
         # if error == 0 discard
 
     ret = []
@@ -78,7 +78,7 @@ def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
             mae = value["error_sum"] / value["count"]
 
         if value["overstimate_count"] != 0:
-            overestimate_error = value["overestimate_error_sum"] / value["overstimate_count"]
+            overestimate_error = value["overestimate_error_sum"] / value["overestimate_count"]
 
         if value["underestimate_count"] != 0:
             underestimate_error = value["underestimate_error_sum"] / value["underestimate_count"]
@@ -90,7 +90,7 @@ def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
                     "overestimate_mae": overestimate_error,
                     "underestimate_mae": underestimate_error,
                     "count": value["count"],
-                    "overstimate_count": value["overstimate_count"],
+                    "overestimate_count": value["overstimate_count"],
                     "underestimate_count": value["underestimate_count"],
                     "age_interval_label": label,
                     })
