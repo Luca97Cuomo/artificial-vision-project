@@ -1,6 +1,8 @@
 import typing
 import numpy as np
 from numpy.random import default_rng
+from keras.layers import Dense, Lambda
+from random_bins.bins_combiner_layer import BinsCombinerLayer
 
 
 class Binner:
@@ -25,18 +27,30 @@ class Binner:
         nearest_centroid_index = np.argmin(distance_from_centroids)
         return nearest_centroid_index
 
+    def _one_hot_encode(self, class_index):
+        new_label = np.zeros(self.n_intervals)
+        new_label[class_index] = 1
+        return new_label
+
     def bin_labels(self, labels: typing.Iterable[float]) -> typing.Iterable[typing.Iterable[float]]:
         new_labels = []
         for centroid_set in self.centroid_sets:
             new_labels.append([])
             for label in labels:
-                label = round(label)
-                interval_index = self._get_label_interval(label, centroid_set)
-                new_label = np.zeros(self.n_intervals)
-                new_label[interval_index] = 1
-                new_labels[-1].append(new_label)
+                interval_index = self._get_label_interval(round(label), centroid_set)
+                new_labels[-1].append(self._one_hot_encode(interval_index))
 
         return new_labels
 
     def architecture(self, output_layer):
-        pass
+        regression_output = BinsCombinerLayer(self.centroid_sets)
+
+        classifiers = []
+        for _ in range(self.n_interval_sets):
+            classifier = Dense(self.n_intervals, activation='softmax', kernel_initializer='glorot_normal')(output_layer)
+            regression_output(classifier)
+            classifiers.append(classifier)
+        return (classifiers + [regression_output],
+                ['categorical_crossentropy'] * self.n_interval_sets + [None],
+                [[None] * self.n_interval_sets] + [['mae']],
+                'val_mae')
