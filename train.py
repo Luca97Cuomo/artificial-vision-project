@@ -21,8 +21,17 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
     checkpoints_dir = os.path.join(output_dir, "checkpoints")
     Path(checkpoints_dir).mkdir(parents=True, exist_ok=True)
 
+    with open(metafile_path) as json_file:
+        metadata = json.load(json_file)
+
+    monitored_quantity = metadata["monitored_quantity"]
+    normalization_function_name = metadata["normalization_function_name"]
+    normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
+    input_shape = metadata["input_shape"]
+    output_type = metadata["output_type"]
+
     model_name = os.path.basename(model_path)
-    model = keras.models.load_model(model_path)
+    model = keras.models.load_model(model_path, custom_objects=models.CUSTOM_OBJECTS)
 
     if learning_rate is not None:
         if verbose:
@@ -31,15 +40,6 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
         K.set_value(model.optimizer.learning_rate, learning_rate)
         if verbose:
             print(f"The new learning rate is {K.eval(model.optimizer.lr)}")
-
-    with open(metafile_path) as json_file:
-        metadata = json.load(json_file)
-
-    monitored_val_quantity = metadata["val_metric_name"]
-    normalization_function_name = metadata["normalization_function_name"]
-    normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
-    input_shape = metadata["input_shape"]
-    output_type = metadata["output_type"]
 
     if output_type == "rvc":
         y_train = one_hot_encoded_labels(y_train, NUMBER_OF_RVC_CLASSES)
@@ -74,18 +74,18 @@ def train_model(model_path, metafile_path, output_dir, batch_size, x_train, y_tr
     # can significantly help a model training process. This is probably because it can stagnate because of strange shapes
     # in the loss function which make it impossible for the optimizer to fall in better minima.
     validation_min_delta = 0.1 / 100  # minimum variation of the monitored quantity for it to be considered improved
-    reduce_lr_plateau_callback = ReduceLROnPlateau(monitor=monitored_val_quantity, mode='auto', verbose=1, patience=3,
+    reduce_lr_plateau_callback = ReduceLROnPlateau(monitor=monitored_quantity, mode='auto', verbose=1, patience=3,
                                                    factor=0.2, cooldown=1, min_delta=validation_min_delta)
 
     # Stops training entirely if, after 7 epochs, no improvement is found on the validation metric.
     # This triggers after the previous callback if it fails to make the training "great again".
-    stopping_callback = EarlyStopping(patience=7, verbose=1, restore_best_weights=True, monitor=monitored_val_quantity,
+    stopping_callback = EarlyStopping(patience=7, verbose=1, restore_best_weights=True, monitor=monitored_quantity,
                                       mode='auto', min_delta=validation_min_delta)
 
     save_callback = ModelCheckpoint(
-        os.path.join(checkpoints_dir, model_name) + ".{epoch:02d}-{" + monitored_val_quantity + ":.4f}.hdf5", verbose=1,
+        os.path.join(checkpoints_dir, model_name) + ".{epoch:02d}-{" + monitored_quantity + ":.4f}.hdf5", verbose=1,
         save_weights_only=False,
-        save_best_only=True, monitor=monitored_val_quantity, mode='auto')
+        save_best_only=True, monitor=monitored_quantity, mode='auto')
 
     history = model.fit(training_data_generator, validation_data=validation_data_generator,
                         initial_epoch=initial_epoch,

@@ -66,7 +66,7 @@ def build_model(backend_name, output_type, output_dir, learning_rate,
     model.save(os.path.join(model_dir, model_name + "_model"))
     meta_file_name = os.path.join(model_dir, model_name + "_metadata.txt")
     with open(meta_file_name, "w") as f:
-        metadata = {"val_metric_name": val_metric_name,
+        metadata = {"monitored_quantity": val_metric_name,
                     "normalization_function_name": normalization_function_name,
                     "predict_function_name": predict_function_name,
                     "input_shape": INPUT_SHAPE,
