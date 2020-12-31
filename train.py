@@ -22,7 +22,7 @@ def train_model(configuration_file_path):
     train = conf["train"]
 
     training_set_path = train["training_set_path"]
-    num_training_samples= train["num_training_samples"]
+    num_training_samples = train["num_training_samples"]
     validation_set_path = train["validation_set_path"]
     num_validation_samples = train["num_validation_samples"]
 
