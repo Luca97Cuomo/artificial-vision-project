@@ -13,11 +13,37 @@ from models import CUSTOM_OBJECTS
 from data_analysis import get_age_interval
 
 
+def take_error_list_key(element):
+    return element["start_age"]
+
+
+def print_error_by_age_intervals(error_list):
+    error_list.sort(key=take_error_list_key)
+
+    for i in range(len(error_list)):
+        element = error_list[i]
+
+        age_interval_label = element["age_interval_label"]
+        mae =  element["mae"],
+        overestimate_mae = element["overestimate_mae"]
+        underestimate_mae = element["underestimate_mae"]
+        count = element["count"]
+        overstimate_count = element["overstimate_count"]
+        underestimate_count = element["underestimate_count"]
+
+        print(f"interval: {age_interval_label}")
+        print(f"mae: {mae}")
+        print(f"overestimate_mae: {overestimate_mae}")
+        print(f"underestimate_mae: {underestimate_mae}")
+        print(f"count: {count}")
+        print(f"overstimate_count: {overstimate_count}")
+        print(f"underestimate_count: {underestimate_count}")
+
+
 def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
-    y = np.rint(y)
     error_by_interval = {}
     for i in range(len(y)):
-        interval_start_age = get_age_interval(y[i], age_interval_width, 0)
+        interval_start_age = get_age_interval(int(round(y[i])), age_interval_width, 0)
 
         error = round(y[i]) - round(y_pred[i])
         abs_error = abs(error)
@@ -68,7 +94,7 @@ def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
                     })
 
     if verbose:
-        print(ret)
+        print_error_by_age_intervals(ret)
 
     return ret
 
