@@ -94,8 +94,6 @@ def build_model(configuration_file_path):
     eval["predict_function_name"] = predict_function_name
     conf["input_shape"] = INPUT_SHAPE
 
-    configuration.dump_configuration(conf)
-
     configuration.save_configuration(configuration_file_path, conf)
 
     if verbose:
