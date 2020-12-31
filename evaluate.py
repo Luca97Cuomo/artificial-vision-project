@@ -20,6 +20,7 @@ def take_error_list_key(element):
 def print_error_by_age_intervals(error_list):
     error_list.sort(key=take_error_list_key)
 
+    print("\n")
     for i in range(len(error_list)):
         element = error_list[i]
 
@@ -31,7 +32,6 @@ def print_error_by_age_intervals(error_list):
         overstimate_count = element["overstimate_count"]
         underestimate_count = element["underestimate_count"]
 
-        print("\n")
         print(f"interval: {age_interval_label}")
         print(f"mae: {mae}")
         print(f"overestimate_mae: {overestimate_mae}")
@@ -49,6 +49,8 @@ def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
 
         error = round(y[i]) - round(y_pred[i])
         abs_error = abs(error)
+
+        type(abs_error)
 
         current = error_by_interval.setdefault(interval_start_age, {"error_sum": 0,
                                                                     "count": 0,
