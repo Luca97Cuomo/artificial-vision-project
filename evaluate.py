@@ -20,12 +20,12 @@ def take_error_list_key(element):
 def print_error_by_age_intervals(error_list):
     error_list.sort(key=take_error_list_key)
 
-    print("\n")
+    print("")
     for i in range(len(error_list)):
         element = error_list[i]
 
         age_interval_label = element["age_interval_label"]
-        mae =  element["mae"],
+        mae =  element["mae"]
         overestimate_mae = element["overestimate_mae"]
         underestimate_mae = element["underestimate_mae"]
         count = element["count"]
@@ -39,7 +39,7 @@ def print_error_by_age_intervals(error_list):
         print(f"count: {count}")
         print(f"overstimate_count: {overstimate_count}")
         print(f"underestimate_count: {underestimate_count}")
-        print("\n")
+        print("")
 
 
 def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
@@ -49,8 +49,6 @@ def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
 
         error = round(y[i]) - round(y_pred[i])
         abs_error = abs(error)
-
-        print(f"type: abs_error: {type(abs_error)}")
 
         current = error_by_interval.setdefault(interval_start_age, {"error_sum": 0,
                                                                     "count": 0,
@@ -112,10 +110,10 @@ def evaluate(y, y_pred, verbose=True):
     mae_float = np.mean(abs(y - y_pred))
 
     if verbose:
-        print("\n")
+        print("")
         print(f"MAE int: {mae_int}")
         print(f"MAE float: {mae_float}")
-        print("\n")
+        print("")
 
     return mae_int, mae_float
 
