@@ -6,6 +6,9 @@ import tensorflow as tf
 import utils
 
 
+NUMBER_OF_RVC_CLASSES = 101
+
+
 def regression_predict(model, X, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
     data_generator = DataGenerator(X, labels=None, input_shape=input_shape, batch_size=batch_size,
                                    preprocessing_function=preprocessing_function,
@@ -82,7 +85,7 @@ def regression_output_function(last_layer):
 
 
 def rvc_output_function(last_layer):
-    output = Dense(101, activation='softmax', kernel_initializer='glorot_normal', name='rvc')(last_layer)
+    output = Dense(NUMBER_OF_RVC_CLASSES, activation='softmax', kernel_initializer='glorot_normal', name='rvc')(last_layer)
 
     loss = "categorical_crossentropy"
 

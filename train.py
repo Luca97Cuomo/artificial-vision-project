@@ -23,10 +23,23 @@ def train_model(configuration_file_path):
     validation_set_path = conf["validation_set_path"]
     num_validation_samples = conf["num_validation_samples"]
 
-NUMBER_OF_RVC_CLASSES = 101
+    output_dir = conf["output_training_dir"]
+    model_path = conf["model_path"]
 
-    output_dir = ["output_training_dir"]
-    model_path = ["model_path"]
+    learning_rate = conf["train_learning_rate"]
+    batch_size = conf["batch_size"]
+    initial_epoch = conf["initial_epoch"]
+
+    monitored_val_quantity = conf["val_metric_name"]
+    normalization_function_name = conf["normalization_function_name"]
+    training_epochs = conf["epochs"]
+
+    input_shape = conf["input_shape"]
+    output_type = conf["output_type"]
+
+    augmentations = conf["augmentations"]
+
+    verbose = conf["verbose"]
 
     print("Reading training and validation set")
     labels_dict = load_labels(csv_path, False)
@@ -40,19 +53,6 @@ NUMBER_OF_RVC_CLASSES = 101
     model_name = os.path.basename(model_path)
     model = keras.models.load_model(model_path)
 
-    learning_rate = ["train_learning_rate"]
-    batch_size = ["batch_size"]
-    initial_epoch = ["initial_epoch"]
-
-    monitored_val_quantity = conf["val_metric_name"]
-    normalization_function_name = conf["normalization_function_name"]
-    input_shape = conf["input_shape"]
-    training_epochs = conf["epochs"]
-
-    augmentations = conf["augmentations"]
-
-    verbose = ["verbose"]
-
     if learning_rate is not None:
         if verbose:
             print("Changing the learning rate")
@@ -62,12 +62,10 @@ NUMBER_OF_RVC_CLASSES = 101
             print(f"The new learning rate is {K.eval(model.optimizer.lr)}")
 
     normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
-    input_shape = metadata["input_shape"]
-    output_type = metadata["output_type"]
 
     if output_type == "rvc":
-        y_train = one_hot_encoded_labels(y_train, NUMBER_OF_RVC_CLASSES)
-        y_val = one_hot_encoded_labels(y_val, NUMBER_OF_RVC_CLASSES)
+        y_train = one_hot_encoded_labels(y_train, models.NUMBER_OF_RVC_CLASSES)
+        y_val = one_hot_encoded_labels(y_val, models.NUMBER_OF_RVC_CLASSES)
 
     if augmentations:
         random_seed = 42

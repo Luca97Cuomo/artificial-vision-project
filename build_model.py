@@ -6,7 +6,6 @@
 
 import argparse
 import os
-import tensorflow as tf
 from keras import optimizers
 from keras.models import Model
 from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, MaxPooling2D, GlobalAveragePooling2D
@@ -37,9 +36,8 @@ def build_model(configuration_file_path):
     output_dir = conf["build_model_dir"]
     learning_rate = conf["build_learning_rate"]
     verbose = conf["verbose"]
+    dense_layer_structure_name = conf["dense_layer_structure_name"]
 
-def build_model(backend_name, output_type, output_dir, learning_rate,
-                dense_layer_structure_name="standard_dense_layer_structure", verbose=True):
     normalization_function_name = backend_name + "_normalization"
     if normalization_function_name not in models.NORMALIZATION_FUNCTIONS:
         raise Exception("The normalization function is not available")
@@ -82,14 +80,6 @@ def build_model(backend_name, output_type, output_dir, learning_rate,
     conf["input_shape"] = INPUT_SHAPE
     with open(configuration_file_path, "w") as f:
         f.write(json.dumps(conf))
-    meta_file_name = os.path.join(model_dir, model_name + "_metadata.txt")
-    with open(meta_file_name, "w") as f:
-        metadata = {"val_metric_name": val_metric_name,
-                    "normalization_function_name": normalization_function_name,
-                    "predict_function_name": predict_function_name,
-                    "input_shape": INPUT_SHAPE,
-                    "output_type": output_type}
-        f.write(json.dumps(metadata))  # use `json.loads` to do the reversese
 
     if verbose:
         model.summary()
@@ -98,15 +88,6 @@ def build_model(backend_name, output_type, output_dir, learning_rate,
 def main():
     parser = argparse.ArgumentParser(description='Build model')
     parser.add_argument('-c', '--configuration_file_path', type=str, help='The path of the configuration file', required=True)
-    parser.add_argument('-b', '--backend_name', type=str,
-                        help='The name of the backend to use (vgg16, resnet50, senet50)', required=True)
-    parser.add_argument('-o', '--output_type', type=str,
-                        help='The output type of the network (regression, rvc, multirvc)', required=True)
-    parser.add_argument('-m', '--model_path', type=str, help='The path where to save the compiled model', required=True)
-    parser.add_argument('-lr', '--learning_rate', type=float, help='The learnig rate used by the model', required=True)
-    parser.add_argument('-d', '--dense_layer_structure', type=str, help='Structure of the finals dense layers',
-                        default='standard_dense_layer_structure')
-    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
 
     args = parser.parse_args()
 

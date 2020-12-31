@@ -34,6 +34,8 @@ def save_configuration_template(path, verbose=False):
                      "num_validation_samples": 30000,
                      "num_test_samples": 100000,
 
+                     "dense_layer_structure_name": "standard_dense_layer_structure",
+
                      "enable_preprocessing": False,
                      "preprocessing_function_name": "standard_preprocessing_function",
 
