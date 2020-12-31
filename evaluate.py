@@ -14,6 +14,7 @@ from data_analysis import get_age_interval
 
 
 def evaluate_by_age_intervals(age_interval_width, y, y_pred, verbose=True):
+    y = np.rint(y)
     error_by_interval = {}
     for i in range(len(y)):
         interval_start_age = get_age_interval(y[i], age_interval_width, 0)
