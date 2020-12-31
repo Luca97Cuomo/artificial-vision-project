@@ -106,8 +106,10 @@ def rvc_output_function(last_layer):
 
 
 def rvc_mae(y_true, y_pred):
-    y_true = tf.map_fn(lambda element: tf.math.argmax(element), y_true, dtype=tf.dtypes.int64)
-    y_pred = tf.map_fn(lambda element: tf.math.argmax(element), y_pred, dtype=tf.dtypes.int64)
+    print(f"")
+
+    y_true = tf.map_fn(lambda element: tf.math.argmax(element), y_true, dtype=tf.dtypes.float64)
+    y_pred = tf.map_fn(lambda element: tf.math.argmax(element), y_pred, dtype=tf.dtypes.float64)
 
     return tf.keras.losses.MAE(y_true, y_pred)
 
