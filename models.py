@@ -4,9 +4,11 @@ from generators import DataGenerator
 import numpy as np
 import tensorflow as tf
 import utils
-
+from random_bins import bins_combiner_layer
+from random_bins import binner
 
 NUMBER_OF_RVC_CLASSES = 101
+BINNER = binner.Binner(n_classes=NUMBER_OF_RVC_CLASSES)
 
 
 def regression_predict(model, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
@@ -127,7 +129,8 @@ def standard_dense_layer_structure(backbone):
 AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50"]
 AVAILABLE_FINAL_DENSE_STRUCTURE = {'standard_dense_layer_structure': standard_dense_layer_structure}
 AVAILABLE_OUTPUT_TYPES = {"regression": regression_output_function,
-                          'rvc': rvc_output_function}
+                          'rvc': rvc_output_function,
+                          'random_bins_classification': BINNER.architecture}
 
 NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization,
                            "resnet50_normalization": resnet50_senet50_normalization,
@@ -135,5 +138,6 @@ NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization,
 PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict, "rvc_predict_function": rvc_predict}
 
 CUSTOM_OBJECTS = {
-    "rvc_mae": rvc_mae
+    "rvc_mae": rvc_mae,
+    'BinsCombinerLayer': bins_combiner_layer.BinsCombinerLayer
 }

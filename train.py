@@ -69,6 +69,9 @@ def train_model(configuration_file_path):
     if output_type == "rvc":
         y_train = one_hot_encoded_labels(y_train, models.NUMBER_OF_RVC_CLASSES)
         y_val = one_hot_encoded_labels(y_val, models.NUMBER_OF_RVC_CLASSES)
+    elif output_type == "random_bins_classifications":
+        y_train = models.BINNER.bin_labels(y_train)
+        y_val = models.BINNER.bin_labels(y_val)
 
     if augmentations:
         random_seed = 42
