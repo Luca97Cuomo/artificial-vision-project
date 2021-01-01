@@ -1,5 +1,6 @@
 from keras.layers import Layer
 import tensorflow as tf
+import itertools
 import numpy as np
 
 
@@ -7,6 +8,21 @@ class BinsCombinerLayer(Layer):
     def __init__(self, centroid_sets, **kwargs):
         super(BinsCombinerLayer, self).__init__(**kwargs)
         self.centroid_sets = centroid_sets
+        # due to compat with tf1, i need to get this to be a tensor at some point.
+        # since tensors cant be lists of lists of different sizes, i need to get the shape a square.
+        sets = len(self.centroid_sets)
+        set_dim = len(self.centroid_sets[0])
+
+        if sets > set_dim:
+            new_centroid_sets = []
+            for centroid_set in self.centroid_sets:
+                new = np.zeros(sets)
+                new[:set_dim] = centroid_set
+                new_centroid_sets.append(new)
+            self.centroid_sets = new_centroid_sets
+        elif set_dim > sets:
+            for _ in range(set_dim - sets):
+                self.centroid_sets.append(np.zeros(set_dim))
 
     def call(self, inputs):
         # https://stackoverflow.com/questions/50641219/equivalent-of-enumerate-in-tensorflow-to-use-index-in-tf-map-fn
