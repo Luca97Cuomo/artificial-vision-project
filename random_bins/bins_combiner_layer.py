@@ -27,24 +27,24 @@ class BinsCombinerLayer(Layer):
     def call(self, inputs):
         # https://stackoverflow.com/questions/50641219/equivalent-of-enumerate-in-tensorflow-to-use-index-in-tf-map-fn
         inputs_len = tf.shape(inputs)[0]
-        inputs_indices = tf.range(inputs_len)
+        # inputs_indices = tf.range(inputs_len)
 
         self.i = 0  # hack
         total_expected_value = tf.scan(
-            lambda total, element: total + self._compute_single_bin_expected_value(element[0], element[1]),
-            (inputs, inputs_indices)
+            lambda total, element: total + self._compute_single_bin_expected_value(element),
+            inputs
         )
 
         return total_expected_value / inputs_len
 
-    def _compute_single_bin_expected_value(self, bin_output, bin_index):
+    def _compute_single_bin_expected_value(self, bin_output):
         # TODO ATTENZIONE IL CENTROIDE NON È IL MEAN VALUE DELL'INTERVALLO! COME LO OTTENGO?
         # ma comunque sembrano usare il centroide in https://github.com/axeber01/dold/blob/28f1386dcf44a7b6d42998009a4fbdf85af02849/age/scripts/utkRandomBins.m#L96
         centroids = tf.convert_to_tensor(self.centroid_sets[self.i])
 
-        bin_output_indices = tf.range(tf.shape(bin_output)[0])
-        expected_value = tf.scan(lambda total, element: total + (element[0] * tf.cast(tf.gather_nd(centroids, [element[1]]), dtype=tf.dtypes.float32)),
-                                 (bin_output, bin_output_indices))
+        # bin_output_indices = tf.range(tf.shape(bin_output)[0])
+        expected_value = tf.scan(lambda total, element: total + (element[0] * centroids),
+                                 (bin_output, centroids))
         self.i += 1
         return expected_value
 
