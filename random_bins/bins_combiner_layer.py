@@ -47,7 +47,7 @@ class BinsCombinerLayer(Layer):
         #                          (bin_output, centroids))
         def scan(total, element):
             print(f'total: {total}\nelement: {element}\nelement[0]: {element[0]}\nelement[1]:{element[1]}\n')
-            return element[0] * element[1] + total[0], 0
+            return element[0] * element[1] + total[0], 0.0
         expected_value = tf.scan(scan,
                                  (bin_output, centroids))[0]
         self.i += 1
