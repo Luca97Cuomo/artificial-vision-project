@@ -72,8 +72,9 @@ def read_configuration(path):
     with open(path, 'r') as f:
         conf = json.load(f)
 
-    if conf["verbose"]:
-        dump_configuration(conf)
+    if "verbose" in conf:
+        if conf["verbose"]:
+            dump_configuration(conf)
 
     return conf
 
