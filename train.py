@@ -66,12 +66,15 @@ def train_model(configuration_file_path):
 
     normalization_function = models.NORMALIZATION_FUNCTIONS[normalization_function_name]
 
+    n_outputs = 1
+
     if output_type == "rvc":
         y_train = one_hot_encoded_labels(y_train, models.NUMBER_OF_RVC_CLASSES)
         y_val = one_hot_encoded_labels(y_val, models.NUMBER_OF_RVC_CLASSES)
     elif output_type == "random_bins_classification":
         y_train = models.BINNER.bin_labels(y_train)
         y_val = models.BINNER.bin_labels(y_val)
+        n_outputs = models.BINNER.n_interval_sets
 
     if augmentations:
         random_seed = 42
@@ -87,9 +90,9 @@ def train_model(configuration_file_path):
         augmenter = None  # or augmentation.NullAugmentation()
 
     training_data_generator = DataGenerator(x_train, y_train, input_shape=input_shape, batch_size=batch_size,
-                                            normalization_function=normalization_function, augmenter=augmenter)
+                                            normalization_function=normalization_function, augmenter=augmenter, n_outputs=n_outputs)
     validation_data_generator = DataGenerator(x_val, y_val, input_shape=input_shape, batch_size=batch_size,
-                                              normalization_function=normalization_function)
+                                              normalization_function=normalization_function, n_outputs=n_outputs)
 
     if initial_epoch == 0:
         append = False

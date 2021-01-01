@@ -7,13 +7,14 @@ from augmentations import augmentation
 
 class DataGenerator(keras.utils.Sequence):
     def __init__(self, data_paths, labels, input_shape, batch_size=32, preprocessing_function=None,
-                 normalization_function=None, shuffle=True, random_seed=42, augmenter=None):
+                 normalization_function=None, shuffle=True, random_seed=42, augmenter=None, n_outputs=1):
         """
         If labels is None it means that the generator has to be used in predict mode where the labels are not required
         if augmentation is not desired an instance of NullAugmentation should be passed
         """
         self.data_paths = data_paths
         self.labels = labels
+        self.n_outputs = n_outputs
         self.input_shape = input_shape
         self.batch_size = batch_size
         self.preprocessing_function = preprocessing_function
@@ -52,7 +53,7 @@ class DataGenerator(keras.utils.Sequence):
         if self.labels is None:
             return batch_x
 
-        batch_y = np.array([self.labels[i] for i in indices])
+        batch_y = [[self.labels[i][j] for j in indices] for i in range(self.n_outputs)]
 
         return batch_x, batch_y
 
