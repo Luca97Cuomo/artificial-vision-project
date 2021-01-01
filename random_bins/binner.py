@@ -54,5 +54,5 @@ class Binner:
         outputs.append(regression_output)
         return (outputs,
                 ['categorical_crossentropy'] * self.n_interval_sets + [None],
-                [[]] * self.n_interval_sets + [['regression_mae']],
-                'regression_val_mae')
+                [[]] * self.n_interval_sets + [['mae']],
+                'val_regression_mae')
