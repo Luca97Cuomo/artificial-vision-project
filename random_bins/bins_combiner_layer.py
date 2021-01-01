@@ -13,6 +13,9 @@ class BinsCombinerLayer(Layer):
         sets = len(self.centroid_sets)
         set_dim = len(self.centroid_sets[0])
 
+        print(sets)
+        print(set_dim)
+
         if sets > set_dim:
             new_centroid_sets = []
             for centroid_set in self.centroid_sets:
@@ -23,6 +26,10 @@ class BinsCombinerLayer(Layer):
         elif set_dim > sets:
             for _ in range(set_dim - sets):
                 self.centroid_sets.append(np.zeros(set_dim))
+
+        print(self.centroid_sets)
+        print(len(self.centroid_sets))
+        print(len(self.centroid_sets[0]))
 
     def call(self, inputs):
         # https://stackoverflow.com/questions/50641219/equivalent-of-enumerate-in-tensorflow-to-use-index-in-tf-map-fn
