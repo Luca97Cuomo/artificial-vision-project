@@ -1,10 +1,10 @@
 from utils import *
 from preprocessing import load_labels
-import json
 import keras
 import numpy as np
 import preprocessing_functions
 import argparse
+from pathlib import Path
 
 import configuration
 from models import NORMALIZATION_FUNCTIONS
@@ -181,9 +181,9 @@ def evaluate_model(configuration_file_path):
         print(f"Saving predictions to {save_predictions_path}")
         with open(save_predictions_path, 'w') as f:
             for i in range(len(x_test)):
-                x_splitted = x_test[i].split("/")
-                identity = x_splitted[-2]
-                image = x_splitted[-1]
+                image_path = Path(x_test[i]).resolve()
+                image = image_path.name
+                identity = image_path.parent
                 path = identity + "/" + image
                 f.write(f'{path},{int(round(y_pred[i]))},{int(round(y_test[i]))}\r\n')
         print("Predictions saved")
