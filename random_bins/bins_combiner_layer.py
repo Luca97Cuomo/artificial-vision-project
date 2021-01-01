@@ -43,7 +43,7 @@ class BinsCombinerLayer(Layer):
         centroids = tf.convert_to_tensor(self.centroid_sets[self.i])
 
         # bin_output_indices = tf.range(tf.shape(bin_output)[0])
-        expected_value = tf.scan(lambda total, element: total + (element[0] * centroids),
+        expected_value = tf.scan(lambda total, element: total + (element[0] * element[1]),
                                  (bin_output, centroids))
         self.i += 1
         return expected_value
