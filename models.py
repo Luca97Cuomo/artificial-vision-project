@@ -5,34 +5,42 @@ import numpy as np
 import tensorflow as tf
 import utils
 
-
 NUMBER_OF_RVC_CLASSES = 101
 
 
-def regression_predict(model, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
+def regression_predict(model, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None,
+                       return_rect=False):
     data_generator = DataGenerator(x, labels=None, input_shape=input_shape, batch_size=batch_size,
                                    preprocessing_function=preprocessing_function,
-                                   normalization_function=normalization_function)
+                                   normalization_function=normalization_function, return_rect=return_rect)
 
-    y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
+    y, rect = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
 
     # y_pred = [[3, 7, 8], [5, 8, 9], [7, 6, 8]]
 
     # do not round to int
-    return np.reshape(y, -1)
+    if return_rect:
+        return np.reshape(y, -1), rect
+    else:
+        return np.reshape(y, -1)
 
 
-def rvc_predict(model, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
+def rvc_predict(model, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None,
+                return_rect=False):
     data_generator = DataGenerator(x, labels=None, input_shape=input_shape, batch_size=batch_size,
                                    preprocessing_function=preprocessing_function,
-                                   normalization_function=normalization_function)
+                                   normalization_function=normalization_function,
+                                   return_rect=return_rect)
 
-    y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
+    y, rect = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
 
     y_processed = tf.map_fn(lambda element: tf.math.argmax(element), y, dtype=tf.dtypes.int64)
 
     with tf.Session().as_default():
-        return y_processed.eval()
+        if return_rect:
+            return y_processed.eval(), rect
+        else:
+            return y_processed.eval()
 
 
 def normalize_input_rcmalli(x, version, data_format=None):
@@ -96,7 +104,8 @@ def regression_output_function(last_layer):
 
 
 def rvc_output_function(last_layer):
-    output = Dense(NUMBER_OF_RVC_CLASSES, activation='softmax', kernel_initializer='glorot_normal', name='rvc')(last_layer)
+    output = Dense(NUMBER_OF_RVC_CLASSES, activation='softmax', kernel_initializer='glorot_normal', name='rvc')(
+        last_layer)
 
     loss = "categorical_crossentropy"
 
@@ -109,7 +118,8 @@ def rvc_mae(y_true, y_pred):
     y_true = tf.map_fn(lambda element: tf.math.argmax(element), y_true, dtype=tf.dtypes.int64)
     y_pred = tf.map_fn(lambda element: tf.math.argmax(element), y_pred, dtype=tf.dtypes.int64)
 
-    return tf.keras.losses.MAE(tf.dtypes.cast(y_true, dtype=tf.dtypes.float64), tf.dtypes.cast(y_pred, dtype=tf.dtypes.float64))
+    return tf.keras.losses.MAE(tf.dtypes.cast(y_true, dtype=tf.dtypes.float64),
+                               tf.dtypes.cast(y_pred, dtype=tf.dtypes.float64))
 
 
 def standard_dense_layer_structure(backbone):

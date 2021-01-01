@@ -58,13 +58,13 @@ def detect_from_image(image, detector):
     rect = enclosing_square(face['roi'])
     cropped_image = cut(image, rect)
 
-    return cropped_image
+    return cropped_image, rect
 
 
 def detect_from_path(image_path, detector):
     image = cv2.imread(image_path)
 
-    detected_image = detect_from_image(image, detector)
+    detected_image = detect_from_image(image, detector)[0]
     if detected_image is None:
         print("Could not find faces for " + image_path)
         return image

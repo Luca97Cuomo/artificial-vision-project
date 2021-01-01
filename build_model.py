@@ -103,7 +103,6 @@ def build_model(configuration_file_path):
             print(f"{layer.name}: trainable {layer.trainable}")
 
 
-
 def main():
     parser = argparse.ArgumentParser(description='Build model')
     parser.add_argument('-c', '--configuration_file_path', type=str, help='The path of the configuration file', required=True)
