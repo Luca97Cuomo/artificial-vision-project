@@ -26,6 +26,8 @@ class BinsCombinerLayer(Layer):
     def _compute_single_bin_expected_value(self, bin_output, bin_index):
         # TODO ATTENZIONE IL CENTROIDE NON È IL MEAN VALUE DELL'INTERVALLO! COME LO OTTENGO?
         # ma comunque sembrano usare il centroide in https://github.com/axeber01/dold/blob/28f1386dcf44a7b6d42998009a4fbdf85af02849/age/scripts/utkRandomBins.m#L96
+        with tf.Session():
+            bin_index = bin_index.eval()
         centroids = self.centroid_sets[bin_index]
 
         bin_output_indices = np.arange(int(np.shape(bin_output)[0]))
