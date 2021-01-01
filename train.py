@@ -43,6 +43,8 @@ def train_model(configuration_file_path):
 
     augmentations = train["augmentations"]
 
+    save_best_only = train["save_best_only"]
+
     verbose = conf["verbose"]
 
     print("Reading training and validation set")
@@ -110,7 +112,7 @@ def train_model(configuration_file_path):
     save_callback = ModelCheckpoint(
         os.path.join(checkpoints_dir, model_name) + ".{epoch:02d}-{" + monitored_quantity + ":.4f}.hdf5", verbose=1,
         save_weights_only=False,
-        save_best_only=True, monitor=monitored_quantity, mode='auto')
+        save_best_only=save_best_only, monitor=monitored_quantity, mode='auto')
 
     history = model.fit(training_data_generator, validation_data=validation_data_generator,
                         initial_epoch=initial_epoch,

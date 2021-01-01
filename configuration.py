@@ -46,7 +46,8 @@ def save_configuration_template(path, verbose=False):
             "initial_epoch": 0,
             # train_learning_rate: if not None the learning rate of model will be changed
             "train_learning_rate": None,
-            "output_training_dir": "/models/vgg16_regression/"
+            "output_training_dir": "/models/vgg16_regression/",
+            "save_best_only": False
         },
 
         "evaluate": {
