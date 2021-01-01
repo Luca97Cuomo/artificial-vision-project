@@ -45,12 +45,13 @@ class Binner:
     def architecture(self, output_layer):
         regression_output = BinsCombinerLayer(self.centroid_sets)
 
-        classifiers = []
+        outputs = []
         for _ in range(self.n_interval_sets):
             classifier = Dense(self.n_intervals, activation='softmax', kernel_initializer='glorot_normal')(output_layer)
             regression_output(classifier)
-            classifiers.append(classifier)
-        return (classifiers + [regression_output],
+            outputs.append(classifier)
+        outputs.append(regression_output)
+        return (outputs,
                 ['categorical_crossentropy'] * self.n_interval_sets + [None],
                 [[None] * self.n_interval_sets] + [['mae']],
                 'val_mae')
