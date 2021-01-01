@@ -12,10 +12,6 @@ class DataGenerator(keras.utils.Sequence):
         If labels is None it means that the generator has to be used in predict mode where the labels are not required
         if augmentation is not desired an instance of NullAugmentation should be passed
         """
-        if labels is not None:
-            if len(data_paths) != len(labels):
-                raise ValueError("Inappropriate sizes for the provided data. Check that they are of the same size.")
-
         self.data_paths = data_paths
         self.labels = labels
         self.input_shape = input_shape
