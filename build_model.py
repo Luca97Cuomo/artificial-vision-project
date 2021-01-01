@@ -100,7 +100,7 @@ def build_model(configuration_file_path):
         model.summary()
         print("Backend structure:\n")
         for layer in backend.layers:
-            print(f"{layer.name}: trainable {layer.trainable} - number of trainable weights {layer.trainable_weights}")
+            print(f"{layer.name}: trainable {layer.trainable}")
 
 
 
