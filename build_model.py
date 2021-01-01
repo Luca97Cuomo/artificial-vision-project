@@ -99,7 +99,8 @@ def build_model(configuration_file_path):
     if verbose:
         model.summary()
         print("Backend structure:\n")
-        print([f"{layer.name}: trainable {layer.trainable} - number of trainable weights {len(layer.trainable_weights)}" for layer in backend.layers])
+        for layer in backend.layers:
+            print(f"{layer.name}: trainable {layer.trainable} - number of trainable weights {layer.trainable_weights}")
 
 
 
