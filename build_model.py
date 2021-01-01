@@ -86,15 +86,16 @@ def build_model(configuration_file_path):
     Path(model_dir).mkdir(parents=True, exist_ok=True)
     model.save(os.path.join(model_dir, model_name + "_model"))
 
-    train = conf["train"]
-    eval = conf["evaluate"]
+    # Saving metadata
+    metadata = {}
 
-    train["monitored_quantity"] = val_metric_name
-    conf["normalization_function_name"] = normalization_function_name
-    eval["predict_function_name"] = predict_function_name
-    conf["input_shape"] = INPUT_SHAPE
+    metadata["monitored_quantity"] = val_metric_name
+    metadata["normalization_function_name"] = normalization_function_name
+    metadata["predict_function_name"] = predict_function_name
+    metadata["input_shape"] = INPUT_SHAPE
+    metadata["output_type"] = output_type
 
-    configuration.save_configuration(configuration_file_path, conf)
+    configuration.save_configuration(conf["metadata_path"], metadata)
 
     if verbose:
         model.summary()
