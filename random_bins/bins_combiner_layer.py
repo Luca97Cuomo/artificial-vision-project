@@ -26,6 +26,7 @@ class BinsCombinerLayer(Layer):
 
     def call(self, inputs):
         # https://stackoverflow.com/questions/50641219/equivalent-of-enumerate-in-tensorflow-to-use-index-in-tf-map-fn
+        inputs = tf.reshape(inputs, (len(self.centroid_sets), len(self.centroid_sets[0])))
         inputs_len = tf.cast(tf.shape(inputs)[0], tf.float32)
         print(inputs_len)
         print(tf.shape(inputs))
