@@ -10,7 +10,10 @@ class BinsCombinerLayer(Layer):
 
     def call(self, inputs):
         # https://stackoverflow.com/questions/50641219/equivalent-of-enumerate-in-tensorflow-to-use-index-in-tf-map-fn
-        inputs_len = int(np.shape(inputs)[0])
+        try:
+            inputs_len = int(np.shape(inputs)[0])
+        except TypeError:
+            inputs_len = 0
         inputs_indices = np.arange(inputs_len)
 
         total_expected_value = tf.scan(
