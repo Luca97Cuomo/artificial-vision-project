@@ -33,10 +33,11 @@ class BinsCombinerLayer(Layer):
         # inputs_indices = tf.range(inputs_len)
 
         self.i = 0  # hack
-        total_expected_value = tf.scan(
+        accumulated_expected_values = tf.scan(
             lambda total, element: total + self._compute_single_bin_expected_value(element),
             inputs
         )
+        total_expected_value = tf.gather_nd(accumulated_expected_values, (tf.shape(accumulated_expected_values)[0] - 1,))
 
         return total_expected_value / inputs_len
 
