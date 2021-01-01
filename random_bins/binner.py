@@ -34,9 +34,9 @@ class Binner:
 
     def bin_labels(self, labels: typing.Iterable[float]) -> typing.Iterable[typing.Iterable[float]]:
         new_labels = []
-        for centroid_set in self.centroid_sets:
+        for label in labels:
             new_labels.append([])
-            for label in labels:
+            for centroid_set in self.centroid_sets:
                 interval_index = self._get_label_interval(round(label), centroid_set)
                 new_labels[-1].append(self._one_hot_encode(interval_index))
 
