@@ -70,12 +70,12 @@ def save_configuration_template(path, verbose=False):
 
 def read_configuration(path):
     with open(path, 'r') as f:
-        configuration = json.load(f)
+        conf = json.load(f)
 
-    if configuration["verbose"]:
-        dump_configuration(configuration)
+    if conf["verbose"]:
+        dump_configuration(conf)
 
-    return configuration
+    return conf
 
 
 def save_configuration(path, configuration):
