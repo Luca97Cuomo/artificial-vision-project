@@ -121,6 +121,9 @@ def evaluate(y, y_pred, verbose=True):
 def evaluate_model(configuration_file_path):
     conf = configuration.read_configuration(configuration_file_path)
 
+    metadata_path = conf["metadata_path"]
+    metadata = configuration.read_configuration(metadata_path)
+
     model_path = conf["model_path"]
 
     preprocessing = conf["preprocessing"]
@@ -139,12 +142,12 @@ def evaluate_model(configuration_file_path):
     save_predictions = save_predictions_dict["enabled"]
     save_predictions_path = save_predictions_dict["save_predictions_path"]
 
-    predict_function_name = eval_dict["predict_function_name"]
+    predict_function_name = metadata["predict_function_name"]
 
-    normalization_function_name = conf["normalization_function_name"]
+    normalization_function_name = metadata["normalization_function_name"]
 
     csv_path = conf["csv_path"]
-    input_shape = conf["input_shape"]
+    input_shape = metadata["input_shape"]
 
     age_intervals_evaluation = eval_dict["age_intervals_evaluation"]
 
