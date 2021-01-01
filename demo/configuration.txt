@@ -1,7 +1,7 @@
 {
   "output_type": "rvc",
   "model_name": "vgg16_regression_model",
-  "model_path": "C:\Users\manud\Desktop\vgg16_rvc_augmented_conv.04-1.7696.hdf5",
+  "model_path": "/home/manudarmi/Desktop/vgg16_rvc_augmented_conv.06-1.7014.hdf5",
   "csv_path": "/train.age_detected.csv",
   "batch_size": 256,
   "normalization_function_name": "vgg16_normalization",
@@ -13,7 +13,7 @@
   "verbose": true,
   "preprocessing": {
     "enabled": true,
-    "preprocessing_function_name": "standard_preprocessing_function"
+    "preprocessing_function_name": "demo_preprocessing"
   },
   "build": {
     "build_model_dir": "/models/",
@@ -42,12 +42,12 @@
     "num_test_samples": 100000,
     "save_predictions": {
       "enabled": true,
-      "save_predictions_path": "C:\Users\manud\Desktop\demo\"
+      "save_predictions_path": "/home/manudarmi/Desktop/demo/"
     },
     "age_intervals_evaluation": {
       "enabled": true,
       "age_interval_width": 10
     },
-    "predict_function_name": "rvc_predict"
+    "predict_function_name": "rvc_predict_function"
   }
 }

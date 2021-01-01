@@ -7,7 +7,7 @@ from augmentations import augmentation
 
 class DataGenerator(keras.utils.Sequence):
     def __init__(self, data_paths, labels, input_shape, batch_size=32, preprocessing_function=None,
-                 normalization_function=None, shuffle=True, random_seed=42, augmenter=None, return_rect=False):
+                 normalization_function=None, shuffle=True, random_seed=42, augmenter=None):
         """
         If labels is None it means that the generator has to be used in predict mode where the labels are not required
         if augmentation is not desired an instance of NullAugmentation should be passed
@@ -30,7 +30,6 @@ class DataGenerator(keras.utils.Sequence):
             augmenter = augmentation.NullAugmentation()
 
         self.augmenter = augmenter
-        self.return_rect = return_rect
         self.indices = np.arange(len(self.data_paths))
         # this is called at initialization in order to create the indices for the subsequent data generation
         self.on_epoch_end()
@@ -49,13 +48,13 @@ class DataGenerator(keras.utils.Sequence):
         batch_x = np.array([self.augmenter(cv2.imread(self.data_paths[i])) for i in indices])
 
         if self.preprocessing_function is not None:
-            batch_x, rect = self.preprocessing_function(batch_x, self.input_shape, self.return_rect)
+            batch_x = self.preprocessing_function(batch_x, self.input_shape)
 
         if self.normalization_function is not None:
             batch_x = self.normalization_function(batch_x)
 
         if self.labels is None:
-            return batch_x, rect
+            return batch_x
 
         batch_y = np.array([self.labels[i] for i in indices])
 

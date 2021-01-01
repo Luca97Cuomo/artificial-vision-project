@@ -1,11 +1,33 @@
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 import cv2
 import argparse
 from pathlib import Path
 import configuration
 import preprocessing_functions
 from models import NORMALIZATION_FUNCTIONS
-from models import PREDICT_FUNCTIONS
+from models import CUSTOM_OBJECTS
+import numpy as np
+import tensorflow as tf
+
+
+def regression_predict_demo(model, x):
+
+    y = model.predict(x, verbose=1)
+
+    # do not round to int
+    return np.reshape(y, -1)
+
+
+def rvc_predict_demo(model, x):
+
+    y = model.predict(x, verbose=1)
+
+    y_processed = tf.map_fn(lambda element: tf.math.argmax(element), y, dtype=tf.dtypes.int64)
+
+    return y_processed.numpy()
+
+
+PREDICT_FUNCTIONS_DEMO = {"regression_predict_function": regression_predict_demo, "rvc_predict_function": rvc_predict_demo}
 
 
 def estimate_age(conf_path):
@@ -33,15 +55,13 @@ def estimate_age(conf_path):
         save_predictions_path = evaluate_conf["save_predictions"]["save_predictions_path"]
 
     predict_function_name = evaluate_conf["predict_function_name"]
-    predict_function = PREDICT_FUNCTIONS[predict_function_name]
+    predict_function = PREDICT_FUNCTIONS_DEMO[predict_function_name]
 
-    model = load_model(model_path, compile=False)
+    model = load_model(model_path, custom_objects=CUSTOM_OBJECTS)
 
     print(f"model input shape: {input_shape}")
 
     cam = cv2.VideoCapture(0)
-
-    cv2.namedWindow("Age estimator")
 
     img_counter = 0
 
@@ -52,15 +72,18 @@ def estimate_age(conf_path):
             break
 
         if frame is not None:
-            y_pred, box = predict_function(model, [frame], input_shape=input_shape, batch_size=1,
-                                           preprocessing_function=preprocessing_function,
-                                           normalization_function=normalization_function,
-                                           return_rect=True)
-            print(f"box= {box}")
-
-            print(f"age = {y_pred}")
-
-            # cv2.putText(frame, str(age), (), font, fontScale=1, color=(0, 255, 0), thickness=2)
+            
+            x, box = preprocessing_function(frame, input_shape)
+            x = normalization_function(x)
+            y_pred = predict_function(model, x)
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            
+            if box is not None:
+                start_point = (box[0], box[1])
+                end_point = (box[0] + box[2], box[1] + box[3])
+                frame = cv2.rectangle(frame, start_point, end_point, color=(0, 255, 0), thickness=2)
+                cv2.putText(frame, str(y_pred), start_point, font, fontScale=1, color=(0, 255, 0), thickness=2)
+            
             cv2.imshow("Age estimator", frame)
             k = cv2.waitKey(1)
             if k % 256 == 27:
@@ -86,7 +109,7 @@ def main():
                         required=True)
     args = parser.parse_args()
 
-    conf = Path(args.configuarion_path).resolve()
+    conf = Path(args.configuration_path).resolve()
     estimate_age(str(conf))
 
 
