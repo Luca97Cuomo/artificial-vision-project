@@ -2,7 +2,6 @@ import typing
 import numpy as np
 from numpy.random import default_rng
 from keras.layers import Dense, Concatenate
-from random_bins.bins_combiner_layer import BinsCombinerLayer
 
 
 class Binner:
@@ -43,16 +42,11 @@ class Binner:
         return new_labels
 
     def architecture(self, output_layer):
-        regression_output = BinsCombinerLayer(self.centroid_sets, name='regression')
-
         outputs = []
         for _ in range(self.n_interval_sets):
             classifier = Dense(self.n_intervals, activation='softmax', kernel_initializer='glorot_normal')(output_layer)
             outputs.append(classifier)
-        concatenated_classifications = Concatenate()(outputs)
-        regression_output = regression_output(concatenated_classifications)
-        outputs.append(regression_output)
         return (outputs,
-                ['categorical_crossentropy'] * self.n_interval_sets + [None],
-                [[]] * self.n_interval_sets + [['mae']],
+                ['categorical_crossentropy'] * self.n_interval_sets,
+                [[]] * self.n_interval_sets,
                 'val_loss')
