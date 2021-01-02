@@ -38,7 +38,7 @@
     "save_best_only": false
   },
   "evaluate": {
-    "test_set_path": "/content/test_set_resized",
+    "test_set_path": "C:\\Users\\manud\\Desktop\\test_images\\",
     "num_test_samples": 100000,
     "save_predictions": {
       "enabled": true,
