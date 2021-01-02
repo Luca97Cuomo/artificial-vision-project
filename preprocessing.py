@@ -60,7 +60,8 @@ def detect_from_image(image, detector):
 
     return cropped_image
 
-def detect_face_box_from_image(image, detector):
+
+def detect_relevant_face_box_from_image(image, detector):
     height, width, channels = image.shape
     faces = detector.detect(image)
     if len(faces) <= 0:
@@ -71,6 +72,16 @@ def detect_face_box_from_image(image, detector):
     cropped_image = cut(image, rect)
 
     return cropped_image, rect
+
+
+def detect_faces(image, detector):
+    faces = detector.detect(image)
+    if len(faces) == 0:
+        return None, None
+    for face in faces:
+        rect = enclosing_square(face['roi'])
+        cropped_image = cut(image, rect)
+        yield cropped_image, rect
 
 
 def detect_from_path(image_path, detector):

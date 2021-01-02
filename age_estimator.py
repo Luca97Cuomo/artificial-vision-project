@@ -73,16 +73,17 @@ def estimate_age(conf_path):
 
         if frame is not None:
             
-            x, box = preprocessing_function(frame, input_shape)
-            x = normalization_function(x)
-            y_pred = predict_function(model, x)
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            
-            if box is not None:
-                start_point = (box[0], box[1])
-                end_point = (box[0] + box[2], box[1] + box[3])
-                frame = cv2.rectangle(frame, start_point, end_point, color=(0, 255, 0), thickness=2)
-                cv2.putText(frame, str(y_pred), start_point, font, fontScale=1, color=(0, 255, 0), thickness=2)
+            cropped_faces, boxes = preprocessing_function(frame, input_shape)
+            if cropped_faces is not None and boxes is not None:
+                cropped_faces = normalization_function(cropped_faces)
+                y_pred = predict_function(model, cropped_faces)
+                font = cv2.FONT_HERSHEY_SIMPLEX
+
+                for prediction, box in zip(y_pred, boxes):
+                    start_point = (box[0], box[1])
+                    end_point = (box[0] + box[2], box[1] + box[3])
+                    frame = cv2.rectangle(frame, start_point, end_point, color=(0, 255, 0), thickness=2)
+                    cv2.putText(frame, str(prediction), start_point, font, fontScale=1, color=(0, 255, 0), thickness=2)
             
             cv2.imshow("Age estimator", frame)
             k = cv2.waitKey(1)
@@ -110,6 +111,7 @@ def main():
     args = parser.parse_args()
 
     conf = Path(args.configuration_path).resolve()
+    cv2.ocl.setUseOpenCL(False)
     estimate_age(str(conf))
 
 

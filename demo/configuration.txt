@@ -1,7 +1,7 @@
 {
   "output_type": "rvc",
   "model_name": "vgg16_regression_model",
-  "model_path": "/home/manudarmi/Desktop/vgg16_rvc_augmented_conv.06-1.7014.hdf5",
+  "model_path": "C:\\Users\\david\\Downloads\\vgg16_rvc_augmented_conv.14-1.6705.hdf5",
   "csv_path": "/train.age_detected.csv",
   "batch_size": 256,
   "normalization_function_name": "vgg16_normalization",
@@ -42,7 +42,7 @@
     "num_test_samples": 100000,
     "save_predictions": {
       "enabled": true,
-      "save_predictions_path": "/home/manudarmi/Desktop/demo/"
+      "save_predictions_path": "."
     },
     "age_intervals_evaluation": {
       "enabled": true,
