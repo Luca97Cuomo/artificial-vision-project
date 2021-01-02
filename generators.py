@@ -58,6 +58,8 @@ class DataGenerator(keras.utils.Sequence):
         else:
             batch_y = [[self.labels[i][j] for j in indices] for i in range(self.n_outputs)]
 
+        print(len(batch_y), len(batch_x))
+
         return batch_x, batch_y
 
     def on_epoch_end(self):
