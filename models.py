@@ -46,33 +46,24 @@ def random_bins_classification_predict(model, x, input_shape, batch_size=32, pre
 
     y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
 
-    # y = [[classifiers], [], []] # for each sample I have a classifiers
-    # classifiers = [[output], [], []] # classifiers is a list of N_CLASSIFIERS (specified in the Binner class)
-    # output = [4, 6, 7, 8 ,9, ...] # this is the output for the one classifier )
-
-    # y_pred = [23, 5, 12, 19, ...]
-
     means = BINNER.compute_means()
 
     y_pred = []
 
     print(f"input shape: {np.array(y).shape}")
 
-    for i in range(len(y)):
-        curr_sample = y[i]
+    # the shape of y is [n_classifiers, n_samples, n_intervals]
+    # so the n_samples is the second parameter, not the first.
+
+    if len(means) != len(y):
+        raise Exception("Unexpected output size")
+
+    for i in range(len(y[0])):
         sum = 0
-
-        print(f"len means: {len(means)}")
-        print(f"len curr sample: {len(curr_sample)}")
-        print(f"means: {means}")
-        print(f"curr sample: {curr_sample}")
-
-        if len(means) != len(curr_sample):
-            raise Exception("Unexpected output size")
 
         # len(means) represents the number of classifiers
         for j in range(len(means)):
-            output = curr_sample[j]
+            output = y[j][i]
             mean = means[j]
 
             index = np.argmax(output)
