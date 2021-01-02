@@ -188,10 +188,12 @@ def rvc_mae(y_true, y_pred):
 
 
 def bins_classification_loss_facade(y_true, y_pred):
+    print("bins_classification_loss_facade called")
     return y_true - y_pred
 
 
 def bins_classification_mae_facade(y_true, y_pred):
+    print("bins_classification_mae_facade called")
     return y_true - y_pred
 
 
@@ -204,6 +206,7 @@ def bins_classification_mae(y_true, y_pred):
 
 
 def bins_classification_loss_train(y_true, y_pred):
+    print("bins_classification_loss_train called")
     # [classes, samples]
     binned_labels = BINNER.bin_labels(from_tensor_to_numpy(y_true))
 
@@ -220,6 +223,7 @@ def bins_classification_loss_train(y_true, y_pred):
 
 
 def bins_classification_mae_train(y_true, y_pred):
+    print("bins_classification_mae_train called")
     # [classes, samples]
 
     y_pred_regression = from_random_bins_classification_to_regression(from_tensor_to_numpy(y_pred), BINNER)
