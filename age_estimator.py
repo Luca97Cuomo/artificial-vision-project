@@ -8,6 +8,7 @@ from models import NORMALIZATION_FUNCTIONS
 from models import CUSTOM_OBJECTS
 import numpy as np
 import tensorflow as tf
+import time
 
 
 def regression_predict_demo(model, x):
@@ -64,9 +65,11 @@ def estimate_age(conf_path):
     cam = cv2.VideoCapture(0)
 
     img_counter = 0
+    font = cv2.FONT_HERSHEY_SIMPLEX
 
     while True:
         ret, frame = cam.read()
+        pre = time.perf_counter()
         if not ret:
             print("Failed capturing a frame")
             break
@@ -77,14 +80,18 @@ def estimate_age(conf_path):
             if cropped_faces is not None and boxes is not None:
                 cropped_faces = normalization_function(cropped_faces)
                 y_pred = predict_function(model, cropped_faces)
-                font = cv2.FONT_HERSHEY_SIMPLEX
 
                 for prediction, box in zip(y_pred, boxes):
                     start_point = (box[0], box[1])
                     end_point = (box[0] + box[2], box[1] + box[3])
                     frame = cv2.rectangle(frame, start_point, end_point, color=(0, 255, 0), thickness=2)
                     cv2.putText(frame, str(prediction), start_point, font, fontScale=1, color=(0, 255, 0), thickness=2)
-            
+
+            post = time.perf_counter()
+            loop_time = post - pre
+            fps = int(round(1 / loop_time))
+            cv2.putText(frame, f"FPS: {fps}", (15, 25), font, fontScale=1, color=(255, 255, 255), thickness=2)
+
             cv2.imshow("Age estimator", frame)
             k = cv2.waitKey(1)
             if k % 256 == 27:

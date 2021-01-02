@@ -3,13 +3,13 @@ from utilities.face_detector import FaceDetector
 import cv2
 import numpy as np
 
+detector = FaceDetector()
+
 
 def standard_preprocessing(x, input_shape):
     # preprocessing pipeline
     # 1) face detection
     # 2) resize
-
-    detector = FaceDetector()
 
     preprocessed_images = []
     rect = None
@@ -26,9 +26,6 @@ def standard_preprocessing(x, input_shape):
 
     numpy_preprocessed_images = np.array(preprocessed_images)
     return numpy_preprocessed_images
-
-
-detector = FaceDetector()
 
 
 def demo_preprocessing(x, input_shape):
