@@ -39,10 +39,6 @@ class DataGenerator(keras.utils.Sequence):
         return int(np.ceil(len(self.data_paths) / self.batch_size))
 
     def __getitem__(self, index):
-        # only for bins classification model
-        models.BINS_CLASSIFICATION_MAE_FUNCTION = models.bins_classification_mae_train
-        models.BINS_CLASSIFICATION_LOSS_FUNCTION = models.bins_classification_loss_train
-
         """Generates one batch of data."""
         indices = self.indices[index * self.batch_size:(index + 1) * self.batch_size]
 
