@@ -58,8 +58,8 @@ class DataGenerator(keras.utils.Sequence):
         else:
             batch_y = [[self.labels[i][j] for j in indices] for i in range(self.n_outputs)]
 
-        print(f"len batch_y {len(batch_y)}")
-        print(f"len batch_x {len(batch_x)}")
+        print(f"len batch_y {np.array(batch_y).shape)}")
+        print(f"len batch_x {batch_x.shape}")
 
         return batch_x, batch_y
 
