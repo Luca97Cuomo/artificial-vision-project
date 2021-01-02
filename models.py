@@ -188,11 +188,11 @@ def rvc_mae(y_true, y_pred):
 
 
 def bins_classification_loss_facade(y_true, y_pred):
-    pass
+    return y_true - y_pred
 
 
 def bins_classification_mae_facade(y_true, y_pred):
-    pass
+    return y_true - y_pred
 
 
 def bins_classification_loss(y_true, y_pred):
