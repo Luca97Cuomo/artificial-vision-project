@@ -13,7 +13,7 @@ import time
 
 def regression_predict_demo(model, x):
 
-    y = model.predict(x, verbose=1)
+    y = int(round((model.predict(x, verbose=1))))
 
     # do not round to int
     return np.reshape(y, -1)
