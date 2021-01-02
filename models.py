@@ -5,7 +5,6 @@ import numpy as np
 import tensorflow as tf
 import utils
 
-
 NUMBER_OF_RVC_CLASSES = 101
 
 
@@ -25,7 +24,7 @@ def regression_predict(model, x, input_shape, batch_size=32, preprocessing_funct
 def rvc_predict(model, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
     data_generator = DataGenerator(x, labels=None, input_shape=input_shape, batch_size=batch_size,
                                    preprocessing_function=preprocessing_function,
-                                   normalization_function=normalization_function)
+                                   normalization_function=normalization_function,)
 
     y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
 
@@ -96,7 +95,8 @@ def regression_output_function(last_layer):
 
 
 def rvc_output_function(last_layer):
-    output = Dense(NUMBER_OF_RVC_CLASSES, activation='softmax', kernel_initializer='glorot_normal', name='rvc')(last_layer)
+    output = Dense(NUMBER_OF_RVC_CLASSES, activation='softmax', kernel_initializer='glorot_normal', name='rvc')(
+        last_layer)
 
     loss = "categorical_crossentropy"
 
@@ -109,7 +109,8 @@ def rvc_mae(y_true, y_pred):
     y_true = tf.map_fn(lambda element: tf.math.argmax(element), y_true, dtype=tf.dtypes.int64)
     y_pred = tf.map_fn(lambda element: tf.math.argmax(element), y_pred, dtype=tf.dtypes.int64)
 
-    return tf.keras.losses.MAE(tf.dtypes.cast(y_true, dtype=tf.dtypes.float64), tf.dtypes.cast(y_pred, dtype=tf.dtypes.float64))
+    return tf.keras.losses.MAE(tf.dtypes.cast(y_true, dtype=tf.dtypes.float64),
+                               tf.dtypes.cast(y_pred, dtype=tf.dtypes.float64))
 
 
 def standard_dense_layer_structure(backbone):

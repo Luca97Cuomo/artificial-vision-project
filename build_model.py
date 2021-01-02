@@ -16,9 +16,6 @@ from pathlib import Path
 import models
 import configuration
 
-# width, height, channels
-INPUT_SHAPE = 224, 224, 3
-
 
 def build_structure(input, backend, dense_layer_structure):
     backend_out = backend(input)
@@ -37,6 +34,7 @@ def build_model(configuration_file_path):
     backend_name = backend["name"]
     unlock_layers = backend["unlock_layers"]
 
+    input_shape = conf["input_shape"]
     output_type = conf["output_type"]
     output_dir = build["build_model_dir"]
     learning_rate = build["build_learning_rate"]
@@ -56,7 +54,7 @@ def build_model(configuration_file_path):
     if dense_layer_structure_name not in models.AVAILABLE_FINAL_DENSE_STRUCTURE:
         raise Exception("The dense layer structure is not available")
 
-    backend = VGGFace(model=backend_name, include_top=False, input_shape=INPUT_SHAPE, weights='vggface')
+    backend = VGGFace(model=backend_name, include_top=False, input_shape=input_shape, weights='vggface')
 
     if unlock_layers == "none":
         for layer in backend.layers:
@@ -68,7 +66,7 @@ def build_model(configuration_file_path):
         for layer in backend.layers[:-unlock_layers]:
             layer.trainable = False
 
-    model_input = Input(shape=INPUT_SHAPE)
+    model_input = Input(shape=input_shape)
 
     optimizer = optimizers.Adam(lr=learning_rate)  # lr is an hyperparameter
 
@@ -87,13 +85,11 @@ def build_model(configuration_file_path):
     model.save(os.path.join(model_dir, model_name + "_model"))
 
     # Saving metadata
-    metadata = {}
-
-    metadata["monitored_quantity"] = val_metric_name
-    metadata["normalization_function_name"] = normalization_function_name
-    metadata["predict_function_name"] = predict_function_name
-    metadata["input_shape"] = INPUT_SHAPE
-    metadata["output_type"] = output_type
+    metadata = {"monitored_quantity": val_metric_name,
+                "normalization_function_name": normalization_function_name,
+                "predict_function_name": predict_function_name,
+                "input_shape": input_shape,
+                "output_type": output_type}
 
     configuration.save_configuration(conf["metadata_path"], metadata)
 
@@ -102,7 +98,6 @@ def build_model(configuration_file_path):
         print("Backend structure:\n")
         for layer in backend.layers:
             print(f"{layer.name}: trainable {layer.trainable}")
-
 
 
 def main():
