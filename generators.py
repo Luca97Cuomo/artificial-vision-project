@@ -54,12 +54,9 @@ class DataGenerator(keras.utils.Sequence):
             return batch_x
 
         if self.n_outputs == 1:
-            batch_y = [self.labels[i] for i in indices]
+            batch_y = np.array([self.labels[i] for i in indices])
         else:
-            batch_y = [[self.labels[i][j] for j in indices] for i in range(self.n_outputs)]
-
-        print(f"len batch_y {np.array(batch_y).shape}")
-        print(f"len batch_x {batch_x.shape}")
+            batch_y = np.array([[self.labels[i][j] for j in indices] for i in range(self.n_outputs)])
 
         return batch_x, batch_y
 

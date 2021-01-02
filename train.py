@@ -61,9 +61,6 @@ def train_model(configuration_file_path):
 
     model = keras.models.load_model(model_path, custom_objects=models.CUSTOM_OBJECTS)
 
-    if verbose:
-        model.summary()
-
     if learning_rate is not None:
         if verbose:
             print("Changing the learning rate")
