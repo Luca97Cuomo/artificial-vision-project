@@ -1,10 +1,10 @@
 from utils import *
 from preprocessing import load_labels
-import json
 import keras
 import numpy as np
 import preprocessing_functions
 import argparse
+from pathlib import Path
 
 import configuration
 from models import NORMALIZATION_FUNCTIONS
@@ -121,6 +121,9 @@ def evaluate(y, y_pred, verbose=True):
 def evaluate_model(configuration_file_path):
     conf = configuration.read_configuration(configuration_file_path)
 
+    metadata_path = conf["metadata_path"]
+    metadata = configuration.read_configuration(metadata_path)
+
     model_path = conf["model_path"]
 
     preprocessing = conf["preprocessing"]
@@ -139,12 +142,12 @@ def evaluate_model(configuration_file_path):
     save_predictions = save_predictions_dict["enabled"]
     save_predictions_path = save_predictions_dict["save_predictions_path"]
 
-    predict_function_name = eval_dict["predict_function_name"]
+    predict_function_name = metadata["predict_function_name"]
 
-    normalization_function_name = conf["normalization_function_name"]
+    normalization_function_name = metadata["normalization_function_name"]
 
     csv_path = conf["csv_path"]
-    input_shape = conf["input_shape"]
+    input_shape = metadata["input_shape"]
 
     age_intervals_evaluation = eval_dict["age_intervals_evaluation"]
 
@@ -181,9 +184,9 @@ def evaluate_model(configuration_file_path):
         print(f"Saving predictions to {save_predictions_path}")
         with open(save_predictions_path, 'w') as f:
             for i in range(len(x_test)):
-                x_splitted = x_test[i].split("/")
-                identity = x_splitted[-2]
-                image = x_splitted[-1]
+                image_path = Path(x_test[i]).resolve()
+                image = image_path.name
+                identity = image_path.parent
                 path = identity + "/" + image
                 f.write(f'{path},{int(round(y_pred[i]))},{int(round(y_test[i]))}\r\n')
         print("Predictions saved")

@@ -44,6 +44,9 @@ def prepare_data_for_generator(data_path, labels_dict, num_samples):
     return image_paths, labels
 
 
+
+
+
 def read_dataset_h5(dataset_path, verbose):
     f = h5py.File(dataset_path, 'r')
 
