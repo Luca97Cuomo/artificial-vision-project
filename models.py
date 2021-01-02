@@ -56,7 +56,7 @@ def random_bins_classification_predict(model, x, input_shape, batch_size=32, pre
 
     y_pred = []
 
-    print(no.array(y).shape)
+    print(f"input shape: {np.array(y).shape}")
 
     for i in range(len(y)):
         curr_sample = y[i]
