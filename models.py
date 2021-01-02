@@ -37,6 +37,11 @@ def rvc_predict(model, x, input_shape, batch_size=32, preprocessing_function=Non
         return y_processed.eval()
 
 
+def random_bins_classification_predict(model, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
+    return 0
+
+
+
 def normalize_input_rcmalli(x, version, data_format=None):
     x_temp = x.astype(dtype="float32")
     if data_format is None:
