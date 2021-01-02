@@ -15,10 +15,6 @@ import configuration
 
 
 def train_model(configuration_file_path):
-    # only for bins classification model
-    models.BINS_CLASSIFICATION_MAE_FUNCTION = models.bins_classification_mae_train
-    models.BINS_CLASSIFICATION_LOSS_FUNCTION = models.bins_classification_loss_train
-
     conf = configuration.read_configuration(configuration_file_path)
 
     metadata_path = conf["metadata_path"]
@@ -130,6 +126,9 @@ def train_model(configuration_file_path):
         save_weights_only=False,
         save_best_only=save_best_only, monitor=monitored_quantity, mode='auto')
 
+    # only for bins classification model
+    models.BINS_CLASSIFICATION_MAE_FUNCTION = models.bins_classification_mae_train
+    models.BINS_CLASSIFICATION_LOSS_FUNCTION = models.bins_classification_loss_train
     history = model.fit(training_data_generator, validation_data=validation_data_generator,
                         initial_epoch=initial_epoch,
                         epochs=training_epochs,
