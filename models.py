@@ -71,7 +71,8 @@ def random_bins_classification_predict(model, x, input_shape, batch_size=32, pre
             index = np.argmax(output)
             max_prob = output[index]
 
-            age = mean[index] * max_prob
+            # age = mean[index] * max_prob
+            age = mean[index] # test purposes
 
             sum += age
 
