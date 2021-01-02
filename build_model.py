@@ -9,9 +9,11 @@ import os
 from keras import optimizers
 from keras.models import Model
 from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, MaxPooling2D, GlobalAveragePooling2D
-from keras_vggface.vggface import VGGFace
+import json
 from pathlib import Path
 import tensorflow as tf
+if tf.__version__[0] != "2":
+    from keras_vggface.vggface import VGGFace
 import models
 import configuration
 
@@ -59,7 +61,7 @@ def build_model(configuration_file_path):
     if backend_name == "vgg19":
         backend = tf.keras.applications.VGG19(include_top=False, weights="imagenet")
     else:
-        backend = VGGFace(model=backend_name, include_top=False, input_shape=INPUT_SHAPE, weights='vggface')
+        backend = VGGFace(model=backend_name, include_top=False, input_shape=input_shape, weights='vggface')
 
     if unlock_layers == "none":
         for layer in backend.layers:
