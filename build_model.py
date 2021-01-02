@@ -12,7 +12,7 @@ from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, Ma
 from keras_vggface.vggface import VGGFace
 import json
 from pathlib import Path
-
+import tensorflow as tf
 import models
 import configuration
 
@@ -45,6 +45,9 @@ def build_model(configuration_file_path):
 
     verbose = conf["verbose"]
 
+    if backend_name not in models.AVAILABLE_BACKENDS:
+        raise Exception("The backend is not available")
+
     normalization_function_name = backend_name + "_normalization"
     if normalization_function_name not in models.NORMALIZATION_FUNCTIONS:
         raise Exception("The normalization function is not available")
@@ -56,7 +59,10 @@ def build_model(configuration_file_path):
     if dense_layer_structure_name not in models.AVAILABLE_FINAL_DENSE_STRUCTURE:
         raise Exception("The dense layer structure is not available")
 
-    backend = VGGFace(model=backend_name, include_top=False, input_shape=INPUT_SHAPE, weights='vggface')
+    if backend_name == "vgg19":
+        backend = tf.keras.applications.VGG19(include_top=False, weights="imagenet")
+    else:
+        backend = VGGFace(model=backend_name, include_top=False, input_shape=INPUT_SHAPE, weights='vggface')
 
     if unlock_layers == "none":
         for layer in backend.layers:
@@ -106,7 +112,8 @@ def build_model(configuration_file_path):
 
 def main():
     parser = argparse.ArgumentParser(description='Build model')
-    parser.add_argument('-c', '--configuration_file_path', type=str, help='The path of the configuration file', required=True)
+    parser.add_argument('-c', '--configuration_file_path', type=str, help='The path of the configuration file',
+                        required=True)
 
     args = parser.parse_args()
 

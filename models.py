@@ -11,7 +11,7 @@ NUMBER_OF_RVC_CLASSES = 101
 def regression_predict(model, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
     data_generator = DataGenerator(x, labels=None, input_shape=input_shape, batch_size=batch_size,
                                    preprocessing_function=preprocessing_function,
-                                   normalization_function=normalization_function, return_rect=return_rect)
+                                   normalization_function=normalization_function)
 
     y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
 
@@ -24,7 +24,7 @@ def regression_predict(model, x, input_shape, batch_size=32, preprocessing_funct
 def rvc_predict(model, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
     data_generator = DataGenerator(x, labels=None, input_shape=input_shape, batch_size=batch_size,
                                    preprocessing_function=preprocessing_function,
-                                   normalization_function=normalization_function,)
+                                   normalization_function=normalization_function)
 
     y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
 
@@ -77,6 +77,11 @@ def vgg16_normalization(dataset, **kwargs):
 
 def resnet50_senet50_normalization(dataset, **kwargs):
     return normalize_input_rcmalli(dataset, 2)
+
+
+def vgg19_normalization(dataset):
+    dataset = dataset.astype(dtype="float32")
+    return tf.keras.applications.vgg19.preprocess_input(dataset)
 
 
 def regression_output_function(last_layer):
@@ -136,7 +141,7 @@ def vgg16_dense_layer_structure(backbone):
     return x
 
 
-AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50"]
+AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50", "vgg19"]
 AVAILABLE_FINAL_DENSE_STRUCTURE = {'standard_dense_layer_structure': standard_dense_layer_structure,
                                    'vgg16_dense_layer_structure': vgg16_dense_layer_structure}
 AVAILABLE_OUTPUT_TYPES = {"regression": regression_output_function,
@@ -144,7 +149,8 @@ AVAILABLE_OUTPUT_TYPES = {"regression": regression_output_function,
 
 NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization,
                            "resnet50_normalization": resnet50_senet50_normalization,
-                           "senet50_normalization": resnet50_senet50_normalization}
+                           "senet50_normalization": resnet50_senet50_normalization,
+                           "vgg19_normalization": vgg19_normalization}
 PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict, "rvc_predict_function": rvc_predict}
 
 CUSTOM_OBJECTS = {
