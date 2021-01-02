@@ -60,6 +60,11 @@ def random_bins_classification_predict(model, x, input_shape, batch_size=32, pre
         curr_sample = y[i]
         sum = 0
 
+        print(f"len means: {len(means)}")
+        print(f"len curr sample: {len(curr_sample)}")
+        print(f"means: {means}")
+        print(f"curr sample: {curr_sample}")
+
         if len(means) != len(curr_sample):
             raise Exception("Unexpected output size")
 
