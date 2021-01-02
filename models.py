@@ -46,7 +46,19 @@ def random_bins_classification_predict(model, x, input_shape, batch_size=32, pre
 
     y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
 
-    means = BINNER.compute_means()
+    if len(x) != len(y[0]):
+        raise Exception("Unexpected number of predictions")
+
+    return from_random_bins_classification_to_regression(y, BINNER)
+
+
+def from_random_bins_classification_to_regression(y, binner):
+    """
+    :param y:       list or numpy array
+    :param binner:
+    :return:        numpy array
+    """
+    means = binner.compute_means()
 
     y_pred = []
 
@@ -55,9 +67,6 @@ def random_bins_classification_predict(model, x, input_shape, batch_size=32, pre
 
     if len(means) != len(y):
         raise Exception("Unexpected number of classifiers")
-
-    if len(x) != len(y[0]):
-        raise Exception("Unexpected number of predictions")
 
     # for each sample
     for i in range(len(y[0])):
@@ -72,7 +81,7 @@ def random_bins_classification_predict(model, x, input_shape, batch_size=32, pre
             max_prob = output[index]
 
             # age = mean[index] * max_prob
-            age = mean[index] # test purposes
+            age = mean[index]
 
             sum += age
 
@@ -158,12 +167,49 @@ def rvc_output_function(last_layer):
     return output, loss, metrics, "val_rvc_mae"
 
 
+def bins_output_function(last_layer):
+    output = BINNER.architecture(last_layer)
+
+    print(f"output shape{output.shape}")
+
+    loss = bins_classification_loss
+
+    metrics = [bins_classification_mae]
+
+    return output, loss, metrics, "val_bins_classification_mae"
+
+
 def rvc_mae(y_true, y_pred):
     y_true = tf.map_fn(lambda element: tf.math.argmax(element), y_true, dtype=tf.dtypes.int64)
     y_pred = tf.map_fn(lambda element: tf.math.argmax(element), y_pred, dtype=tf.dtypes.int64)
 
     return tf.keras.losses.MAE(tf.dtypes.cast(y_true, dtype=tf.dtypes.float64),
                                tf.dtypes.cast(y_pred, dtype=tf.dtypes.float64))
+
+
+def bins_classification_mae(y_true, y_pred):
+    # [classes, samples]
+
+    y_pred_regression = from_random_bins_classification_to_regression(from_tensor_to_numpy(y_pred), BINNER)
+
+    return tf.keras.losses.MAE(tf.dtypes.cast(y_true, dtype=tf.dtypes.float64),
+                               tf.convert_to_tensor(y_pred_regression, dtype=tf.dtypes.float64))
+
+
+def bins_classification_loss(y_true, y_pred):
+    # [classes, samples]
+    binned_labels = BINNER.bin_labels(from_tensor_to_numpy(y_true))
+
+    if BINNER.n_interval_sets != len(binned_labels):
+        raise Exception("n_interval_sets != len(binned_labels)")
+
+    cce_function = tf.keras.losses.CategoricalCrossentropy()
+
+    sum = cce_function(binned_labels[0], from_tensor_to_numpy(y_pred[0]))
+    for i in range(1, BINNER.n_interval_sets):
+        sum += cce_function(binned_labels[i], from_tensor_to_numpy(y_pred[i]))
+
+    return sum
 
 
 def standard_dense_layer_structure(backbone):
@@ -189,6 +235,11 @@ def vgg16_dense_layer_structure(backbone):
     return x
 
 
+def from_tensor_to_numpy(y):
+    with tf.Session().as_default():
+        return y.eval()
+
+
 AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50", "vgg19"]
 
 
@@ -198,7 +249,7 @@ AVAILABLE_FINAL_DENSE_STRUCTURE = {'standard_dense_layer_structure': standard_de
 
 AVAILABLE_OUTPUT_TYPES = {"regression": regression_output_function,
                           'rvc': rvc_output_function,
-                          'random_bins_classification': BINNER.architecture}
+                          'random_bins_classification': bins_output_function}
 
 NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization,
                            "resnet50_normalization": resnet50_senet50_normalization,
@@ -213,5 +264,8 @@ PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict,
 
 CUSTOM_OBJECTS = {
     "rvc_mae": rvc_mae,
-    'BinsCombinerLayer': bins_combiner_layer.BinsCombinerLayer
+    'BinsCombinerLayer': bins_combiner_layer.BinsCombinerLayer,
+    "bins_classification_loss": bins_classification_loss,
+    "bins_classification_mae": bins_classification_mae
+
 }
