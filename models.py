@@ -11,7 +11,7 @@ NUMBER_OF_RVC_CLASSES = 101
 def regression_predict(model, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
     data_generator = DataGenerator(x, labels=None, input_shape=input_shape, batch_size=batch_size,
                                    preprocessing_function=preprocessing_function,
-                                   normalization_function=normalization_function, return_rect=return_rect)
+                                   normalization_function=normalization_function)
 
     y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
 
