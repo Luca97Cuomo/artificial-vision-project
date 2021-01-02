@@ -168,7 +168,7 @@ def rvc_output_function(last_layer):
 
 
 def bins_output_function(last_layer):
-    output = BINNER.architecture()
+    output = BINNER.architecture(last_layer)
 
     print(f"output shape{output.shape}")
 
