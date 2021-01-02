@@ -25,6 +25,7 @@ def rvc_predict_demo(model, x):
 
     y_processed = tf.map_fn(lambda element: tf.math.argmax(element), y, dtype=tf.dtypes.int64)
 
+    # You need tensorflow 2.x.x to run this function
     return y_processed.numpy()
 
 
