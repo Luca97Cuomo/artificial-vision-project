@@ -18,7 +18,7 @@ def regression_predict(model, x, input_shape, batch_size=32, preprocessing_funct
 
     y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
 
-    # y_pred = [[3, 7, 8], [5, 8, 9], [7, 6, 8]]
+    # y = [[3], [5], [8]]
 
     # do not round to int
     return np.reshape(y, -1)
@@ -31,6 +31,8 @@ def rvc_predict(model, x, input_shape, batch_size=32, preprocessing_function=Non
 
     y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
 
+    # y = [[3, 6, 8], [5, 7, 0], [8, 4, 7]]
+
     y_processed = tf.map_fn(lambda element: tf.math.argmax(element), y, dtype=tf.dtypes.int64)
 
     with tf.Session().as_default():
@@ -38,8 +40,45 @@ def rvc_predict(model, x, input_shape, batch_size=32, preprocessing_function=Non
 
 
 def random_bins_classification_predict(model, x, input_shape, batch_size=32, preprocessing_function=None, normalization_function=None):
-    return 0
+    data_generator = DataGenerator(x, labels=None, input_shape=input_shape, batch_size=batch_size,
+                                   preprocessing_function=preprocessing_function,
+                                   normalization_function=normalization_function)
 
+    y = model.predict(data_generator, verbose=1)  # predict should work as predict_generator if a generator is passed
+
+    # y = [[classifiers], [], []] # for each sample I have a classifiers
+    # classifiers = [[output], [], []] # classifiers is a list of N_CLASSIFIERS (specified in the Binner class)
+    # output = [4, 6, 7, 8 ,9, ...] # this is the output for the one classifier )
+
+    # y_pred = [23, 5, 12, 19, ...]
+
+    means = BINNER.compute_means()
+
+    y_pred = []
+
+    for i in range(len(y)):
+        curr_sample = y[i]
+        sum = 0
+
+        if len(means) != len(curr_sample):
+            raise Exception("Unexpected output size")
+
+        # len(means) represents the number of classifiers
+        for j in range(len(means)):
+            output = curr_sample[j]
+            mean = means[j]
+
+            index = np.argmax(output)
+            max_prob = output[index]
+
+            age = mean[index] * max_prob
+
+            sum += age
+
+        mean_age = sum / len(means)
+        y_pred.append(mean_age)
+
+    return np.array(y_pred)
 
 
 def normalize_input_rcmalli(x, version, data_format=None):
