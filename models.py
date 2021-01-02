@@ -207,7 +207,7 @@ NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization,
 
 PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict,
                      "rvc_predict_function": rvc_predict,
-                     "random_bins_classification_predict_function": regression_predict}
+                     "random_bins_classification_predict_function": random_bins_classification_predict}
 
 
 CUSTOM_OBJECTS = {
