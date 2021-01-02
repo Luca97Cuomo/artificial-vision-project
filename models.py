@@ -52,13 +52,13 @@ def random_bins_classification_predict(model, x, input_shape, batch_size=32, pre
     return from_random_bins_classification_to_regression(y, BINNER)
 
 
-def from_random_bins_classification_to_regression(y, binner_instance):
+def from_random_bins_classification_to_regression(y, binner):
     """
-    :param y:               list or numpy array
-    :param binner_instance:
-    :return:                numpy array
+    :param y:       list or numpy array
+    :param binner:
+    :return:        numpy array
     """
-    means = binner_instance.compute_means()
+    means = binner.compute_means()
 
     y_pred = []
 
@@ -187,23 +187,16 @@ def rvc_mae(y_true, y_pred):
                                tf.dtypes.cast(y_pred, dtype=tf.dtypes.float64))
 
 
-def bins_classification_loss_facade(y_true, y_pred):
-    pass
+def bins_classification_mae(y_true, y_pred):
+    # [classes, samples]
 
+    y_pred_regression = from_random_bins_classification_to_regression(from_tensor_to_numpy(y_pred), BINNER)
 
-def bins_classification_mae_facade(y_true, y_pred):
-    pass
+    return tf.keras.losses.MAE(tf.dtypes.cast(y_true, dtype=tf.dtypes.float64),
+                               tf.convert_to_tensor(y_pred_regression, dtype=tf.dtypes.float64))
 
 
 def bins_classification_loss(y_true, y_pred):
-    return BINS_CLASSIFICATION_LOSS_FUNCTION(y_true, y_pred)
-
-
-def bins_classification_mae(y_true, y_pred):
-    return BINS_CLASSIFICATION_MAE_FUNCTION(y_true, y_pred)
-
-
-def bins_classification_loss_train(y_true, y_pred):
     # [classes, samples]
     binned_labels = BINNER.bin_labels(from_tensor_to_numpy(y_true))
 
@@ -217,15 +210,6 @@ def bins_classification_loss_train(y_true, y_pred):
         sum += cce_function(binned_labels[i], from_tensor_to_numpy(y_pred[i]))
 
     return sum
-
-
-def bins_classification_mae_train(y_true, y_pred):
-    # [classes, samples]
-
-    y_pred_regression = from_random_bins_classification_to_regression(from_tensor_to_numpy(y_pred), BINNER)
-
-    return tf.keras.losses.MAE(tf.dtypes.cast(y_true, dtype=tf.dtypes.float64),
-                               tf.convert_to_tensor(y_pred_regression, dtype=tf.dtypes.float64))
 
 
 def standard_dense_layer_structure(backbone):
@@ -285,7 +269,3 @@ CUSTOM_OBJECTS = {
     "bins_classification_mae": bins_classification_mae
 
 }
-
-
-BINS_CLASSIFICATION_MAE_FUNCTION = bins_classification_mae_facade
-BINS_CLASSIFICATION_LOSS_FUNCTION = bins_classification_loss_facade
