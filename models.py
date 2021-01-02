@@ -134,8 +134,20 @@ def standard_dense_layer_structure(backbone):
     return x
 
 
+def vgg16_dense_layer_structure(backbone):
+    global_pool = GlobalAveragePooling2D()
+    x = global_pool(backbone)
+
+    # dense
+    x = Dense(4096, activation='relu', kernel_initializer='he_normal')(x)
+    x = Dense(4096, activation='relu', kernel_initializer='he_normal')(x)
+
+    return x
+
+
 AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50"]
-AVAILABLE_FINAL_DENSE_STRUCTURE = {'standard_dense_layer_structure': standard_dense_layer_structure}
+AVAILABLE_FINAL_DENSE_STRUCTURE = {'standard_dense_layer_structure': standard_dense_layer_structure,
+                                   'vgg16_dense_layer_structure': vgg16_dense_layer_structure}
 AVAILABLE_OUTPUT_TYPES = {"regression": regression_output_function,
                           'rvc': rvc_output_function}
 

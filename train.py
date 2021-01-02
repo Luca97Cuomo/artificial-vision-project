@@ -17,6 +17,9 @@ import configuration
 def train_model(configuration_file_path):
     conf = configuration.read_configuration(configuration_file_path)
 
+    metadata_path = conf["metadata_path"]
+    metadata = configuration.read_configuration(metadata_path)
+
     csv_path = conf["csv_path"]
 
     train = conf["train"]
@@ -34,12 +37,12 @@ def train_model(configuration_file_path):
     batch_size = conf["batch_size"]
     initial_epoch = train["initial_epoch"]
 
-    monitored_quantity = train["monitored_quantity"]
-    normalization_function_name = conf["normalization_function_name"]
+    monitored_quantity = metadata["monitored_quantity"]
+    normalization_function_name = metadata["normalization_function_name"]
     training_epochs = train["epochs"]
 
-    input_shape = conf["input_shape"]
-    output_type = conf["output_type"]
+    input_shape = metadata["input_shape"]
+    output_type = metadata["output_type"]
 
     augmentations = train["augmentations"]
 
