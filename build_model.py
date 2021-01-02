@@ -12,12 +12,9 @@ from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, Ma
 from keras_vggface.vggface import VGGFace
 import json
 from pathlib import Path
-
+import tensorflow as tf
 import models
 import configuration
-
-# width, height, channels
-INPUT_SHAPE = 224, 224, 3
 
 
 def build_structure(input, backend, dense_layer_structure):
@@ -37,6 +34,7 @@ def build_model(configuration_file_path):
     backend_name = backend["name"]
     unlock_layers = backend["unlock_layers"]
 
+    input_shape = conf["input_shape"]
     output_type = conf["output_type"]
     output_dir = build["build_model_dir"]
     learning_rate = build["build_learning_rate"]
@@ -44,6 +42,9 @@ def build_model(configuration_file_path):
     model_name = conf["model_name"]
 
     verbose = conf["verbose"]
+
+    if backend_name not in models.AVAILABLE_BACKENDS:
+        raise Exception("The backend is not available")
 
     normalization_function_name = backend_name + "_normalization"
     if normalization_function_name not in models.NORMALIZATION_FUNCTIONS:
@@ -56,7 +57,10 @@ def build_model(configuration_file_path):
     if dense_layer_structure_name not in models.AVAILABLE_FINAL_DENSE_STRUCTURE:
         raise Exception("The dense layer structure is not available")
 
-    backend = VGGFace(model=backend_name, include_top=False, input_shape=INPUT_SHAPE, weights='vggface')
+    if backend_name == "vgg19":
+        backend = tf.keras.applications.VGG19(include_top=False, weights="imagenet")
+    else:
+        backend = VGGFace(model=backend_name, include_top=False, input_shape=INPUT_SHAPE, weights='vggface')
 
     if unlock_layers == "none":
         for layer in backend.layers:
@@ -68,7 +72,7 @@ def build_model(configuration_file_path):
         for layer in backend.layers[:-unlock_layers]:
             layer.trainable = False
 
-    model_input = Input(shape=INPUT_SHAPE)
+    model_input = Input(shape=input_shape)
 
     optimizer = optimizers.Adam(lr=learning_rate)  # lr is an hyperparameter
 
@@ -86,23 +90,26 @@ def build_model(configuration_file_path):
     Path(model_dir).mkdir(parents=True, exist_ok=True)
     model.save(os.path.join(model_dir, model_name + "_model"))
 
-    train = conf["train"]
-    evaluate = conf["evaluation"]
+    # Saving metadata
+    metadata = {"monitored_quantity": val_metric_name,
+                "normalization_function_name": normalization_function_name,
+                "predict_function_name": predict_function_name,
+                "input_shape": input_shape,
+                "output_type": output_type}
 
-    train["monitored_quantity"] = val_metric_name
-    conf["normalization_function_name"] = normalization_function_name
-    evaluate["predict_function_name"] = predict_function_name
-    conf["input_shape"] = INPUT_SHAPE
-
-    configuration.save_configuration(configuration_file_path, conf)
+    configuration.save_configuration(conf["metadata_path"], metadata)
 
     if verbose:
         model.summary()
+        print("Backend structure:\n")
+        for layer in backend.layers:
+            print(f"{layer.name}: trainable {layer.trainable}")
 
 
 def main():
     parser = argparse.ArgumentParser(description='Build model')
-    parser.add_argument('-c', '--configuration_file_path', type=str, help='The path of the configuration file', required=True)
+    parser.add_argument('-c', '--configuration_file_path', type=str, help='The path of the configuration file',
+                        required=True)
 
     args = parser.parse_args()
 

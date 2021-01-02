@@ -87,6 +87,11 @@ def resnet50_senet50_normalization(dataset, **kwargs):
     return normalize_input_rcmalli(dataset, 2)
 
 
+def vgg19_normalization(dataset):
+    dataset = dataset.astype(dtype="float32")
+    return tf.keras.applications.vgg19.preprocess_input(dataset)
+
+
 def regression_output_function(last_layer):
     output = Dense(1, activation='relu', kernel_initializer='glorot_normal', name='regression')(
         last_layer)  # todo prob meglio HE_NORMAL
@@ -103,7 +108,8 @@ def regression_output_function(last_layer):
 
 
 def rvc_output_function(last_layer):
-    output = Dense(NUMBER_OF_RVC_CLASSES, activation='softmax', kernel_initializer='glorot_normal', name='rvc')(last_layer)
+    output = Dense(NUMBER_OF_RVC_CLASSES, activation='softmax', kernel_initializer='glorot_normal', name='rvc')(
+        last_layer)
 
     loss = "categorical_crossentropy"
 
@@ -116,7 +122,8 @@ def rvc_mae(y_true, y_pred):
     y_true = tf.map_fn(lambda element: tf.math.argmax(element), y_true, dtype=tf.dtypes.int64)
     y_pred = tf.map_fn(lambda element: tf.math.argmax(element), y_pred, dtype=tf.dtypes.int64)
 
-    return tf.keras.losses.MAE(y_true, y_pred)
+    return tf.keras.losses.MAE(tf.dtypes.cast(y_true, dtype=tf.dtypes.float64),
+                               tf.dtypes.cast(y_pred, dtype=tf.dtypes.float64))
 
 
 def standard_dense_layer_structure(backbone):
@@ -131,8 +138,20 @@ def standard_dense_layer_structure(backbone):
     return x
 
 
-AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50"]
-AVAILABLE_FINAL_DENSE_STRUCTURE = {'standard_dense_layer_structure': standard_dense_layer_structure}
+def vgg16_dense_layer_structure(backbone):
+    global_pool = GlobalAveragePooling2D()
+    x = global_pool(backbone)
+
+    # dense
+    x = Dense(4096, activation='relu', kernel_initializer='he_normal')(x)
+    x = Dense(4096, activation='relu', kernel_initializer='he_normal')(x)
+
+    return x
+
+
+AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50", "vgg19"]
+AVAILABLE_FINAL_DENSE_STRUCTURE = {'standard_dense_layer_structure': standard_dense_layer_structure,
+                                   'vgg16_dense_layer_structure': vgg16_dense_layer_structure}
 AVAILABLE_OUTPUT_TYPES = {"regression": regression_output_function,
                           'rvc': rvc_output_function,
                           'random_bins_classification': BINNER.architecture}
@@ -142,6 +161,9 @@ NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization,
                            "senet50_normalization": resnet50_senet50_normalization}
 PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict, "rvc_predict_function": rvc_predict,
                      "random_bins_classification_predict_function": regression_predict}
+                           "senet50_normalization": resnet50_senet50_normalization,
+                           "vgg19_normalization": vgg19_normalization}
+PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict, "rvc_predict_function": rvc_predict}
 
 CUSTOM_OBJECTS = {
     "rvc_mae": rvc_mae,
