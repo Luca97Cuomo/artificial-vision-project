@@ -50,3 +50,35 @@ class Binner:
                 ['categorical_crossentropy'] * self.n_interval_sets,
                 [[]] * self.n_interval_sets,
                 'val_loss')
+
+    def compute_means(self):
+        means_set = []
+        for i in range(self.n_interval_sets):
+            means = self._compute_classifier_means(self.centroid_sets[i])
+            means_set.append(means)
+
+        return means_set
+
+    def _compute_classifier_means(self, centroids):
+        means = []
+
+        prec_centroid = None
+        for i in range(len(centroids)):
+            curr_centroid = centroids[i]
+            if prec_centroid is None:
+                left_border = 0
+            else:
+                left_border = (prec_centroid + curr_centroid) / 2
+
+            if i == (len(centroids) - 1):
+                right_border = self.n_classes - 1
+            else:
+                right_border = (curr_centroid + centroids[i + 1]) / 2
+
+            mean = (left_border + right_border) / 2
+
+            means.append(mean)
+
+            prec_centroid = curr_centroid
+
+        return means

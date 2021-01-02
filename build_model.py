@@ -10,7 +10,6 @@ from keras import optimizers
 from keras.models import Model
 from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, MaxPooling2D, GlobalAveragePooling2D
 from keras_vggface.vggface import VGGFace
-import json
 from pathlib import Path
 import tensorflow as tf
 import models

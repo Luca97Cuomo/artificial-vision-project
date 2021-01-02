@@ -150,20 +150,26 @@ def vgg16_dense_layer_structure(backbone):
 
 
 AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50", "vgg19"]
+
+
 AVAILABLE_FINAL_DENSE_STRUCTURE = {'standard_dense_layer_structure': standard_dense_layer_structure,
                                    'vgg16_dense_layer_structure': vgg16_dense_layer_structure}
+
+
 AVAILABLE_OUTPUT_TYPES = {"regression": regression_output_function,
                           'rvc': rvc_output_function,
                           'random_bins_classification': BINNER.architecture}
 
 NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization,
                            "resnet50_normalization": resnet50_senet50_normalization,
-                           "senet50_normalization": resnet50_senet50_normalization}
-PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict, "rvc_predict_function": rvc_predict,
-                     "random_bins_classification_predict_function": regression_predict}
                            "senet50_normalization": resnet50_senet50_normalization,
-                           "vgg19_normalization": vgg19_normalization}
-PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict, "rvc_predict_function": rvc_predict}
+                           "vgg19_normalization": vgg19_normalization
+                           }
+
+PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict,
+                     "rvc_predict_function": rvc_predict,
+                     "random_bins_classification_predict_function": regression_predict}
+
 
 CUSTOM_OBJECTS = {
     "rvc_mae": rvc_mae,
