@@ -31,11 +31,14 @@ def rvc_predict_demo(model, x, verbose=0):
     return y_processed.numpy()
 
 
-def predict_from_camera(model, input_shape, save_predictions_path, preprocessing_function, normalization_function, predict_function, verbose):
+def predict_from_camera(model, input_shape, save_predictions_path, preprocessing_function, normalization_function,
+                        predict_function, verbose=0):
+
     cam = cv2.VideoCapture(0)
 
     img_counter = 0
     font = cv2.FONT_HERSHEY_SIMPLEX
+    first_loop = True
 
     while True:
         ret, frame = cam.read()
@@ -63,6 +66,13 @@ def predict_from_camera(model, input_shape, save_predictions_path, preprocessing
             cv2.putText(frame, f"FPS: {fps}", (15, 25), font, fontScale=1, color=(255, 255, 255), thickness=2)
 
             cv2.imshow("Age estimator", frame)
+
+            if first_loop:
+                print("\nPress ESC to quit.\n")
+                if save_predictions_path is not None:
+                    print(f"Press SPACE to save prediction in {save_predictions_path}.\n")
+                first_loop = False
+
             k = cv2.waitKey(1)
             if k % 256 == ESC_KEY:
                 # ESC pressed
@@ -70,18 +80,23 @@ def predict_from_camera(model, input_shape, save_predictions_path, preprocessing
                 break
             elif k % 256 == SPACE_KEY:
                 # SPACE pressed
-                img_name = f"opencv_frame_{img_counter}.png"
-                save_path = Path(save_predictions_path).resolve() / img_name
-                cv2.imwrite(str(save_path), frame)
-                print(f"{save_path.name} written!")
-                img_counter += 1
+                if save_predictions_path is not None:
+                    img_name = f"opencv_frame_{img_counter}.png"
+                    save_path = Path(save_predictions_path).resolve() / img_name
+                    cv2.imwrite(str(save_path), frame)
+                    print(f"{save_path} written!")
+                    img_counter += 1
+                else:
+                    print("You must specify save_prediction_path in the configuration file.")
 
     cam.release()
 
     cv2.destroyAllWindows()
 
 
-def predict_from_images(model, input_shape, images_path, save_predictions_path, preprocessing_function, normalization_function, predict_function, verbose):
+def predict_from_images(model, input_shape, images_path, save_predictions_path, preprocessing_function,
+                        normalization_function, predict_function, verbose):
+
     font = cv2.FONT_HERSHEY_SIMPLEX
 
     images_path = str(Path(images_path).resolve())
@@ -99,9 +114,13 @@ def predict_from_images(model, input_shape, images_path, save_predictions_path, 
                     end_point = (box[0] + box[2], box[1] + box[3])
                     frame = cv2.rectangle(frame, start_point, end_point, color=(0, 255, 0), thickness=2)
                     cv2.putText(frame, str(prediction), start_point, font, fontScale=1, color=(0, 255, 0), thickness=2)
-                if verbose:
-                    print("Store result in" + str(Path(save_predictions_path).resolve() / image))
-                cv2.imwrite(str(Path(save_predictions_path).resolve() / image), frame)
+                if save_predictions_path is not None:
+                    cv2.imwrite(str(Path(save_predictions_path).resolve() / image), frame)
+
+                    if verbose:
+                        print("Store result in " + str(Path(save_predictions_path).resolve() / image))
+                else:
+                    print("Cannot store predictions. You need to pass a suitable path in the configuration file.")
 
 
 PREDICT_FUNCTIONS_DEMO = {"regression_predict_function": regression_predict_demo,
@@ -147,15 +166,15 @@ def estimate_age(conf_path, use_images=False):
 
     model = load_model(model_path, custom_objects=CUSTOM_OBJECTS)
 
-    print(f"Model input shape: {input_shape}")
+    if verbose:
+        print(f"Model input shape: {input_shape}")
 
     if use_images:
-        print("ciao")
         predict_from_images(model, input_shape, images_path, save_predictions_path, preprocessing_function,
                             normalization_function, predict_function, verbose)
     else:
         predict_from_camera(model, input_shape, save_predictions_path, preprocessing_function,
-                            normalization_function, predict_function, verbose)
+                            normalization_function, predict_function)
 
 
 def main():

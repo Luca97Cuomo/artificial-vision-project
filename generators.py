@@ -53,7 +53,10 @@ class DataGenerator(keras.utils.Sequence):
         if self.labels is None:
             return batch_x
 
-        batch_y = [[self.labels[i][j] for j in indices] for i in range(self.n_outputs)]
+        if self.output_type == 1:
+            batch_y = [self.labels[i][j] for j in indices]
+        else:
+            batch_y = [[self.labels[i][j] for j in indices] for i in range(self.n_outputs)]
 
         return batch_x, batch_y
 

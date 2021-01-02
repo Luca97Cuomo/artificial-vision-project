@@ -72,7 +72,7 @@ def random_bins_classification_predict(model, x, input_shape, batch_size=32, pre
             max_prob = output[index]
 
             # age = mean[index] * max_prob
-            age = mean[index] # test purposes
+            age = mean[index]
 
             sum += age
 
