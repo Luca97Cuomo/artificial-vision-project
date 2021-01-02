@@ -167,18 +167,6 @@ def rvc_output_function(last_layer):
     return output, loss, metrics, "val_rvc_mae"
 
 
-def bins_output_function(last_layer):
-    output = BINNER.architecture(last_layer)
-
-    print(f"output shape{output.shape}")
-
-    loss = ['categorical_crossentropy'] * BINNER.n_interval_sets
-
-    metrics = []
-
-    return output, loss, metrics, "val_loss"
-
-
 def rvc_mae(y_true, y_pred):
     y_true = tf.map_fn(lambda element: tf.math.argmax(element), y_true, dtype=tf.dtypes.int64)
     y_pred = tf.map_fn(lambda element: tf.math.argmax(element), y_pred, dtype=tf.dtypes.int64)
@@ -187,29 +175,29 @@ def rvc_mae(y_true, y_pred):
                                tf.dtypes.cast(y_pred, dtype=tf.dtypes.float64))
 
 
-def bins_classification_mae(y_true, y_pred):
-    # [classes, samples]
-
-    y_pred_regression = from_random_bins_classification_to_regression(from_tensor_to_numpy(y_pred), BINNER)
-
-    return tf.keras.losses.MAE(tf.dtypes.cast(y_true, dtype=tf.dtypes.float64),
-                               tf.convert_to_tensor(y_pred_regression, dtype=tf.dtypes.float64))
-
-
-def bins_classification_loss(y_true, y_pred):
-    # [classes, samples]
-    binned_labels = BINNER.bin_labels(from_tensor_to_numpy(y_true))
-
-    if BINNER.n_interval_sets != len(binned_labels):
-        raise Exception("n_interval_sets != len(binned_labels)")
-
-    cce_function = tf.keras.losses.CategoricalCrossentropy()
-
-    sum = cce_function(binned_labels[0], from_tensor_to_numpy(y_pred[0]))
-    for i in range(1, BINNER.n_interval_sets):
-        sum += cce_function(binned_labels[i], from_tensor_to_numpy(y_pred[i]))
-
-    return sum
+# def bins_classification_mae(y_true, y_pred):
+#     # [classes, samples]
+#
+#     y_pred_regression = from_random_bins_classification_to_regression(from_tensor_to_numpy(y_pred), BINNER)
+#
+#     return tf.keras.losses.MAE(tf.dtypes.cast(y_true, dtype=tf.dtypes.float64),
+#                                tf.convert_to_tensor(y_pred_regression, dtype=tf.dtypes.float64))
+#
+#
+# def bins_classification_loss(y_true, y_pred):
+#     # [classes, samples]
+#     binned_labels = BINNER.bin_labels(from_tensor_to_numpy(y_true))
+#
+#     if BINNER.n_interval_sets != len(binned_labels):
+#         raise Exception("n_interval_sets != len(binned_labels)")
+#
+#     cce_function = tf.keras.losses.CategoricalCrossentropy()
+#
+#     sum = cce_function(binned_labels[0], from_tensor_to_numpy(y_pred[0]))
+#     for i in range(1, BINNER.n_interval_sets):
+#         sum += cce_function(binned_labels[i], from_tensor_to_numpy(y_pred[i]))
+#
+#     return sum
 
 
 def standard_dense_layer_structure(backbone):
@@ -234,10 +222,10 @@ def vgg16_dense_layer_structure(backbone):
 
     return x
 
-
-def from_tensor_to_numpy(y):
-    with tf.Session().as_default():
-        return y.eval()
+#
+# def from_tensor_to_numpy(y):
+#     with tf.Session().as_default():
+#         return y.eval()
 
 
 AVAILABLE_BACKENDS = ["vgg16", "resnet50", "senet50", "vgg19"]
@@ -249,7 +237,7 @@ AVAILABLE_FINAL_DENSE_STRUCTURE = {'standard_dense_layer_structure': standard_de
 
 AVAILABLE_OUTPUT_TYPES = {"regression": regression_output_function,
                           'rvc': rvc_output_function,
-                          'random_bins_classification': bins_output_function}
+                          'random_bins_classification': BINNER.architecture}
 
 NORMALIZATION_FUNCTIONS = {"vgg16_normalization": vgg16_normalization,
                            "resnet50_normalization": resnet50_senet50_normalization,
