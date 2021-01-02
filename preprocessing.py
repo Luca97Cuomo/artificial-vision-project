@@ -15,7 +15,6 @@ LABEL_DIR = ''
 random.seed(42)
 
 
-
 def detect_from_image(image, detector):
     height, width, channels = image.shape
     faces = detector.detect(image)
@@ -46,6 +45,7 @@ def detect_faces(image, detector):
     faces = detector.detect(image)
     if len(faces) == 0:
         return None, None
+
     for face in faces:
         rect = enclosing_square(face['roi'])
         cropped_image = cut(image, rect)

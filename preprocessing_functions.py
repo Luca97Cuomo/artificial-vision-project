@@ -28,19 +28,31 @@ def standard_preprocessing(x, input_shape):
     return numpy_preprocessed_images
 
 
-def demo_preprocessing(x, input_shape):
+def demo_preprocessing(x, input_shape, use_images=False):
     batch = []
     boxes = []
+    if use_images:
+        detected_image, box = detect_relevant_face_box_from_image(x, detector)
+        if detected_image is None:
+            detected_image = x
+            boxes = None
+        else:
+            boxes.append(box)
 
-    for detected_image, box in detect_faces(x, detector):
         resized_image = cv2.resize(detected_image, (input_shape[0], input_shape[1]), interpolation=cv2.INTER_AREA)
         batch.append(resized_image)
-        boxes.append(box)
-    if len(batch) == 0:
-        batch.append(cv2.resize(x, (input_shape[0], input_shape[1]), interpolation=cv2.INTER_AREA))
+    else:
+        for detected_image, box in detect_faces(x, detector):
+            resized_image = cv2.resize(detected_image, (input_shape[0], input_shape[1]), interpolation=cv2.INTER_AREA)
+            batch.append(resized_image)
+            boxes.append(box)
+        if len(batch) == 0:
+            batch.append(cv2.resize(x, (input_shape[0], input_shape[1]), interpolation=cv2.INTER_AREA))
 
-        boxes = None
+            boxes = None
 
     return np.array(batch), boxes
 
-AVAILABLE_PREPROCESSING_FUNCTIONS = {"standard_preprocessing_function": standard_preprocessing, "demo_preprocessing": demo_preprocessing}
+
+AVAILABLE_PREPROCESSING_FUNCTIONS = {"standard_preprocessing_function": standard_preprocessing,
+                                     "demo_preprocessing": demo_preprocessing}
