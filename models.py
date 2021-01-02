@@ -172,11 +172,11 @@ def bins_output_function(last_layer):
 
     print(f"output shape{output.shape}")
 
-    loss = bins_classification_loss
+    loss = ['categorical_crossentropy'] * BINNER.n_interval_sets
 
-    metrics = [bins_classification_mae]
+    metrics = []
 
-    return output, loss, metrics, "val_bins_classification_mae"
+    return output, loss, metrics, "val_loss"
 
 
 def rvc_mae(y_true, y_pred):
