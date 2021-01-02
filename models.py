@@ -253,7 +253,6 @@ PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict,
 CUSTOM_OBJECTS = {
     "rvc_mae": rvc_mae,
     'BinsCombinerLayer': bins_combiner_layer.BinsCombinerLayer,
-    "bins_classification_loss": bins_classification_loss,
-    "bins_classification_mae": bins_classification_mae
-
+    # "bins_classification_loss": bins_classification_loss,
+    # "bins_classification_mae": bins_classification_mae
 }
