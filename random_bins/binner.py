@@ -46,10 +46,18 @@ class Binner:
         for _ in range(self.n_interval_sets):
             classifier = Dense(self.n_intervals, activation='softmax', kernel_initializer='glorot_normal')(output_layer)
             outputs.append(classifier)
+
+        """
         return (outputs,
                 ['categorical_crossentropy'] * self.n_interval_sets,
                 [[]] * self.n_interval_sets,
                 'val_loss')
+
+        return outputs
+        """
+
+        return Concatenate(axis=0)(outputs)
+
 
     def compute_means(self):
         means_set = []
