@@ -187,7 +187,7 @@ def evaluate_model(configuration_file_path):
                 image_path = Path(x_test[i]).resolve()
                 image = image_path.name
                 identity = image_path.parent
-                path = identity + "/" + image
+                path = f"{identity}/{image}"
                 f.write(f'{path},{int(round(y_pred[i]))},{int(round(y_test[i]))}\r\n')
         print("Predictions saved")
 
