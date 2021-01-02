@@ -50,14 +50,16 @@ def random_bins_classification_predict(model, x, input_shape, batch_size=32, pre
 
     y_pred = []
 
-    print(f"input shape: {np.array(y).shape}")
-
     # the shape of y is [n_classifiers, n_samples, n_intervals]
     # so the n_samples is the second parameter, not the first.
 
     if len(means) != len(y):
-        raise Exception("Unexpected output size")
+        raise Exception("Unexpected number of classifiers")
 
+    if len(x) != len(y[0]):
+        raise Exception("Unexpected number of predictions")
+
+    # for each sample
     for i in range(len(y[0])):
         sum = 0
 
