@@ -1,7 +1,7 @@
 
 # Default ignored files
 /.idea/
-demo/
+demo/configuration.txt
 __pycache__/
 utilities/
 venv_3_6/
