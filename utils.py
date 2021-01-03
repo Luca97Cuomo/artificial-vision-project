@@ -84,9 +84,7 @@ def load_model(conf):
     if tensorflow_version == 1:
         model = keras.models.load_model(model_path, custom_objects=CUSTOM_OBJECTS)
     elif tensorflow_version == 2:
-        checkpoint = conf["checkpoint_path"]
         model = tf.keras.models.load_model(model_path, custom_objects=CUSTOM_OBJECTS)
-        model.load_weights(checkpoint)
     else:
         raise Exception("Tensorflow version not supported")
     return model
