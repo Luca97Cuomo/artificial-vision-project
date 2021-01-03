@@ -11,6 +11,7 @@ from models import NORMALIZATION_FUNCTIONS
 from models import PREDICT_FUNCTIONS
 from models import CUSTOM_OBJECTS
 from data_analysis import get_age_interval
+from utils import load_model
 
 
 def take_error_list_key(element):
@@ -164,7 +165,8 @@ def evaluate_model(configuration_file_path):
     labels_dict = load_labels(csv_path, False)
     x_test, y_test = prepare_data_for_generator(test_set_path, labels_dict, num_test_samples)
 
-    model = keras.models.load_model(model_path, custom_objects=CUSTOM_OBJECTS)
+
+    model = load_model(conf)
 
     predict_function = PREDICT_FUNCTIONS[predict_function_name]
     normalization_function = NORMALIZATION_FUNCTIONS[normalization_function_name]

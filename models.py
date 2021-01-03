@@ -3,7 +3,6 @@ from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, Ma
 from generators import DataGenerator
 import numpy as np
 import tensorflow as tf
-import utils
 from random_bins import bins_combiner_layer
 from random_bins import binner
 
@@ -252,7 +251,7 @@ PREDICT_FUNCTIONS = {"regression_predict_function": regression_predict,
 
 CUSTOM_OBJECTS = {
     "rvc_mae": rvc_mae,
-    'BinsCombinerLayer': bins_combiner_layer.BinsCombinerLayer,
+    'BinsCombinerLayer': bins_combiner_layer.BinsCombinerLayer
     # "bins_classification_loss": bins_classification_loss,
     # "bins_classification_mae": bins_classification_mae
 }

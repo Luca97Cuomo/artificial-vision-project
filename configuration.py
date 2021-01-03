@@ -13,6 +13,9 @@ def save_configuration_template(path, verbose=False):
 
         "verbose": True,
 
+        "tf_version" : 1,
+        "checkpoint_path" : "",
+
         "preprocessing": {
             "enabled": False,
             "preprocessing_function_name": "standard_preprocessing_function",

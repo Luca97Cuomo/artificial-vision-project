@@ -7,6 +7,7 @@ import preprocessing_functions
 import keras
 import numpy as np
 from pathlib import Path
+from utils import load_model
 
 
 def prepare_data_to_predict(test_set_path):
@@ -60,7 +61,7 @@ def predict_model(configuration_file_path):
 
     x_test = prepare_data_to_predict(test_set_path)
 
-    model = keras.models.load_model(model_path, custom_objects=CUSTOM_OBJECTS)
+    model = load_model(conf)
 
     predict_function = PREDICT_FUNCTIONS[predict_function_name]
     normalization_function = NORMALIZATION_FUNCTIONS[normalization_function_name]

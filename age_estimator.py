@@ -1,15 +1,14 @@
-from tensorflow.keras.models import load_model
 import cv2
 import argparse
 from pathlib import Path
 import configuration
 import preprocessing_functions
 from models import NORMALIZATION_FUNCTIONS
-from models import CUSTOM_OBJECTS
 import numpy as np
 import tensorflow as tf
 import time
 import os
+from utils import load_model
 
 ESC_KEY = 27
 SPACE_KEY = 32
@@ -33,7 +32,6 @@ def rvc_predict_demo(model, x, verbose=0):
 
 def predict_from_camera(model, input_shape, save_predictions_path, preprocessing_function, normalization_function,
                         predict_function, verbose=0):
-
     cam = cv2.VideoCapture(0)
 
     img_counter = 0
@@ -96,7 +94,6 @@ def predict_from_camera(model, input_shape, save_predictions_path, preprocessing
 
 def predict_from_images(model, input_shape, images_path, save_predictions_path, preprocessing_function,
                         normalization_function, predict_function, verbose):
-
     font = cv2.FONT_HERSHEY_SIMPLEX
 
     images_path = str(Path(images_path).resolve())
@@ -164,7 +161,7 @@ def estimate_age(conf_path, use_images=False):
     predict_function_name = evaluate_conf["predict_function_name"]
     predict_function = PREDICT_FUNCTIONS_DEMO[predict_function_name]
 
-    model = load_model(model_path, custom_objects=CUSTOM_OBJECTS)
+    model = load_model(conf)
 
     if verbose:
         print(f"Model input shape: {input_shape}")

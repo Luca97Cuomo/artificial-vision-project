@@ -1,10 +1,7 @@
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau
 from keras import backend as K
-import keras
 import argparse
 import pickle
-
-
 from utils import *
 import models
 from preprocessing import load_labels
@@ -12,6 +9,7 @@ from generators import DataGenerator
 from pathlib import Path
 from augmentations import augmentation
 import configuration
+from utils import load_model
 
 
 def train_model(configuration_file_path):
@@ -32,6 +30,7 @@ def train_model(configuration_file_path):
     output_dir = train["output_training_dir"]
     model_path = conf["model_path"]
     model_name = conf["model_name"]
+    tensorflow_version = conf["tf_version"]
 
     learning_rate = train["train_learning_rate"]
     batch_size = conf["batch_size"]
@@ -59,7 +58,7 @@ def train_model(configuration_file_path):
     checkpoints_dir = os.path.join(output_dir, "checkpoints")
     Path(checkpoints_dir).mkdir(parents=True, exist_ok=True)
 
-    model = keras.models.load_model(model_path, custom_objects=models.CUSTOM_OBJECTS)
+    model = load_model(conf)
 
     if learning_rate is not None:
         if verbose:
@@ -76,10 +75,13 @@ def train_model(configuration_file_path):
     if output_type == "rvc":
         y_train = one_hot_encoded_labels(y_train, models.NUMBER_OF_RVC_CLASSES)
         y_val = one_hot_encoded_labels(y_val, models.NUMBER_OF_RVC_CLASSES)
+
+    """
     elif output_type == "random_bins_classification":
         y_train = models.BINNER.bin_labels(y_train)
         y_val = models.BINNER.bin_labels(y_val)
         n_outputs = models.BINNER.n_interval_sets
+    """
 
     if augmentations:
         random_seed = 42

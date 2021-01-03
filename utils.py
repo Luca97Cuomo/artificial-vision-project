@@ -1,6 +1,9 @@
 import h5py
 import os
 import numpy as np
+from models import CUSTOM_OBJECTS
+import tensorflow as tf
+import keras
 
 
 def prepare_data_for_generator(data_path, labels_dict, num_samples):
@@ -44,9 +47,6 @@ def prepare_data_for_generator(data_path, labels_dict, num_samples):
     return image_paths, labels
 
 
-
-
-
 def read_dataset_h5(dataset_path, verbose):
     f = h5py.File(dataset_path, 'r')
 
@@ -76,3 +76,17 @@ def one_hot_encoded_labels(labels, number_of_classes):
         hot_encoded_labels.append(formatted_label)
 
     return np.array(hot_encoded_labels)
+
+
+def load_model(conf):
+    tensorflow_version = conf["tf_version"]
+    model_path = conf["model_path"]
+    if tensorflow_version == 1:
+        model = keras.models.load_model(model_path, custom_objects=CUSTOM_OBJECTS)
+    elif tensorflow_version == 2:
+        checkpoint = conf["checkpoint_path"]
+        model = tf.keras.models.load_model(model_path, custom_objects=CUSTOM_OBJECTS)
+        model.load_weights(checkpoint)
+    else:
+        raise Exception("Tensorflow version not supported")
+    return model
