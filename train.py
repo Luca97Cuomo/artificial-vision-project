@@ -60,6 +60,9 @@ def train_model(configuration_file_path):
 
     model = load_model(conf)
 
+    if tensorflow_version == 2:
+        model.load_weights(train["checkpoint_path"])
+
     if learning_rate is not None:
         if verbose:
             print("Changing the learning rate")

@@ -13,8 +13,7 @@ def save_configuration_template(path, verbose=False):
 
         "verbose": True,
 
-        "tf_version" : 1,
-        "checkpoint_path" : "",
+        "tf_version": 1,
 
         "preprocessing": {
             "enabled": False,
@@ -37,6 +36,8 @@ def save_configuration_template(path, verbose=False):
         "train": {
             "training_set_path": "/content/training_set_resized",
             "validation_set_path": "/content/validation_set_resized",
+            # used only for TF2, if you are using TF1 the checkpoint_path must be specified in model_path
+            "checkpoint_path": "",
             "num_training_samples": 300000,
             "num_validation_samples": 30000,
             "augmentations": False,
