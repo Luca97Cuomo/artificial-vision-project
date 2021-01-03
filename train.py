@@ -86,6 +86,10 @@ def train_model(configuration_file_path):
         y_val = models.BINNER.bin_labels(y_val)
         n_outputs = models.BINNER.n_interval_sets
 
+    print(y_train)
+    print("validation \n")
+
+    print(y_val)
     if augmentations:
         random_seed = 42
         augmenter = augmentation.HorizontalMotionBlurAugmentation(probability=0.05, seed=random_seed)
