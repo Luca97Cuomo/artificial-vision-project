@@ -181,11 +181,12 @@ def main():
     parser = argparse.ArgumentParser(description='Estimates your age.')
     parser.add_argument('-c', '--configuration_path', type=str, help='The path of the configuration', required=True)
     parser.add_argument('-i', '--images', action="store_true",
-                        help='Use images instead of camera if provided. The path of images folder must be provided'
+                        help='Uses images instead of camera if provided. The path of images folder must be provided'
                              'in the configuration file using test_set_path in the evaluate section.')
     args = parser.parse_args()
 
     conf = Path(args.configuration_path).resolve()
+    # This lise solved a bug relate to opencl
     cv2.ocl.setUseOpenCL(False)
 
     estimate_age(str(conf), use_images=args.images)
