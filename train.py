@@ -61,7 +61,10 @@ def train_model(configuration_file_path):
     model = load_model(conf)
 
     if tensorflow_version == 2:
-        model.load_weights(train["checkpoint_path"])
+        try:
+            model.load_weights(train["checkpoint_path"])
+        except:
+            pass
 
     if learning_rate is not None:
         if verbose:
@@ -97,7 +100,8 @@ def train_model(configuration_file_path):
         augmenter = None  # or augmentation.NullAugmentation()
 
     training_data_generator = DataGenerator(x_train, y_train, input_shape=input_shape, batch_size=batch_size,
-                                            normalization_function=normalization_function, augmenter=augmenter, n_outputs=n_outputs)
+                                            normalization_function=normalization_function, augmenter=augmenter,
+                                            n_outputs=n_outputs)
     validation_data_generator = DataGenerator(x_val, y_val, input_shape=input_shape, batch_size=batch_size,
                                               normalization_function=normalization_function, n_outputs=n_outputs)
 
@@ -141,7 +145,8 @@ def train_model(configuration_file_path):
 
 def main():
     parser = argparse.ArgumentParser(description='Train model')
-    parser.add_argument('-c', '--configuration_file_path', type=str, help='The path of the configuration file', required=True)
+    parser.add_argument('-c', '--configuration_file_path', type=str, help='The path of the configuration file',
+                        required=True)
 
     args = parser.parse_args()
 
