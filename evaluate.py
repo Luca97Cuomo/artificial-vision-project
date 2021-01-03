@@ -26,7 +26,7 @@ def print_error_by_age_intervals(error_list):
         element = error_list[i]
 
         age_interval_label = element["age_interval_label"]
-        mae =  element["mae"]
+        mae = element["mae"]
         overestimate_mae = element["overestimate_mae"]
         underestimate_mae = element["underestimate_mae"]
         count = element["count"]
@@ -165,7 +165,6 @@ def evaluate_model(configuration_file_path):
     labels_dict = load_labels(csv_path, False)
     x_test, y_test = prepare_data_for_generator(test_set_path, labels_dict, num_test_samples)
 
-
     model = load_model(conf)
 
     predict_function = PREDICT_FUNCTIONS[predict_function_name]
@@ -179,7 +178,6 @@ def evaluate_model(configuration_file_path):
 
     if evaluate_by_age_intervals_flag:
         evaluate_by_age_intervals(age_interval_width, y_test, y_pred, True)
-
 
     # saving predictions if the path is not None
     if save_predictions:
@@ -196,7 +194,8 @@ def evaluate_model(configuration_file_path):
 
 def main():
     parser = argparse.ArgumentParser(description='Evaluate model')
-    parser.add_argument('-c', '--configuration_file_path', type=str, help='The path of the configuration file', required=True)
+    parser.add_argument('-c', '--configuration_file_path', type=str, help='The path of the configuration file',
+                        required=True)
 
     args = parser.parse_args()
 
