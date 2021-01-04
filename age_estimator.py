@@ -57,14 +57,12 @@ def estimate_age(conf_path, use_images=False):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Estimates your age. Use it only with TF2.')
+    parser = argparse.ArgumentParser(description='Estimates your age.')
     parser.add_argument('-c', '--configuration_path', type=str, help='The path of the configuration', required=True)
     parser.add_argument('-i', '--images', action="store_true",
                         help='Uses images instead of camera if provided. The path of images folder must be provided'
                              'in the configuration file using test_set_path in the evaluate section.')
     args = parser.parse_args()
-    if tf.__version__[0] != '2':
-        raise Exception("Tensorflow version is not supported. Use TF2.")
 
     conf = Path(args.configuration_path).resolve()
     # This lise solved a bug relate to opencl

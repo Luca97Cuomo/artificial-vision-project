@@ -52,8 +52,12 @@ def rvc_predict_demo(model, x, verbose=0):
 
     y_processed = tf.map_fn(lambda element: tf.math.argmax(element), y, dtype=tf.dtypes.int64)
 
-    # You need tensorflow 2.x.x to run this function
-    y = y_processed.numpy()
+    if tf.__version__[0] == 2:
+        y = y_processed.numpy()
+    else:
+        with tf.Session().as_default():
+            y = y_processed.eval()
+
     return y.astype('int64')
 
 
