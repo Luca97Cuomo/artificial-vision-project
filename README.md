@@ -15,6 +15,7 @@ Emanuele D'Arminio
 ## Installation
 
 ### Colab
+
 It is strongly recommended to clone this repository on Google Colab instead cloning it on your personal machine.
 This is because on Colab you don't have to install any dependencies and you won't have problem with CUDA libraries.
 
@@ -63,16 +64,45 @@ Tested CUDA and cuDNN versions that works well with the framework:
 If you want to preprocess your dataset in order to avoid doing it during the training (or the evaluation), saving a lot of computational time, 
 you can used the preprocessing module. We have assumed that your dataset is organized as follows:
 
-+-- dataset_path
-|   +-- identity_1
-    |   +-- image_1
+```
+dataset_path
+|--- identity_1
+|   |--- image_1.jpg
+|   |--- image_2.jpg
+|   |--- ...
+|--- identity_2
+|   |--- image_1.jpg
+|   |--- image_2.jpg
+|   |--- ...
+|--- ...
+```
 
+Use the script as follow to divide the dataset in training-validation-test set and preprocess them.
+
+The preprocessing pipeline is:
+ 
+- Detect the most relevant face into the image with opencv face detector.
+- Crop the image with the enclosing square containing the face detected.
+- Resize the cropped image with the input shape given into the metadata file.
 
 ```shell script
 
-
+python3 preprocessing.py -d "dataset_path" -l "labels_path" -o "destination_path" -n "number_of_images_to_use" -v "validation_fraction" -t "test_fraction" -ih "new_image_height" -iw "new_image_width"
 
 ``` 
+
+Using this script, the three datasets will contain different identities. In particular the validation_fraction and test_fraction, passed as argument, refer also to the identity fraction that each dataset will contain.  
+We assumed that the labels are passed as a csv file with this format:
+
+```
+
+identity_1/image_1.jpg,age_1
+identity_1/image_2.jpg,age_2
+...
+identity_x/image_x.jpg,age_x
+...
+
+```
 
 ### Build your model
 
@@ -182,7 +212,7 @@ You can see a template of the train configuration file:
 For `"standard_preprocessing_function"` we refer to the following preprocessing:
 
 - Detect the most relevant face into the image with opencv face detector.
-- Crop the face into a square.
+- Crop the image with the enclosing square containing the face detected.
 - Resize the cropped image with the input shape given into the metadata file. 
 
 
@@ -239,3 +269,7 @@ After created the configuration file just run the following script to test your 
 python3 evaluate.py -c "test_configuration_path"
 
 ```
+
+### Demo
+
+A configured demo has been developed to test your net. 
