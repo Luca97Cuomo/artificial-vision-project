@@ -77,7 +77,7 @@ def predict_model(configuration_file_path):
         for i in range(len(x_test)):
             image_path = Path(x_test[i]).resolve()
             image = image_path.name
-            identity = image_path.parent
+            identity = image_path.parent.name
             path = f"{identity}/{image}"
             f.write(f'{path},{int(round(y_pred[i]))}\r\n')
     print("Predictions saved")
