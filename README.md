@@ -175,7 +175,7 @@ For `"standard_preprocessing_function"` we refer to the following preprocessing:
 After created the configuration file just run the following script to train your model:
 ```shell script
 
-!python3 train.py -c "train_configuration_path"
+python3 train.py -c "train_configuration_path"
 
 ```
 
