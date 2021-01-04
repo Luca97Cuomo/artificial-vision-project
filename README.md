@@ -200,7 +200,7 @@ You can see a template of the evaluate configuration file:
     },
 
     "evaluate": {
-        "test_set_path": "path of the test set",
+        "test_set_path": "absolute path of the test set",
         "num_test_samples": "number of test set samples you want to use, ignored if csv_path is null",
 
         "save_predictions": {
@@ -214,5 +214,14 @@ You can see a template of the evaluate configuration file:
         }
     }
 }
+
+```
+
+The evaluation script can also be used as predict script if the path of the labels is null.
+
+After created the configuration file just run the following script to test your model:
+```shell script
+
+python3 evaluate.py -c "test_configuration_path"
 
 ```
