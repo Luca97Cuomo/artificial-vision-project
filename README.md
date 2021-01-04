@@ -7,7 +7,7 @@ This framework is not intended for production-grade use. It was created in order
 
 ```
 Davide Cafaro
-Carmine Carratu'
+Carmine Carratù
 Luca Cuomo
 Emanuele D'Arminio
 ```
