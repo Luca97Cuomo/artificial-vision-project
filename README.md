@@ -60,6 +60,20 @@ Tested CUDA and cuDNN versions that works well with the framework:
 
 ### Prepare the dataset
 
+If you want to preprocess your dataset in order to avoid doing it during the training (or the evaluation), saving a lot of computational time, 
+you can used the preprocessing module. We have assumed that your dataset is organized as follows:
+
++-- dataset_path
+|   +-- identity_1
+    |   +-- image_1
+
+
+```shell script
+
+
+
+``` 
+
 ### Build your model
 
 If you want to build your own model you need to write a json configuration file and pass it to the build model script.
