@@ -310,8 +310,8 @@ To execute the demo you need to create a configuration file as follow:
 After created the configuration file just run the following script to test your model with the demo:
 
 ```shell script
-# Run with camera
 
+# Run with camera
 python3 age_estimator.py -c "demo_configuration_path"
 
 # Run on images
