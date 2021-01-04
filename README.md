@@ -188,7 +188,7 @@ You can see a template of the train configuration file:
 
     "preprocessing": {
         "enabled": "true or false, if true the training data will be preprocessed",
-        "preprocessing_function_name": "choose on in ['standard_preprocessing_function']"
+        "preprocessing_function_name": "choose one in ['standard_preprocessing_function']"
     },
 
     "train": {
@@ -240,7 +240,7 @@ You can see a template of the evaluate configuration file:
 
     "preprocessing": {
         "enabled": "true or false, if true the test data will be preprocessed",
-        "preprocessing_function_name": "choose on in ['standard_preprocessing_function']"
+        "preprocessing_function_name": "choose one in ['standard_preprocessing_function']"
     },
 
     "evaluate": {
@@ -272,4 +272,82 @@ python3 evaluate.py -c "test_configuration_path"
 
 ### Demo
 
-A configured demo has been developed to test your net. 
+A demo has been developed to test your net. It works with images or with a camera.
+Using the camera, you can also apply corruptions to the frames at runtime, to test how your net behave with data corruption.
+You can use the demo with tensorflow 1 or 2, with or without GPU.
+
+To execute the demo you need to create a configuration file as follow: 
+```json
+
+{
+    "model_path": "path of the model saved as hdf5 file",
+    "tf_version": "the tensorflow version that you're using now, choose one in [1, 2]",
+    "input_shape": "input shape of your net, you can pass a json list like this [224, 224, 3]",
+    "output_type": "choose one in ['regression', 'rvc', 'random_bins_classification']",    
+    "verbose": "true or false",
+    
+    "build": {
+        "backend": {
+            "name": "choose one in ['vgg16', 'resnet50', 'senet50', 'vgg19']"
+        }
+    },
+
+    "preprocessing": {
+        "preprocessing_function_name": "choose one in ['demo_preprocessing']"
+    },
+
+    "evaluate": {
+        "test_set_path": "absolute path of folder containing the images to use for the demo. Ignored if you want to use the camera.",
+        "save_predictions": {
+            "enabled": "true or false",
+            "save_predictions_path": "path where to save predictions"
+        }
+    }
+}
+
+```
+
+After created the configuration file just run the following script to test your model with the demo:
+
+```shell script
+# Run with camera
+
+python3 age_estimator.py -c "demo_configuration_path"
+
+# Run on images
+python3 age_estimator.py -c "demo_configuration_path" -i
+
+```
+The corruption that you can apply to the frames captured by your camera are additive and have different severity values.
+
+#### How to use the demo with camera
+
+```
+How to use the demo:
+
+Press ESC to quit.
+
+Press SPACE to save prediction in <save_prediction_path>.
+
+- Press 1 for horizontal motion blur
+
+- Press 2 for vertical motion blur
+
+- Press 3 for pixelate motion blur
+
+- Press 4 for gaussian noise corruption
+
+- Press 5 for brightness change corruption
+
+- Press 6 for contrast change corruption
+
+- Press R to reset all the corruptions
+
+Every time you press a number the severity value is increased, if it reaches the severity limit it will be deactivate.
+
+```
+
+The instructions will be printed also after you execute the script.
+
+
+

@@ -1,7 +1,7 @@
 from demo.utils import *
 import configuration
 import preprocessing_functions
-from models import NORMALIZATION_FUNCTIONS
+from models import NORMALIZATION_FUNCTIONS, AVAILABLE_OUTPUT_TYPES
 import argparse
 from utils import load_model
 
@@ -13,17 +13,17 @@ def estimate_age(conf_path, use_images=False):
 
     model_path = conf["model_path"]
     input_shape = conf["input_shape"]
-    normalization_function_name = conf["normalization_function_name"]
+    backend_name = conf["build"]["backend"]["name"]
 
+    normalization_function_name = backend_name + "_normalization"
+    if normalization_function_name not in NORMALIZATION_FUNCTIONS:
+        raise Exception("The normalization function is not available")
     normalization_function = NORMALIZATION_FUNCTIONS[normalization_function_name]
 
     preprocessing_conf = conf["preprocessing"]
-    enable_preprocessing = preprocessing_conf["enabled"]
     preprocessing_function_name = preprocessing_conf["preprocessing_function_name"]
 
-    if not enable_preprocessing:
-        preprocessing_function = None
-    elif preprocessing_function_name not in preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS:
+    if preprocessing_function_name not in preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS:
         raise Exception("The requested preprocessing function is not supported")
     else:
         preprocessing_function = preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS[preprocessing_function_name]
@@ -40,7 +40,11 @@ def estimate_age(conf_path, use_images=False):
     else:
         images_path = None
 
-    predict_function_name = evaluate_conf["predict_function_name"]
+    output_type = conf["output_type"]
+    if output_type not in AVAILABLE_OUTPUT_TYPES:
+        raise Exception("The output type is not available")
+
+    predict_function_name = output_type + "_predict_function"
     predict_function = PREDICT_FUNCTIONS_DEMO[predict_function_name]
 
     model = load_model(conf)

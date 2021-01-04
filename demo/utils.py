@@ -122,6 +122,7 @@ def predict_from_camera(model, input_shape, save_predictions_path, preprocessing
             elif k % 256 == SPACE_KEY:
                 # SPACE pressed
                 space_key_function(save_predictions_path, frame, img_counter)
+                img_counter += 1
             elif k % 256 == RESET_KEY:
                 reset_augmentation()
             elif k % 256 in AUGMENTERS.keys():
@@ -181,7 +182,7 @@ def print_demo_informations(save_predictions_path):
         print(f"Press SPACE to save prediction in {save_predictions_path}.\n")
 
     print("How to use the demo:\n"
-          "\n- Press 1 to for horizontal motion blur\n"
+          "\n- Press 1 for horizontal motion blur\n"
           "\n- Press 2 for vertical motion blur\n"
           "\n- Press 3 for pixelate motion blur\n"
           "\n- Press 4 for gaussian noise corruption\n"
@@ -202,7 +203,6 @@ def space_key_function(save_predictions_path, frame, img_counter):
         save_path = Path(save_predictions_path).resolve() / img_name
         cv2.imwrite(str(save_path), frame)
         print(f"{save_path} written!")
-        img_counter += 1
     else:
         print("You must specify save_prediction_path in the configuration file.")
 
