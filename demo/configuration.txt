@@ -2,7 +2,7 @@
   "output_type": "rvc",
   "tf_version": 2,
   "model_name": "vgg16_regression_model",
-  "model_path": "C:\\Users\\manud\\Desktop\\models\\vgg16_regression.hdf5",
+  "model_path": "C:\\Users\\manud\\Desktop\\models\\vgg16_rvc_aug_all.hdf5",
   "csv_path": "/train.age_detected.csv",
   "batch_size": 256,
   "normalization_function_name": "vgg16_normalization",
@@ -50,6 +50,6 @@
       "enabled": true,
       "age_interval_width": 10
     },
-    "predict_function_name": "regression_predict_function"
+    "predict_function_name": "rvc_predict_function"
   }
 }

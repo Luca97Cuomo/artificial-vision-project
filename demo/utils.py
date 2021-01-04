@@ -52,7 +52,7 @@ def rvc_predict_demo(model, x, verbose=0):
 
     y_processed = tf.map_fn(lambda element: tf.math.argmax(element), y, dtype=tf.dtypes.int64)
 
-    if tf.__version__[0] == 2:
+    if tf.__version__[0] == "2":
         y = y_processed.numpy()
     else:
         with tf.Session().as_default():

@@ -67,20 +67,20 @@ You can see a template of the build configuration file:
 
 ```json
 {
-    "model_name": name for you model,
-    "input_shape": input shape of your net, you can pass a json list like this [224, 224, 3],
-    "output_type": choose one in ["regression", "rvc", "random_bins_classification"],
-    "verbose": true or false,
+    "model_name": "name for you model",
+    "input_shape": "input shape of your net, you can pass a json list like this [224, 224, 3]",
+    "output_type": "choose one in ["regression", "rvc", "random_bins_classification"]",
+    "verbose": "true or false",
 
     "build": {
-      "build_model_dir": folder path where you want to save your model,
-      "build_learning_rate": learning rate of your model (it must be a number),
+      "build_model_dir": "folder path where you want to save your model",
+      "build_learning_rate": "learning rate of your model (it must be a number)",
 
-      "dense_layer_structure_name": choose one in ["standard_dense_layer_structure", "vgg16_dense_layer_structure"],
+      "dense_layer_structure_name": "choose one in ["standard_dense_layer_structure", "vgg16_dense_layer_structure"]",
 
       "backend": {
-        "name": choose one in ["vgg16", "resnet50", "senet50"] if you're using TF1, choose one in ["vgg19"] if you're using TF2,
-        "unlock_layers": this is the number of layers (from the end of the net) you want to unlock for training, choose one in ["none", "all", 1, 2, ..]
+        "name": "choose one in ["vgg16", "resnet50", "senet50"] if you're using TF1, choose one in ["vgg19"] if you're using TF2",
+        "unlock_layers": "this is the number of layers (from the end of the net) you want to unlock for training, choose one in ["none", "all", 1, 2, ..]",
       }
     }
 }
