@@ -9,7 +9,6 @@ import os
 from keras import optimizers
 from keras.models import Model
 from keras.layers import Dense, Flatten, Concatenate, Input, Dropout, Conv2D, MaxPooling2D, GlobalAveragePooling2D
-import json
 from pathlib import Path
 import tensorflow as tf
 if tf.__version__[0] != "2":

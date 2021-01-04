@@ -47,16 +47,8 @@ class FaceDetector:
             print("FaceDetector -> bye")
 
 
-def top_left(f):
-    return (f['roi'][0], f['roi'][1])
-
-
-def bottom_right(f):
-    return (f['roi'][0] + f['roi'][2], f['roi'][1] + f['roi'][3])
-
-
 def enclosing_square(rect):
-    #crea un quadrato che contiene il rettangolo passato in ingresso
+    # crea un quadrato che contiene il rettangolo passato in ingresso
     def _to_wh(s, l, ss, ll, width_is_long):
         if width_is_long:
             return l, s, ll, ss
@@ -80,14 +72,6 @@ def enclosing_square(rect):
     ss = ll
 
     return _to_wh(s, l, ss, ll, width_is_long)
-
-
-def add_margin(roi, qty):
-    return (
-        roi[0] - qty,
-        roi[1] - qty,
-        roi[2] + 2 * qty,
-        roi[3] + 2 * qty)
 
 
 def cut(frame, roi):
