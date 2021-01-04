@@ -2,7 +2,7 @@
   "output_type": "rvc",
   "tf_version": 2,
   "model_name": "vgg16_regression_model",
-  "model_path": "C:\\Users\\manud\\Desktop\\models\\vgg16_rvc_aug_all.hdf5",
+  "model_path": "C:\\Users\\manud\\Desktop\\models\\vgg19_rvc_augmented_all.12-1.3932.hdf5",
   "csv_path": "/train.age_detected.csv",
   "normalization_function_name": "vgg16_normalization",
   "input_shape": [
@@ -20,7 +20,7 @@
     "build_learning_rate": 0.0001,
     "dense_layer_structure_name": "standard_dense_layer_structure",
     "backend": {
-      "name": "vgg16",
+      "name": "vgg19",
       "unlock_layers": "none"
     }
   },
@@ -45,7 +45,7 @@
     "batch_size": 256,
     "save_predictions": {
       "enabled": true,
-      "save_predictions_path": "C:\\Users\\manud\\Desktop\\demo-vgg16-bins"
+      "save_predictions_path": "C:\\Users\\manud\\Desktop\\demo-wualius"
     },
     "age_intervals_evaluation": {
       "enabled": true,
