@@ -114,6 +114,22 @@ def generate_cropped_train_test_val(dataset_path, destination_path, val_fraction
     extract_cropped_subset(training_set_path, detector, training_dirs, training_samples, image_width, image_height)
 
 
+def generate_preprocessed_test_set(dataset_path, destination_path, detector, image_width, image_height):
+    destination = Path(destination_path).resolve()
+    dataset = Path(dataset_path).resolve()
+    dirs = list(dataset.iterdir())
+
+    test_samples = count_dataset_images(dataset)
+
+    print(f"The images in {dataset_path} are {test_samples}")
+
+    test_set_path = destination / "test_set"
+
+    test_set_path.mkdir(exist_ok=True)
+
+    extract_cropped_subset(test_set_path, detector, dirs, test_samples, image_width, image_height)
+
+
 def extract_cropped_subset(destination_path, detector, dirs, total_samples, image_width, image_height):
     evaluated_samples = 0
     i = 0
@@ -311,6 +327,7 @@ def main():
     labels = load_labels(args.label_path, args.round)
 
     detector = FaceDetector()
+
     generate_cropped_train_test_val(args.dataset_path, args.destination_path, val_fraction, test_fraction, detector,
                                     args.number_of_images, labels, args.image_height, args.image_width)
 
