@@ -4,7 +4,6 @@
   "model_name": "vgg16_regression_model",
   "model_path": "C:\\Users\\manud\\Desktop\\models\\vgg16_rvc_aug_all.hdf5",
   "csv_path": "/train.age_detected.csv",
-  "batch_size": 256,
   "normalization_function_name": "vgg16_normalization",
   "input_shape": [
     224,
@@ -34,6 +33,7 @@
     "monitored_quantity": "val_mae",
     "augmentations": false,
     "epochs": 20,
+    "batch_size": 256,
     "initial_epoch": 0,
     "train_learning_rate": null,
     "output_training_dir": "/models/vgg16_regression/",
@@ -42,6 +42,7 @@
   "evaluate": {
     "test_set_path": "C:\\Users\\manud\\Desktop\\test_images\\",
     "num_test_samples": 100000,
+    "batch_size": 256,
     "save_predictions": {
       "enabled": true,
       "save_predictions_path": "C:\\Users\\manud\\Desktop\\demo-vgg16-bins"

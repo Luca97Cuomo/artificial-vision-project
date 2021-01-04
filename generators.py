@@ -42,10 +42,12 @@ class DataGenerator(keras.utils.Sequence):
         indices = self.indices[index * self.batch_size:(index + 1) * self.batch_size]
 
         # np.array creates a deep copy
-        batch_x = np.array([self.augmenter(cv2.imread(self.data_paths[i])) for i in indices])
+        batch_x = np.array([cv2.imread(self.data_paths[i]) for i in indices])
 
         if self.preprocessing_function is not None:
             batch_x = self.preprocessing_function(batch_x, self.input_shape)
+
+        batch_x = np.array([self.augmenter(x) for x in batch_x])
 
         if self.normalization_function is not None:
             batch_x = self.normalization_function(batch_x)

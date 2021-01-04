@@ -4,6 +4,7 @@ import argparse
 import pickle
 from utils import *
 import models
+import preprocessing_functions
 from preprocessing import load_labels
 from generators import DataGenerator
 from pathlib import Path
@@ -19,7 +20,14 @@ def train_model(configuration_file_path):
     metadata = configuration.read_configuration(metadata_path)
 
     csv_path = conf["csv_path"]
+    model_path = conf["model_path"]
+    model_name = conf["model_name"]
 
+    preprocessing = conf["preprocessing"]
+    preprocessing_function_name = preprocessing["preprocessing_function_name"]
+    enable_preprocessing = preprocessing["enabled"]
+
+    tensorflow_version = conf["tf_version"]
     train = conf["train"]
 
     training_set_path = train["training_set_path"]
@@ -28,12 +36,9 @@ def train_model(configuration_file_path):
     num_validation_samples = train["num_validation_samples"]
 
     output_dir = train["output_training_dir"]
-    model_path = conf["model_path"]
-    model_name = conf["model_name"]
-    tensorflow_version = conf["tf_version"]
 
     learning_rate = train["train_learning_rate"]
-    batch_size = conf["batch_size"]
+    batch_size = train["batch_size"]
     initial_epoch = train["initial_epoch"]
 
     monitored_quantity = metadata["monitored_quantity"]
@@ -78,6 +83,13 @@ def train_model(configuration_file_path):
 
     n_outputs = 1
 
+    if not enable_preprocessing:
+        preprocessing_function = None
+    elif preprocessing_function_name not in preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS:
+        raise Exception("The requested preprocessing function is not supported")
+    else:
+        preprocessing_function = preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS[preprocessing_function_name]
+
     if output_type == "rvc":
         y_train = one_hot_encoded_labels(y_train, models.NUMBER_OF_RVC_CLASSES)
         y_val = one_hot_encoded_labels(y_val, models.NUMBER_OF_RVC_CLASSES)
@@ -100,9 +112,11 @@ def train_model(configuration_file_path):
         augmenter = None  # or augmentation.NullAugmentation()
 
     training_data_generator = DataGenerator(x_train, y_train, input_shape=input_shape, batch_size=batch_size,
+                                            preprocessing_function=preprocessing_function,
                                             normalization_function=normalization_function, augmenter=augmenter,
                                             n_outputs=n_outputs)
     validation_data_generator = DataGenerator(x_val, y_val, input_shape=input_shape, batch_size=batch_size,
+                                              preprocessing_function=preprocessing_function,
                                               normalization_function=normalization_function, n_outputs=n_outputs)
 
     if initial_epoch == 0:

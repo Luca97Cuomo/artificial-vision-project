@@ -136,7 +136,7 @@ def evaluate_model(configuration_file_path):
     test_set_path = eval_dict["test_set_path"]
     num_test_samples = eval_dict["num_test_samples"]
 
-    batch_size = conf["batch_size"]
+    batch_size = eval_dict["batch_size"]
 
     save_predictions_dict = eval_dict["save_predictions"]
 
