@@ -190,7 +190,7 @@ def evaluate_model(configuration_file_path):
             for i in range(len(x_test)):
                 image_path = Path(x_test[i]).resolve()
                 image = image_path.name
-                identity = image_path.parent
+                identity = image_path.parent.name
                 path = f"{identity}/{image}"
                 if csv_path is not None:
                     f.write(f'{path},{int(round(y_pred[i]))},{int(round(y_test[i]))}\r\n')
