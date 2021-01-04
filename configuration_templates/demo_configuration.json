@@ -1,0 +1,25 @@
+{
+    "model_path": "path of the model saved as hdf5 file",
+    "tf_version": "the tensorflow version that you're using now, choose one in [1, 2]",
+    "input_shape": "input shape of your net, you can pass a json list like this [224, 224, 3]",
+    "output_type": "choose one in ['regression', 'rvc', 'random_bins_classification']",
+    "verbose": "true or false",
+
+    "build": {
+        "backend": {
+            "name": "choose one in ['vgg16', 'resnet50', 'senet50', 'vgg19']"
+        }
+    },
+
+    "preprocessing": {
+        "preprocessing_function_name": "choose one in ['demo_preprocessing']"
+    },
+
+    "evaluate": {
+        "test_set_path": "absolute path of folder containing the images to use for the demo. Ignored if you want to use the camera.",
+        "save_predictions": {
+            "enabled": "true or false",
+            "save_predictions_path": "path where to save predictions"
+        }
+    }
+}

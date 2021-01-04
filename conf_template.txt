@@ -3,6 +3,12 @@
   "model_path": "/models/vgg16_regression/vgg16_regression_model",
   "csv_path": "/train.age_detected.csv",
   "metadata_path": "metadata.txt",
+  "input_shape": [
+    224,
+    224,
+    3
+  ],
+  "output_type": "rvc",
   "verbose": true,
   "tf_version": 1,
   "preprocessing": {
@@ -10,7 +16,6 @@
     "preprocessing_function_name": "standard_preprocessing_function"
   },
   "build": {
-    "output_type": "regression",
     "build_model_dir": "/models/",
     "build_learning_rate": 0.0001,
     "dense_layer_structure_name": "standard_dense_layer_structure",

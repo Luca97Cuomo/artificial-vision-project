@@ -8,6 +8,8 @@ def save_configuration_template(path, verbose=False):
         "model_path": "/models/vgg16_regression/vgg16_regression_model",
         "csv_path": "/train.age_detected.csv",
         "metadata_path": "metadata.txt",
+        "input_shape": (224, 224, 3),
+        "output_type": "rvc",
 
         "verbose": True,
 
@@ -19,7 +21,6 @@ def save_configuration_template(path, verbose=False):
         },
 
         "build": {
-            "output_type": "regression",
             "build_model_dir": "/models/",
             "build_learning_rate": 0.0001,
 

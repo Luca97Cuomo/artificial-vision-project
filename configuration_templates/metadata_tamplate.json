@@ -1,0 +1,11 @@
+{
+  "monitored_quantity": "val_mae",
+  "normalization_function_name": "vgg16_normalization",
+  "predict_function_name": "rvc_predict_function",
+  "input_shape": [
+    224,
+    224,
+    3
+  ],
+  "output_type": "rvc"
+}
