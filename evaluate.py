@@ -128,13 +128,12 @@ def evaluate_model(configuration_file_path):
     model_path = conf["model_path"]
 
     preprocessing = conf["preprocessing"]
-    eval_dict = conf["evaluate"]
-
     preprocessing_function_name = preprocessing["preprocessing_function_name"]
     enable_preprocessing = preprocessing["enabled"]
 
+    eval_dict = conf["evaluate"]
+
     test_set_path = eval_dict["test_set_path"]
-    num_test_samples = eval_dict["num_test_samples"]
 
     batch_size = eval_dict["batch_size"]
 
@@ -150,10 +149,12 @@ def evaluate_model(configuration_file_path):
     csv_path = conf["csv_path"]
     input_shape = metadata["input_shape"]
 
-    age_intervals_evaluation = eval_dict["age_intervals_evaluation"]
+    if csv_path is not None:
+        age_intervals_evaluation = eval_dict["age_intervals_evaluation"]
 
-    evaluate_by_age_intervals_flag = age_intervals_evaluation["enabled"]
-    age_interval_width = age_intervals_evaluation["age_interval_width"]
+        evaluate_by_age_intervals_flag = age_intervals_evaluation["enabled"]
+        age_interval_width = age_intervals_evaluation["age_interval_width"]
+        num_test_samples = eval_dict["num_test_samples"]
 
     if not enable_preprocessing:
         preprocessing_function = None
@@ -162,8 +163,11 @@ def evaluate_model(configuration_file_path):
     else:
         preprocessing_function = preprocessing_functions.AVAILABLE_PREPROCESSING_FUNCTIONS[preprocessing_function_name]
 
-    labels_dict = load_labels(csv_path, False)
-    x_test, y_test = prepare_data_for_generator(test_set_path, labels_dict, num_test_samples)
+    if csv_path is not None:
+        labels_dict = load_labels(csv_path, False)
+        x_test, y_test = prepare_data_for_generator(test_set_path, labels_dict, num_test_samples)
+    else:
+        x_test = prepare_images_for_generator(data_path=test_set_path)
 
     model = load_model(conf)
 
@@ -173,11 +177,11 @@ def evaluate_model(configuration_file_path):
     y_pred = predict_function(model, x_test, input_shape=input_shape, batch_size=batch_size,
                               preprocessing_function=preprocessing_function,
                               normalization_function=normalization_function)
+    if csv_path is not None:
+        evaluate(y_test, y_pred, True)
 
-    evaluate(y_test, y_pred, True)
-
-    if evaluate_by_age_intervals_flag:
-        evaluate_by_age_intervals(age_interval_width, y_test, y_pred, True)
+        if evaluate_by_age_intervals_flag:
+            evaluate_by_age_intervals(age_interval_width, y_test, y_pred, True)
 
     # saving predictions if the path is not None
     if save_predictions:
@@ -188,7 +192,10 @@ def evaluate_model(configuration_file_path):
                 image = image_path.name
                 identity = image_path.parent
                 path = f"{identity}/{image}"
-                f.write(f'{path},{int(round(y_pred[i]))},{int(round(y_test[i]))}\r\n')
+                if csv_path is not None:
+                    f.write(f'{path},{int(round(y_pred[i]))},{int(round(y_test[i]))}\r\n')
+                else:
+                    f.write(f'{path},{int(round(y_pred[i]))}\r\n')
         print("Predictions saved")
 
 

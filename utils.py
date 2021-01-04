@@ -6,6 +6,17 @@ import tensorflow as tf
 import keras
 
 
+def prepare_images_for_generator(data_path):
+    image_paths = []
+    identities = os.listdir(data_path)
+    for identity in identities:
+        images = os.listdir(os.path.join(data_path, identity))
+        for image in images:
+            image_paths.append(os.path.join(data_path, identity, image))
+
+    return image_paths
+
+
 def prepare_data_for_generator(data_path, labels_dict, num_samples):
     # take only the identities that are both in the data_path and in the csv file
     identities = set(os.listdir(data_path)) & labels_dict.keys()
