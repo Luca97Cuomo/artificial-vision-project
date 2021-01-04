@@ -44,15 +44,11 @@ class DataGenerator(keras.utils.Sequence):
         # np.array creates a deep copy
         batch_x = np.array([self.augmenter(cv2.imread(self.data_paths[i])) for i in indices])
 
-        print(f"shape before normalization: {batch_x.shape}")
-
         if self.preprocessing_function is not None:
             batch_x = self.preprocessing_function(batch_x, self.input_shape)
 
         if self.normalization_function is not None:
             batch_x = self.normalization_function(batch_x)
-
-        print(f"shape after normalization: {batch_x.shape}")
 
         if self.labels is None:
             return batch_x
