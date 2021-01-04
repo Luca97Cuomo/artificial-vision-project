@@ -7,9 +7,6 @@ from pathlib import Path
 from tqdm import tqdm
 import shutil
 
-# from imutils.face_utils import FaceAligner
-# import dlib
-
 DATASET_DIR = ''
 LABEL_DIR = ''
 random.seed(42)
@@ -55,7 +52,7 @@ def detect_faces(image, detector):
 def detect_from_path(image_path, detector):
     image = cv2.imread(image_path)
 
-    detected_image = detect_from_image(image, detector)[0]
+    detected_image = detect_from_image(image, detector)
     if detected_image is None:
         print("Could not find faces for " + image_path)
         return image
@@ -79,7 +76,7 @@ def remove_not_labeled_identities(identities, labels):
 
 
 def generate_cropped_train_test_val(dataset_path, destination_path, val_fraction, test_fraction, detector,
-                                    total_samples, labels):
+                                    total_samples, labels, image_width, image_height):
     destination = Path(destination_path).resolve()
     dataset = Path(dataset_path).resolve()
     dirs = list(dataset.iterdir())
@@ -112,12 +109,12 @@ def generate_cropped_train_test_val(dataset_path, destination_path, val_fraction
     test_set_path.mkdir(exist_ok=True)
     validation_set_path.mkdir(exist_ok=True)
 
-    extract_cropped_subset(test_set_path, detector, test_dirs, test_samples)
-    extract_cropped_subset(validation_set_path, detector, val_dirs, val_samples)
-    extract_cropped_subset(training_set_path, detector, training_dirs, training_samples)
+    extract_cropped_subset(test_set_path, detector, test_dirs, test_samples, image_width, image_height)
+    extract_cropped_subset(validation_set_path, detector, val_dirs, val_samples, image_width, image_height)
+    extract_cropped_subset(training_set_path, detector, training_dirs, training_samples, image_width, image_height)
 
 
-def extract_cropped_subset(destination_path, detector, dirs, total_samples):
+def extract_cropped_subset(destination_path, detector, dirs, total_samples, image_width, image_height):
     evaluated_samples = 0
     i = 0
 
@@ -139,6 +136,7 @@ def extract_cropped_subset(destination_path, detector, dirs, total_samples):
                     identity_path = destination_path / identity.name
                     identity_path.mkdir(exist_ok=True)
                     cropped_image = detect_from_path(str(current_image), detector)
+                    cropped_image = cv2.resize(cropped_image, (image_width, image_height), interpolation=cv2.INTER_AREA)
                     cv2.imwrite(str(identity_path / current_image.name), cropped_image)
                     evaluated_samples += 1
                     pbar.update(1)
@@ -281,7 +279,7 @@ def main():
     parser.add_argument('-R', '--round', action='store_true', help='Round the ages to the nearest integer')
     parser.add_argument('--h5_output_path', type=str,
                         help='The absolute path of the folder that will contain the h5 dataset files',
-                        required=True)
+                        required=False)
     parser.add_argument('-n', '--number_of_images', type=int,
                         help='The number of images that will be taken from the dataset',
                         required=True)
@@ -291,6 +289,12 @@ def main():
     parser.add_argument('-t', '--test_fraction', type=float,
                         help='The fraction of the dataset that will be used for the test set',
                         required=False, default=0.3)
+    parser.add_argument('-ih', '--image_height', type=int,
+                        help='The height of the cropped images',
+                        required=False)
+    parser.add_argument('-iw', '--image_width', type=int,
+                        help='The width of the cropped images',
+                        required=False)
 
     args = parser.parse_args()
 
@@ -308,20 +312,8 @@ def main():
 
     detector = FaceDetector()
     generate_cropped_train_test_val(args.dataset_path, args.destination_path, val_fraction, test_fraction, detector,
-                                    args.number_of_images, labels)
-
-    generate_h5_dataset(datasets_path=args.destination_path, output_path=args.h5_output_path, dataset_name="test_set",
-                        labels=labels, image_width=224, image_height=224)
-
-    generate_h5_dataset(datasets_path=args.destination_path, output_path=args.h5_output_path,
-                        dataset_name="validation_set",
-                        labels=labels, image_width=224, image_height=224)
-    generate_h5_dataset(datasets_path=args.destination_path, output_path=args.h5_output_path,
-                        dataset_name="training_set",
-                        labels=labels, image_width=224, image_height=224)
+                                    args.number_of_images, labels, args.image_height, args.image_width)
 
 
 if __name__ == '__main__':
-    extract_virgin_dataset(r"C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\vggface2_train\train",
-                           r"C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\cropped_dataset\test_set",
-                           r"C:\Users\utente\Desktop\Magistrale\magistrale\Visione artificiale\virgin_datasets\virgin_test_set")
+    main()
