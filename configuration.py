@@ -9,8 +9,6 @@ def save_configuration_template(path, verbose=False):
         "csv_path": "/train.age_detected.csv",
         "metadata_path": "metadata.txt",
 
-        "batch_size": 256,
-
         "verbose": True,
 
         "tf_version": 1,
@@ -43,16 +41,16 @@ def save_configuration_template(path, verbose=False):
             "augmentations": False,
             "epochs": 20,
             "initial_epoch": 0,
+            "batch_size": 256,
             # train_learning_rate: if not None the learning rate of model will be changed
             "train_learning_rate": None,
             "output_training_dir": "/models/vgg16_regression/",
             "save_best_only": False
         },
-
         "evaluate": {
             "test_set_path": "/content/test_set_resized",
             "num_test_samples": 100000,
-
+            "batch_size": 256,
             "save_predictions": {
                 "enabled": False,
                 "save_predictions_path": "/models/vgg16_regression/predictions.txt"
@@ -62,7 +60,7 @@ def save_configuration_template(path, verbose=False):
                 "enabled": True,
                 "age_interval_width": 10
             }
-        },
+        }
     }
 
     with open(path, 'w') as f:
