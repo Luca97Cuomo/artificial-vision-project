@@ -34,7 +34,7 @@ def rvc_predict(model, x, input_shape, batch_size=32, preprocessing_function=Non
 
     y_processed = tf.map_fn(lambda element: tf.math.argmax(element), y, dtype=tf.dtypes.int64)
 
-    if tf.__version__[0] == "":
+    if tf.__version__[0] == "2":
         return y_processed.numpy()
     else:
         with tf.Session().as_default():

@@ -61,10 +61,10 @@ def train_model(configuration_file_path):
     model = load_model(conf)
 
     if tensorflow_version == 2:
-        try:
+        if train.get("checkpoint_path") is not None:
             model.load_weights(train["checkpoint_path"])
-        except:
-            pass
+        else:
+            print("No checkpoint found, starting training from initial model!")
 
     if learning_rate is not None:
         if verbose:
@@ -86,10 +86,6 @@ def train_model(configuration_file_path):
         y_val = models.BINNER.bin_labels(y_val)
         n_outputs = models.BINNER.n_interval_sets
 
-    print(y_train)
-    print("validation \n")
-
-    print(y_val)
     if augmentations:
         random_seed = 42
         augmenter = augmentation.HorizontalMotionBlurAugmentation(probability=0.05, seed=random_seed)
