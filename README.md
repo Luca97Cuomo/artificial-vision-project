@@ -14,12 +14,12 @@ Emanuele D'Arminio
 
 ## Installation
 
-### Colab
+### Google Colab
 
-It is strongly recommended to clone this repository on Google Colab instead cloning it on your personal machine.
-This is because on Colab you don't have to install any dependencies and you won't have problem with CUDA libraries.
+It is strongly recommended to clone this repository on Google Colab instead of cloning it on your personal machine.
+This is because on Colab you don't have to install any dependencies and you won't have problems with CUDA libraries.
 
-All you need to do is choose tensorflow version.
+All you need to do is to choose Tensorflow version.
 
 ```python 
 %tensorflow_version 1 # 1 or 2
@@ -49,7 +49,7 @@ pip install -r requirements_tf2.txt
 ```
 #### CUDA and cuDNN dependencies
 
-Tested CUDA and cuDNN versions that works well with the framework:
+Tested CUDA and cuDNN versions that work well with the framework:
 
 ```
 - CUDA Toolkit: 10.1 (TF2)
@@ -61,8 +61,8 @@ Tested CUDA and cuDNN versions that works well with the framework:
 
 ### Prepare the dataset
 
-If you want to preprocess your dataset in order to avoid doing it during the training (or the evaluation), saving a lot of computational time, 
-you can used the preprocessing module. We have assumed that your dataset is organized as follows:
+If you want to preprocess your dataset in order to avoid doing it during the training (or the evaluation), saving a lot of computational time if executing multiple experiments with the same preprocessing, 
+you can use the preprocessing module. We have assumed that your dataset is organized as follows:
 
 ```
 dataset_path
@@ -77,22 +77,22 @@ dataset_path
 |--- ...
 ```
 
-Use the script as follow to divide the dataset in training-validation-test set and preprocess them.
+Use the following script to divide the dataset in training-validation-test set and apply the preprocessing.
 
 The preprocessing pipeline is:
- 
-- Detect the most relevant face into the image with opencv face detector.
+
+- Detect the most relevant face into the image with OpenCV face detector.
 - Crop the image with the enclosing square containing the face detected.
-- Resize the cropped image with the input shape given into the metadata file.
+- Resize the cropped image with the input shape given as arguments.
 
 ```shell script
 
 python3 preprocessing.py -d "dataset_path" -l "labels_path" -o "destination_path" -n "number_of_images_to_use" -v "validation_fraction" -t "test_fraction" -ih "new_image_height" -iw "new_image_width"
 
-``` 
+```
 
-Using this script, the three datasets will contain different identities. In particular the validation_fraction and test_fraction, passed as argument, refer also to the identity fraction that each dataset will contain.  
-We assumed that the labels are passed as a csv file with this format:
+Using this script, the three datasets will contain different identities. In particular the `validation_fraction` and `test_fraction`, passed as arguments, refer to both identities and images of the split.  
+We assumed that the labels are passed as a CSV file with this format:
 
 ```
 
@@ -106,15 +106,15 @@ identity_x/image_x.jpg,age_x
 
 ### Build your model
 
-If you want to build your own model you need to write a json configuration file and pass it to the build model script.
+If you want to build your own model you need to write a JSON configuration file and pass it to the build model script.
 You can see a template of the build configuration file:
 
 ```json
 {
-    "model_name": "name for you model",
+    "model_name": "name for your model",
     "input_shape": "input shape of your net, you can pass a json list like this [224, 224, 3]",
     "output_type": "choose one in ['regression', 'rvc', 'random_bins_classification']",
-    "verbose": "true or false",
+    "verbose": "boolean: true or false",
 
     "build": {
       "build_model_dir": "folder path where you want to save your model",
@@ -146,7 +146,7 @@ def standard_dense_layer_structure(backbone):
 
 ```
 
-After created the configuration file just run the following script to build your model:
+After having created the configuration file just run the following script to build your model:
 
 ```shell script
 
@@ -154,7 +154,7 @@ python3 build_model.py -c "build_configuration_path"
 
 ```
 
-The build model script will generate a metadata file, in your model output dir, useful for the training procedure. It will be something like this:
+The build model script will generate a metadata file, in your model output directory, useful to scripts which use the model. It will be something like this:
 
 ```json
 {
@@ -172,7 +172,7 @@ The build model script will generate a metadata file, in your model output dir, 
 
 ### Train your net
 
-To train your net you need to write a json configuration file and pass it to the train model script.
+To train your net you need to write a JSON configuration file and pass it to the train model script.
 You can see a template of the train configuration file:
 
 ```json
@@ -194,16 +194,16 @@ You can see a template of the train configuration file:
     "train": {
         "training_set_path": "path of the training set",
         "validation_set_path": "path of the validation set",
-        "checkpoint_path": "if you want to train with tf 1, the checkpoint must be specified in model_path, this is useful only for models built with TF2.",
+        "checkpoint_path": "if you want to train with TF1, the checkpoint must be specified in model_path, this is useful only for models built with TF2.",
         "num_training_samples": "the number of training samples, it must be an integer",
         "num_validation_samples": "the number of validation samples, it must be an integer",
         "augmentations": "true or false, if true data will be randomly augmented with different corruptions during the training",
         "epochs": "number of epochs, it must be an integer",
         "batch_size": "the batch size you want to use, it must be an integer",
-        "initial_epoch": "0 if you want to start from the first epoch",
-        "train_learning_rate": "if not null, the learning rate of the model, chosen during the build, will be changed",
+        "initial_epoch": "0 if you want to start from the first epoch, otherwise it can be set to resume training from a checkpoint correctly",
+        "train_learning_rate": "if not null, the learning rate of the model chosen during the build will be overridden by this value",
         "output_training_dir": "directory path where checkpoints and model outputs will be stored",
-        "save_best_only": "true or false, if false all the checkpoints are going to be saved, otherwise only the best checkpoints"
+        "save_best_only": "true or false, if false all the checkpoints are going to be saved, otherwise only the checkpoints which improve on the validation set"
     }
 }
 
@@ -211,12 +211,12 @@ You can see a template of the train configuration file:
 
 For `"standard_preprocessing_function"` we refer to the following preprocessing:
 
-- Detect the most relevant face into the image with opencv face detector.
+- Detect the most relevant face into the image with OpenCV face detector.
 - Crop the image with the enclosing square containing the face detected.
 - Resize the cropped image with the input shape given into the metadata file. 
 
 
-After created the configuration file just run the following script to train your model:
+After having created the configuration file just run the following script to train your model:
 ```shell script
 
 python3 train.py -c "train_configuration_path"
@@ -225,7 +225,7 @@ python3 train.py -c "train_configuration_path"
 
 ### Test your net
 
-To test your net you need to write a json configuration file and pass it to the evaluate model script.
+To test your net you need to write a JSON configuration file and pass it to the evaluate model script.
 You can see a template of the evaluate configuration file:
 
 ```json
@@ -263,7 +263,7 @@ You can see a template of the evaluate configuration file:
 
 The evaluation script can also be used as predict script if the path of the labels is null.
 
-After created the configuration file just run the following script to test your model:
+After having created the configuration file just run the following script to test your model:
 ```shell script
 
 python3 evaluate.py -c "test_configuration_path"
@@ -273,8 +273,8 @@ python3 evaluate.py -c "test_configuration_path"
 ### Demo
 
 A demo has been developed to test your net. It works with images or with a camera.
-Using the camera, you can also apply corruptions to the frames at runtime, to test how your net behave with data corruption.
-You can use the demo with tensorflow 1 or 2, with or without GPU.
+Using the camera, you can also apply corruptions to the frames at runtime, to test how your net behaves with data corruption.
+You can use the demo with Tensorflow 1 or 2, with or without GPU.
 
 To execute the demo you need to create a configuration file as follow: 
 ```json
@@ -343,7 +343,7 @@ Press SPACE to save prediction in <save_prediction_path>.
 
 - Press R to reset all the corruptions
 
-Every time you press a number the severity value is increased, if it reaches the severity limit it will be deactivate.
+Every time you press a number the severity value is increased, if it reaches the severity limit it will be deactivated.
 
 ```
 
