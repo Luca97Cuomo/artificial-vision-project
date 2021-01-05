@@ -152,7 +152,10 @@ def train_model(configuration_file_path):
     with open(os.path.join(output_dir, model_name + "_history"), 'wb') as f:
         if verbose:
             print("Saving history ...")
-        pickle.dump(history, f)
+        if tensorflow_version == 1:
+            pickle.dump(history, f)
+        else:
+            pickle.dump(history.history, f)
 
     model.save(os.path.join(output_dir, model_name + "_completed_training"))
 
