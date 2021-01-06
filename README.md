@@ -41,10 +41,12 @@ Clone this repository on your machine and execute:
 
 ```shell script
 # TF 1
+# Python versions supported 3.6 
 pip install git+https://github.com/rcmalli/keras-vggface.git
 pip install -r requirements_tf1.txt
 
 # TF 2
+# Python versions supported 3.6 - 3.8
 pip install -r requirements_tf2.txt
 ```
 #### CUDA and cuDNN dependencies
